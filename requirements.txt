@@ -1,0 +1,5 @@
+binaryornot
+requests
+reuse
+PyYAML
+fosslight_util
