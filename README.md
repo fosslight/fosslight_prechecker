@@ -3,12 +3,8 @@ Copyright (c) 2021 LG Electronics
 SPDX-License-Identifier: Apache-2.0
  -->
 # FOSSLight REUSE
-```note
-Tool to check REUSE compliance in source code by using reuse-tool.
-```
 
-**FOSSLight REUSE** uses [reuse-tool][ret], to detect the copyright and license phrases contained in the file. Some files (ex- build script), binary files, directory and files in specific directories (ex-test) are excluded from the result. And removes words such as "-only" and "-old-style" from the license name to be printed. The output result is generated in Excel format.
-
+**FOSSLight REUSE** uses [reuse-tool][ret] to check whether the source code's copyright and license writing rules are complied with.
 
 [ret]: https://github.com/fsfe/reuse-tool
 
