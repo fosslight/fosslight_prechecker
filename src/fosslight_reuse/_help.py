@@ -16,11 +16,9 @@ _HELP_MESSAGE_REUSE = """
 
         Optional
             -h\t\t\t    Print help message
-            -n\t\t\t    If you do not want to use the Default REUSE dep5 file, add this parameter
-                              \t\t- Default REUSE dep5 file function:
-                              \t\t    exclude venv*/, node_modules,.*/ Folders, .json and binary file from reuse lint
-            -r <file_name>\t    File name to save the result in xml format. (Default : reuse_checker.xml)
-            -f <file_list>\t    List of files to check if license information is not included. (Separator : ,)"""
+            -n\t\t\t    Don't exclude venv*, node_modules, and .*/ from the analysis
+            -r <file_name>\t    Xml format result file name (Default : reuse_checker.xml)
+            -f <file1,file2,..>\t    List of files to check copyright and license """
 
 
 def print_help_msg(exitOpt=True):
