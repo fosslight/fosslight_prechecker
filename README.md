@@ -103,7 +103,7 @@ Please report any ideas or bugs to improve by creating an issue in [Git Reposito
 [repo]: https://github.com/fosslight/fosslight_reuse/issues
 
 ## 📄 License
-Copyright (c) 2020 LG Electronics, Inc. 
+Copyright (c) 2020 LG Electronics, Inc.     
 FOSSLight REUSE is Apache-2.0, as found in the [LICENSE][l] file.
 
 [l]: https://github.com/fosslight/fosslight_reuse/blob/main/LICENSE
