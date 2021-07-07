@@ -10,6 +10,10 @@ Files: .github/*
 Copyright: 2021 LG Electronics
 License: Apache-2.0
 
+Files: tests/*
+Copyright: 2021 LG Electronics
+License: Apache-2.0
+
 Files: MANIFEST.in
 Copyright: 2021 LG Electronics
 License: Apache-2.0

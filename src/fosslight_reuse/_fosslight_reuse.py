@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2021 LG Electronics Inc.
 # SPDX-License-Identifier: Apache-2.0
-import getopt
 import os
 import shutil
 import sys
@@ -14,7 +13,6 @@ from binaryornot.check import is_binary
 import fosslight_util.constant as constant
 from fosslight_util.set_log import init_log, init_log_item
 from yaml import safe_dump
-from ._help import print_help_msg
 from reuse import report
 from reuse.project import Project
 from reuse.report import ProjectReport
@@ -301,12 +299,10 @@ def init(path_to_find, result_file, file_list):
         _result_log["File list to check"] = file_list
 
 
-def main():
+def run_lint(path_to_find, file, disable, result_file):
     global _turn_on_default_reuse_config, _check_only_file_mode
 
-    path_to_find = os.getcwd()
     file_to_check_list = []
-    result_file = "reuse_checker.xml"
     _exit_code = os.EX_OK
 
     try:
@@ -314,25 +310,14 @@ def main():
     except Exception as ex:
         print_error('Error' + str(ex))
 
-    try:
-        argv = sys.argv[1:]
-        opts, args = getopt.getopt(argv, 'hnf:p:r:')
-    except getopt.GetoptError:
-        print_help_msg(False)
-        write_xml_and_exit(result_file, os.EX_USAGE)
-
-    for opt, arg in opts:
-        if opt == "-h":
-            print_help_msg(True)
-        elif opt == "-f":
-            _check_only_file_mode = True
-            file_to_check_list = arg.split(',')
-        elif opt == "-p":
-            path_to_find = arg
-        elif opt == "-n":
-            _turn_on_default_reuse_config = False
-        elif opt == "-r":
-            result_file = arg
+    if file != "":
+        file_to_check_list = file.split(',')
+        _check_only_file_mode = True
+    if path_to_find == "":
+        path_to_find = os.getcwd()
+    if result_file == "":
+        result_file = "reuse_checker.xml"
+    _turn_on_default_reuse_config = not disable
 
     # reuse lint can only be executed on a directory.
     if not os.path.isdir(path_to_find):
@@ -355,7 +340,3 @@ def main():
             result_for_summary(str_lint_result, oss_pkg_info, path_to_find, msg_missing_files)
 
     write_xml_and_exit(result_file, _exit_code)
-
-
-if __name__ == "__main__":
-    main()
