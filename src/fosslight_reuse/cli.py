@@ -5,7 +5,7 @@
 import argparse
 from ._help import _HELP_MESSAGE_REUSE
 from ._fosslight_reuse import run_lint
-from fosslight_oss_pkg._fosslight_oss_pkg import convert_report
+from fosslight_oss_pkg.fosslight_oss_pkg import convert_report
 
 
 def main():
