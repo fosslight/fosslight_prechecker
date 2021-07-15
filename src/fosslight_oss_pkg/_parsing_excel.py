@@ -23,6 +23,7 @@ def convert_excel_to_yaml(oss_report_to_read, output_file):
 
     if os.path.isfile(oss_report_to_read):
         try:
+            _logger.warning("Read data from :" + oss_report_to_read)
             items = read_oss_report(oss_report_to_read)
             for item in items:
                 _row_to_print.append(item.get_print_json())
@@ -30,7 +31,7 @@ def convert_excel_to_yaml(oss_report_to_read, output_file):
                 output_file = output_file if output_file.endswith(_file_extension) else output_file + _file_extension
                 _output_json[_json_root_key] = _row_to_print
                 write_yaml_file(output_file, _output_json)
-                _logger.warn("Output: "+output_file)
+                _logger.warning("Output: " + output_file)
         except Exception as error:
             _logger.error("Convert yaml:"+str(error))
     else:

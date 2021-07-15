@@ -26,20 +26,19 @@ def find_report_file(path_to_find):
             file_with_path = os.path.join(path_to_find, file)
             if os.path.isfile(file_with_path):
                 return file
-        for p, d, f in os.walk(path_to_find):
-            for file in f:
+        for root, dirs, files in os.walk(path_to_find):
+            for file in files:
                 file_name = file.lower()
                 if (file_name.startswith("oss-report") or file_name.startswith("fosslight-report")) \
                    and file_name.endswith(".xlsx"):
-                    return os.path.join(d, file)
-    except Exception:
-        pass
+                    return os.path.join(root, file)
+    except Exception as error:
+        logger.debug("Find report:"+str(error))
     return ""
 
 
 def convert_report(base_path, files, output_name):
     oss_pkg_files = ["oss-pkg-info.yml", "oss-pkg-info.yaml"]
-    base_path = ""
     file_option_on = False
     convert_yml_mode = False
     convert_excel_mode = False
@@ -79,9 +78,9 @@ def convert_report(base_path, files, output_name):
         if is_window:
             convert_yml_mode = True
             base_path = os.getcwd()
-            convert_excel_mode = True
-            if report_to_read == "":
-                report_to_read = find_report_file(base_path)
+            report_to_read = find_report_file(base_path)
+            if report_to_read != "":
+                convert_excel_mode = True
         else:
             print_help_msg()
 
