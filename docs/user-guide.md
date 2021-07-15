@@ -127,10 +127,18 @@ $ fosslight_reuse report -f src/oss-pkg-info.yaml,main/setting.yml
 
 ### Ex 2. Convert OSS Report to oss-pkg-info.yaml file.
 ```
-$ fosslight_reuse report -f src/OSS-Report.xlsx
+$ fosslight_reuse report -f src/FOSSLight-Report.xlsx
 ```
 
 ## 📁 Result
 If an output file name is specified with -o, a result file is created with that name.
 - FOSSLight-Report_[datetime].xlsx : When the oss-pkg-info.yaml file is converted to OSS-Report.xlsx
 - oss-pkg-info_[datetime].yaml : FOSSLight-Report.xlsx is converted to oss-pkg-info.yaml.
+
+
+## 🚀 How to run - report (Run as executable. Only for windows.)
+1. Download the executable from [fosslight_reuse release][release]
+2. Run the executable from the path where FOSSLight-Report*.xlsx or oss-pkg-info.yaml is located.
+3. If oss-pkg-info.yaml exists, it will be converted to FOSSLight-Report.xlsx, and if FOSSLight-Report*.xlsx is found, it will be converted to oss-pkg-info.yaml.
+
+[release]: https://github.com/fosslight/fosslight_reuse/releases
