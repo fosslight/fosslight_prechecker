@@ -25,7 +25,7 @@ if __name__ == "__main__":
         url='https://github.com/fosslight/fosslight_reuse',
         download_url='https://github.com/fosslight/fosslight_reuse',
         classifiers=[
-            "License :: OSI Approved :: Closed Source Software",
+            "License :: OSI Approved :: Apache Software License",
             "Programming Language :: Python :: 3",
             "Programming Language :: Python :: 3.6",
             "Programming Language :: Python :: 3.7",
