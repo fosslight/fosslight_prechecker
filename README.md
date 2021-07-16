@@ -1,6 +1,6 @@
 <!--
 Copyright (c) 2021 LG Electronics
-SPDX-License-Identifier: Apache-2.0
+SPDX-License-Identifier: GPL-3.0-only
  -->
 # FOSSLight REUSE
 
@@ -26,6 +26,6 @@ Please report any ideas or bugs to improve by creating an issue in [Git Reposito
 [repo]: https://github.com/fosslight/fosslight_reuse/issues
 
 ## 📄 License  
-FOSSLight REUSE is licensed under [Apache-2.0][l].
+FOSSLight REUSE is licensed under [GPL-3.0-only][l].
 
 [l]: https://github.com/fosslight/fosslight_reuse/blob/main/LICENSE

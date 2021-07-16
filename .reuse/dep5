@@ -4,19 +4,19 @@ Source: https://github.com/fosslight/fosslight_reuse
 
 Files: *.md
 Copyright: 2021 LG Electronics
-License: Apache-2.0
+License: GPL-3.0-only
 
 Files: .github/*
 Copyright: 2021 LG Electronics
-License: Apache-2.0
+License: GPL-3.0-only
 
 Files: tests/*
 Copyright: 2021 LG Electronics
-License: Apache-2.0
+License: GPL-3.0-only
 
 Files: MANIFEST.in
 Copyright: 2021 LG Electronics
-License: Apache-2.0
+License: GPL-3.0-only
 
 Files: requirements*.txt
 Copyright: 2021 LG Electronics
