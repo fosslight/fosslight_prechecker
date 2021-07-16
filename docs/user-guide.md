@@ -12,7 +12,7 @@ It uses [reuse-tool][ret] to check whether the source code's copyright and licen
 1. `lint` --- Check whether the source code's copyright and license writing rules are complied with.    
 2. `report` --- Convert oss-pkg-info.yaml to FOSSLight-Report.xlsx and vice versa.
      - It converts oss-pkg-info.yaml to SRC Sheet of FOSSLight Report or    
-     - BIN (Android) and BOM Sheet of OSS Report to oss-pkg-info.yaml.
+     - BIN (Android) and BOM Sheet of FOSSLight Report to oss-pkg-info.yaml.
 
 ## 🎉 How to install
 
@@ -52,12 +52,12 @@ $ fosslight_reuse lint -p /home/test/ -f "notice/sample.py,src/init.py"
     3-1. When running on a project basis. (without -f parameter)
     - If there is no ./reuse/dep5 file in the Root Path, it is created.
     - If it already exists, copy it to bk file and append the default config value to the existing dep file.
-    - By creating dep5 files, exclude binary or .json, venv */*, node_modules/*,. */* from reuse.
+    - By creating the dep5 file, exclude binary or .json, venv*/*, node_modules/*,. */* from reuse.
     - Run the reuse lint 
         If the OSS Package Information file exists, the list of missing license files is not printed.
-    - Rollback dep5-related file creation part.    
+    - Remove dep5-related file.    
     
-    3-2. When executing in file unit (with -f option)
+    3-2. When executing in file unit (with -f parameter)
     - Print the copyright text and license text extraction by file.
     - However, if the file does not exist or the file is binary or .json, copyright text and license text are not printed.
 
@@ -112,9 +112,9 @@ $ fosslight_reuse report
 | p | [path_to_check] | O | Convert all oss-pkg-info*.yaml or oss-pkg-info*.yml in the path recursively | 
 | h | None | X | Print help message. | 
 | o | [result_file_name] | X | Output file name |    
-| f | [file1,file2,...] | X | 1. Yaml files are converted as OSS Report (separated by, if multiple) <br> ex) -f src/oss-pkg-info.yaml,main/setting.yml 2. OSS Report file to be converted to oss-pkg-info.yaml. |
+| f | [file1,file2,...] | X | 1. Yaml files are converted as FOSSLight Report (separated by, if multiple) <br> ex) -f src/oss-pkg-info.yaml,main/setting.yml 2. FOSSLight Report file to be converted to oss-pkg-info.yaml. |
 
-### Ex 1. Convert oss-pkg-info.yaml file to OSS Report.
+### Ex 1. Convert oss-pkg-info.yaml file to FOSSLight Report.
 1-1. Convert all oss-pkg-info*.yaml or oss-pkg-info*.yml in the path recursively.
 ``` 
 $ fosslight_reuse report -p /home/test/source
@@ -125,7 +125,7 @@ $ fosslight_reuse report -p /home/test/source
 $ fosslight_reuse report -f src/oss-pkg-info.yaml,main/setting.yml
 ```
 
-### Ex 2. Convert OSS Report to oss-pkg-info.yaml file.
+### Ex 2. Convert FOSSLight Report to oss-pkg-info.yaml file.
 ```
 $ fosslight_reuse report -f src/FOSSLight-Report.xlsx
 ```
