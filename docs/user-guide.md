@@ -53,8 +53,8 @@ $ fosslight_reuse lint -p /home/test/ -f "notice/sample.py,src/init.py"
     - If there is no ./reuse/dep5 file in the Root Path, it is created.
     - If it already exists, copy it to bk file and append the default config value to the existing dep file.
     - By creating the dep5 file, exclude binary or .json, venv*/*, node_modules/*,. */* from reuse.
-    - Run the reuse lint 
-        If the OSS Package Information file exists, the list of missing license files is not printed.
+    - Run the reuse lint. 
+        ( If the OSS Package Information file exists, the list of missing license files is not printed.)
     - Remove dep5-related file.    
     
     3-2. When executing in file unit (with -f parameter)
