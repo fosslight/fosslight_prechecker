@@ -87,3 +87,13 @@ jobs:
       run: |
         python setup.py sdist bdist_wheel
         twine upload dist/*
+    - name: Upload Release 3rd Party License text
+      id: upload-release-license
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: ./LICENSES/LicenseRef-3rd_party_licenses.txt
+        asset_name: LicenseRef-3rd_party_licenses.txt
+        asset_content_type: text/plain
