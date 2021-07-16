@@ -131,8 +131,8 @@ $ fosslight_reuse report -f src/FOSSLight-Report.xlsx
 ```
 
 ## 📁 Result
-If an output file name is specified with -o, a result file is created with that name.
-- FOSSLight-Report_[datetime].xlsx : When the oss-pkg-info.yaml file is converted to OSS-Report.xlsx
+ an output file name is specified with -o, a result file is created with that name.
+- FOSSLight-Report_[datetime].xlsx : When the oss-pkg-info.yaml file is converted to FOSS-Report.xlsx
 - oss-pkg-info_[datetime].yaml : FOSSLight-Report.xlsx is converted to oss-pkg-info.yaml.
 
 
