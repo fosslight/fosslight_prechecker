@@ -5,16 +5,17 @@ SPDX-License-Identifier: GPL-3.0-only
 # FOSSLight REUSE
 
 **FOSSLight REUSE** is a tool that can be used to comply with the copyright/license writing rules in the source code.     
-It uses [reuse-tool][ret] to check whether the source code's copyright and license writing rules are complied with.
+It uses [reuse-tool][ret] to check whether the [source code's copyright and license writing rules][rule] are complied with.
 
 [ret]: https://github.com/fsfe/reuse-tool
+[rule]: https://oss.lge.com/guide/process/osc_process/1-identification/copyright_license_rule.html
 
 
 ## 📖 User Guide
 Please see the [**User Guide**](https://github.com/fosslight/fosslight_reuse/blob/main/docs/user-guide.md) for more information on how to install and run it.    
 Here a short summary:    
 
-- `lint` --- Check whether the source code's copyright and license writing rules are complied with.
+- `lint` --- Check whether the [source code's copyright and license writing rules][rule] are complied with.
 
 - `report` --- Convert oss-pkg-info.yaml to FOSSLight-Report.xlsx and vice versa.
 
