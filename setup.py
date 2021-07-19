@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Copyright (c) 2021 LG Electronics
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: GPL-3.0-only
 from codecs import open
 from setuptools import setup, find_packages
 
@@ -20,12 +20,12 @@ if __name__ == "__main__":
         description='FOSSLight Reuse',
         long_description=readme,
         long_description_content_type='text/markdown',
-        license='Apache-2.0',
+        license='GPL-3.0-only',
         author='LG Electronics',
         url='https://github.com/fosslight/fosslight_reuse',
         download_url='https://github.com/fosslight/fosslight_reuse',
         classifiers=[
-            "License :: OSI Approved :: Apache Software License",
+            "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
             "Programming Language :: Python :: 3",
             "Programming Language :: Python :: 3.6",
             "Programming Language :: Python :: 3.7",
