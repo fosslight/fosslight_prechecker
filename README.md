@@ -19,7 +19,7 @@ Here a short summary:
 
 - `lint` --- Check whether the [source code's copyright and license writing rules][rule] are complied with.
 
-- `report` --- Convert oss-pkg-info.yaml to FOSSLight-Report.xlsx and vice versa.
+- `report` --- Convert [oss-pkg-info.yaml](https://github.com/fosslight/fosslight_reuse/blob/main/tests/report/oss-pkg-info.yaml) to [FOSSLight-Report.xlsx](https://fosslight.org/fosslight-guide-en/learn/2_fosslight_report.html) and vice versa.
 
 
 ## 👏 How to report issue
