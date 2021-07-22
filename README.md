@@ -2,11 +2,11 @@
 Copyright (c) 2021 LG Electronics
 SPDX-License-Identifier: GPL-3.0-only
  -->
-# FOSSLight REUSE
+# FOSSLight Reuse
 
 <img src="https://img.shields.io/pypi/l/fosslight-reuse" alt="License" /> <img src="https://img.shields.io/pypi/v/fosslight_reuse" alt="Current python package version." /> <img src="https://img.shields.io/pypi/pyversions/fosslight_reuse" /> [![REUSE status](https://api.reuse.software/badge/github.com/fosslight/fosslight_reuse)](https://api.reuse.software/info/github.com/fosslight/fosslight_reuse)
 
-**FOSSLight REUSE** is a tool that can be used to comply with the copyright/license writing rules in the source code.     
+**FOSSLight Reuse** is a tool that can be used to comply with the copyright/license writing rules in the source code.     
 It uses [reuse-tool][ret] to check whether the [source code's copyright and license writing rules][rule] are complied with.
 
 [ret]: https://github.com/fsfe/reuse-tool
@@ -29,6 +29,6 @@ Please report any ideas or bugs to improve by creating an issue in [Git Reposito
 [repo]: https://github.com/fosslight/fosslight_reuse/issues
 
 ## 📄 License  
-FOSSLight REUSE is licensed under [GPL-3.0-only][l].
+FOSSLight Reuse is licensed under [GPL-3.0-only][l].
 
 [l]: https://github.com/fosslight/fosslight_reuse/blob/main/LICENSE
