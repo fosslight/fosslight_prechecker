@@ -4,6 +4,8 @@ SPDX-License-Identifier: GPL-3.0-only
  -->
 # FOSSLight REUSE
 
+<img src="https://img.shields.io/pypi/l/fosslight_reuse" alt="License" /> <img src="https://img.shields.io/pypi/v/fosslight_reuse" alt="Current python package version." /> <img src="https://img.shields.io/pypi/pyversions/fosslight_reuse" /> [![REUSE status](https://api.reuse.software/badge/github.com/fosslight/fosslight_reuse)](https://api.reuse.software/info/github.com/fosslight/fosslight_reuse)
+
 **FOSSLight REUSE** is a tool that can be used to comply with the copyright/license writing rules in the source code.     
 It uses [reuse-tool][ret] to check whether the source code's copyright and license writing rules are complied with.
 
@@ -11,7 +13,7 @@ It uses [reuse-tool][ret] to check whether the source code's copyright and licen
 
 
 ## 📖 User Guide
-Please see the [**User Guide**](https://github.com/fosslight/fosslight_reuse/blob/main/docs/user-guide.md) for more information on how to install and run it.    
+Please see the [**User Guide**](https://fosslight.org/fosslight-guide-en/scanner/3_reuse.html) for more information on how to install and run it.    
 Here a short summary:    
 
 - `lint` --- Check whether the source code's copyright and license writing rules are complied with.
