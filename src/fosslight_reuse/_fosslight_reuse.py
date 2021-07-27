@@ -18,8 +18,9 @@ from reuse.project import Project
 from reuse.report import ProjectReport
 
 _PKG_NAME = "fosslight_reuse"
-_MSG_REFERENCE = "Ref. Copyright and License Writing Rules in Source Code. : http://collab.lge.com/main/x/1eb-LQ"
-_MSG_FOLLOW_LIC_TXT = "Follow the Copyright and License Writing Rules in Source Code. : http://collab.lge.com/main/x/1eb-LQ"
+_RULE_LINK = "https://oss.lge.com/guide/process/osc_process/1-identification/copyright_license_rule.html"
+_MSG_REFERENCE = "Ref. Copyright and License Writing Rules in Source Code. : " + _RULE_LINK
+_MSG_FOLLOW_LIC_TXT = "Follow the Copyright and License Writing Rules in Source Code. : " + _RULE_LINK
 _REUSE_CONFIG_FILE = ".reuse/dep5"
 _DEFAULT_EXCLUDE_EXTENSION_FILES = []  # Exclude files from reuse
 _DEFAULT_EXCLUDE_EXTENSION = ["jar", "png", "exe", "so", "a", "dll", "jpeg", "jpg", "ttf", "lib", "ttc", "pfb",
