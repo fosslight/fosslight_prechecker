@@ -21,3 +21,7 @@ License: GPL-3.0-only
 Files: requirements*.txt
 Copyright: 2021 LG Electronics
 License: LicenseRef-3rd_party_licenses
+
+Files: .bumpversion.cfg
+Copyright: 2021 LG Electronics
+License: Apache-2.0
