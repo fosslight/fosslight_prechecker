@@ -12,8 +12,8 @@ _HELP_MESSAGE_REUSE = """
 
     Parameters:
         Mode
-            lint\t\t\t   Check REUSE compliance
-            report\t\t\t    oss_pkg_info.yaml <-> FOSSLight-Report.xml
+            lint\t\t    Check REUSE compliance
+            report\t\t    oss_pkg_info.yaml <-> FOSSLight-Report.xml
 
         Options:
             -h\t\t\t    Print help message
