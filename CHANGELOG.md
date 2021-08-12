@@ -1,5 +1,13 @@
 # Changelog
 
+## v2.0.2 (12/08/2021)
+## Changes
+## 🔧 Maintenance
+
+- Merge init_log & init_log_item functiions @bjk7119 (#15)
+
+---
+
 ## v2.0.0 (22/07/2021)
 
 ---
