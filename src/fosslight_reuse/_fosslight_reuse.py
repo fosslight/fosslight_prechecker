@@ -11,7 +11,7 @@ import locale
 from datetime import datetime
 from binaryornot.check import is_binary
 import fosslight_util.constant as constant
-from fosslight_util.set_log import init_log, init_log_item
+from fosslight_util.set_log import init_log
 from yaml import safe_dump
 from reuse import report
 from reuse.project import Project
@@ -294,8 +294,8 @@ def init(path_to_find, result_file, file_list):
 
     _start_time = datetime.now().strftime('%Y%m%d_%H-%M-%S')
     output_dir = os.path.dirname(os.path.abspath(result_file))
-    logger = init_log(os.path.join(output_dir, "fosslight_reuse_log_"+_start_time+".txt"))
-    _result_log = init_log_item(_PKG_NAME, path_to_find)
+    logger, _result_log = init_log(os.path.join(output_dir, "fosslight_reuse_log_"+_start_time+".txt"),
+                                   True, logging.INFO, logging.DEBUG, _PKG_NAME, path_to_find)
     if file_list:
         _result_log["File list to check"] = file_list
 
