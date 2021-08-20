@@ -1,7 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-# Copyright (c) 2021 LG Electronics Inc.
-# SPDX-License-Identifier: GPL-3.0-only
+
 import argparse
 from ._help import _HELP_MESSAGE_REUSE
 from ._fosslight_reuse import run_lint
