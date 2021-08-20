@@ -4,4 +4,4 @@ reuse
 PyYAML
 xlrd==1.2.0
 XlsxWriter==1.2.9
-fosslight_util
+fosslight_util>=1.1.0
