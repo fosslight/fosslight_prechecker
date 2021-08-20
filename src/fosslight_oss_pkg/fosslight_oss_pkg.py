@@ -10,7 +10,7 @@ from pathlib import Path
 from yaml import safe_dump
 from fosslight_reuse._help import print_help_msg
 from fosslight_util.constant import LOGGER_NAME
-from fosslight_util.set_log import init_log, init_log_item
+from fosslight_util.set_log import init_log
 from ._parsing_yaml import convert_yml_to_excel
 from ._parsing_excel import convert_excel_to_yaml
 
@@ -59,8 +59,8 @@ def convert_report(base_path, files, output_name):
         except Exception:
             pass
 
-    logger = init_log(os.path.join(output_dir, "fosslight_reuse_log_"+now+".txt"))
-    _result_log = init_log_item(_PKG_NAME, base_path)
+    logger, _result_log = init_log(os.path.join(output_dir, "fosslight_reuse_log_"+now+".txt"),
+                                   True, logging.INFO, logging.DEBUG, _PKG_NAME, base_path)
 
     if base_path != "":
         convert_yml_mode = True
