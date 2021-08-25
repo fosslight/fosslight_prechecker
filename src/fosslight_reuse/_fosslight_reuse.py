@@ -36,6 +36,7 @@ _result_log = {}
 
 logger = logging.getLogger(constant.LOGGER_NAME)
 
+
 def find_oss_pkg_info(path):
     global _DEFAULT_EXCLUDE_EXTENSION_FILES
     _OSS_PKG_INFO_FILES = ["oss-pkg-info.yaml", "oss-pkg-info.yml", "oss-package.info", "requirement.txt",
@@ -159,6 +160,7 @@ def reuse_for_files(path, files):
 
     return missing_license_list, missing_copyright_list, error_occurred
 
+
 def check_file_extension(all_files):
     files_filtered = []
     _POSSIBLE_EXTENSION = list(EXTENSION_COMMENT_STYLE_MAP.keys())
@@ -170,7 +172,7 @@ def check_file_extension(all_files):
                 files_filtered.append(file)
 
     return files_filtered
-        
+
 
 def check_license_and_copyright(path_to_find, all_files, missing_license, missing_copyright):
     # Check file extension for each list
@@ -181,7 +183,7 @@ def check_license_and_copyright(path_to_find, all_files, missing_license, missin
     missing_copyright_filtered = check_file_extension(missing_copyright)
     logger.info("missing_copyright_filtered : " + str(missing_copyright_filtered))
 
-    skip_files = sorted(list(set(all_files_fitered) - set(missing_license_filtered) - set(missing_copyright_filtered)))   
+    skip_files = sorted(list(set(all_files_fitered) - set(missing_license_filtered) - set(missing_copyright_filtered)))
     logger.info("\n# File list that have both license and copyright : {count} / {total}".format(
             count=len(skip_files),
             total=len(all_files)))
@@ -193,6 +195,7 @@ def check_license_and_copyright(path_to_find, all_files, missing_license, missin
         unused_lic_list, usused_cop_list, error_occurred = reuse_for_files(path_to_find, file_list)
 
     return missing_license_filtered, missing_copyright_filtered
+
 
 def set_missing_license_copyright(missing_license_filtered, missing_copyright_filtered, project, path_to_find):
     input_license = None
@@ -208,8 +211,8 @@ def set_missing_license_copyright(missing_license_filtered, missing_copyright_fi
             lic_path.append(os.getcwd() + '/' + path_to_find + '/' + lic_file)
 
         logger.info("# Select a license to write in the license missing files ")
-        select = input("   1.MIT,  2.Apache-2.0,  3.LGE Proprietary License,  4.Not select now : " )
-        if select == '1' or select =='MIT':
+        select = input("   1.MIT,  2.Apache-2.0,  3.LGE Proprietary License,  4.Not select now : ")
+        if select == '1' or select == 'MIT':
             input_license = 'MIT'
         elif select == '2' or select == 'Apache-2.0':
             input_license = 'Apache-2.0'
@@ -236,6 +239,7 @@ def set_missing_license_copyright(missing_license_filtered, missing_copyright_fi
         run(parsed_args, project)
     logger.info("\n")
 
+
 def reuse_for_project(repository):
     result = ""
     missing_license = []
@@ -258,7 +262,7 @@ def reuse_for_project(repository):
             if i:
                 result += ","
             result += " "
-            result += lic        
+            result += lic
 
         result += ("\n* Files with copyright information: {count} / {total}").format(
             count=file_total - len(report.files_without_copyright),
@@ -283,7 +287,8 @@ def reuse_for_project(repository):
         missing_copyright = [sub.replace(repository, '') for sub in missing_copyright]
 
         # Print Skipped Files
-        missing_license_filtered, missing_copyright_filtered = check_license_and_copyright(repository, all_files, missing_license, missing_copyright)
+        missing_license_filtered, missing_copyright_filtered = \
+            check_license_and_copyright(repository, all_files, missing_license, missing_copyright)
 
     except Exception as ex:
         print_error('Error_Reuse_lint:' + str(ex))
@@ -441,13 +446,19 @@ def run_lint(path_to_find, file, disable, result_file):
         license_missing_files, copyright_missing_files, error_occurred = reuse_for_files(path_to_find, file_to_check_list)
         oss_pkg_info = []
     else:
-        str_lint_result, license_missing_files, copyright_missing_files, oss_pkg_info, error_occurred, project = reuse_for_project(path_to_find)
+        str_lint_result, license_missing_files, copyright_missing_files, oss_pkg_info, error_occurred, project \
+            = reuse_for_project(path_to_find)
 
     if error_occurred:  # In case reuse lint failed
         _exit_code = os.EX_SOFTWARE
     else:
         msg_missing_files = result_for_missing_license_and_copyright_files(license_missing_files, copyright_missing_files, oss_pkg_info)
         if not _check_only_file_mode:
-            result_for_summary(str_lint_result, oss_pkg_info, path_to_find, msg_missing_files, license_missing_files, copyright_missing_files, project)
+            result_for_summary(str_lint_result,
+                               oss_pkg_info,
+                               path_to_find,
+                               msg_missing_files,
+                               license_missing_files,
+                               copyright_missing_files, project)
 
     write_xml_and_exit(result_file, _exit_code)
