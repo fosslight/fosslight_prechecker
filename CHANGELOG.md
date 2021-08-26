@@ -1,5 +1,17 @@
 # Changelog
 
+## v2.0.3 (26/08/2021)
+## Changes
+## 🐛 Hotfixes
+
+- Fix a bug related release action @soimkim (#24)
+
+## 🔧 Maintenance
+
+- Set condition to use FOSSLight Util v1.1.0 or later @bjk7119 (#16)
+
+---
+
 ## v2.0.2 (12/08/2021)
 ## Changes
 ## 🔧 Maintenance
