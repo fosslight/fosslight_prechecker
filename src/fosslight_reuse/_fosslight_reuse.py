@@ -340,4 +340,6 @@ def run_lint(path_to_find, file, disable, result_file):
         if not _check_only_file_mode:
             result_for_summary(str_lint_result, oss_pkg_info, path_to_find, msg_missing_files)
 
+    logger.error("Test Test")
+
     write_xml_and_exit(result_file, _exit_code)
