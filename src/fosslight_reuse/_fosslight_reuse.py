@@ -462,3 +462,5 @@ def run_lint(path_to_find, file, disable, result_file):
                                copyright_missing_files, project)
 
     write_xml_and_exit(result_file, _exit_code)
+
+    logger.warning("Test Test")
