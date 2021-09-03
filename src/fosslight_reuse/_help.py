@@ -14,6 +14,7 @@ _HELP_MESSAGE_REUSE = """
         Mode
             lint\t\t    Check REUSE compliance
             report\t\t    oss_pkg_info.yaml <-> FOSSLight-Report.xml
+            add\t\t\t    Add missing license and copyright
 
         Options:
             -h\t\t\t    Print help message
