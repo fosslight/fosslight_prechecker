@@ -13,12 +13,10 @@ from binaryornot.check import is_binary
 import fosslight_util.constant as constant
 from fosslight_util.set_log import init_log
 from yaml import safe_dump
-from reuse._main import parser as reuse_arg_parser
 from reuse import report
 from reuse.project import Project
 from reuse.report import ProjectReport
-from reuse.header import run
-from reuse._comment import EXTENSION_COMMENT_STYLE_MAP
+
 
 _PKG_NAME = "fosslight_reuse"
 _RULE_LINK = "https://oss.lge.com/guide/process/osc_process/1-identification/copyright_license_rule.html"
@@ -45,14 +43,13 @@ def find_oss_pkg_info(path):
                            "podfile.lock", "cartfile.resolved"]
 
     oss_pkg_info = []
-    all_files = []
+
     try:
         for root, dirs, files in os.walk(path):
             for file in files:
                 file_lower_case = file.lower()
                 file_abs_path = os.path.join(root, file)
                 file_rel_path = os.path.relpath(file_abs_path, path)
-                all_files.append(file_rel_path)
 
                 if file_lower_case in _OSS_PKG_INFO_FILES or file_lower_case.startswith("module_license_"):
                     oss_pkg_info.append(file_rel_path)
@@ -66,7 +63,7 @@ def find_oss_pkg_info(path):
     except Exception as ex:
         print_error('Error_FIND_OSS_PKG :' + str(ex))
 
-    return oss_pkg_info, all_files
+    return oss_pkg_info
 
 
 def create_reuse_dep5_file(path):
@@ -158,86 +155,7 @@ def reuse_for_files(path, files):
         print_error('Error_Reuse_for_file :' + str(ex))
         error_occurred = True
 
-    return missing_license_list, missing_copyright_list, error_occurred
-
-
-def check_file_extension(all_files):
-    files_filtered = []
-    _POSSIBLE_EXTENSION = list(EXTENSION_COMMENT_STYLE_MAP.keys())
-
-    if all_files != "":
-        for file in all_files:
-            file_extension = os.path.splitext(file)[1]
-            if file_extension in _POSSIBLE_EXTENSION:
-                files_filtered.append(file)
-
-    return files_filtered
-
-
-def check_license_and_copyright(path_to_find, all_files, missing_license, missing_copyright):
-    # Check file extension for each list
-    all_files_fitered = check_file_extension(all_files)
-    logger.info("all_files_fitered : " + str(all_files))
-    missing_license_filtered = check_file_extension(missing_license)
-    logger.info("missing_license_filtered : " + str(missing_license_filtered))
-    missing_copyright_filtered = check_file_extension(missing_copyright)
-    logger.info("missing_copyright_filtered : " + str(missing_copyright_filtered))
-
-    skip_files = sorted(list(set(all_files_fitered) - set(missing_license_filtered) - set(missing_copyright_filtered)))
-    logger.info("\n# File list that have both license and copyright : {count} / {total}".format(
-            count=len(skip_files),
-            total=len(all_files)))
-
-    for file in skip_files:
-        file_list = list()
-        file_list.append(file)
-
-        unused_lic_list, usused_cop_list, error_occurred = reuse_for_files(path_to_find, file_list)
-
-    return missing_license_filtered, missing_copyright_filtered
-
-
-def set_missing_license_copyright(missing_license_filtered, missing_copyright_filtered, project, path_to_find):
-    input_license = None
-    input_copyright = None
-
-    main_parser = reuse_arg_parser()
-
-    # Print missing license
-    if missing_license_filtered is not None and len(missing_license_filtered) > 0:
-        lic_path = []
-
-        for lic_file in sorted(missing_license_filtered):
-            lic_path.append(os.getcwd() + '/' + path_to_find + '/' + lic_file)
-
-        logger.info("# Select a license to write in the license missing files ")
-        select = input("   1.MIT,  2.Apache-2.0,  3.LGE Proprietary License,  4.Not select now : ")
-        if select == '1' or select == 'MIT':
-            input_license = 'MIT'
-        elif select == '2' or select == 'Apache-2.0':
-            input_license = 'Apache-2.0'
-        elif select == '3' or select == 'LGE Proprietary License':
-            input_license = 'LGE Proprietary License'
-        elif select == '4' or select == 'Quit' or select == 'quit':
-            logger.info(" Not selected any license to write ")
-            return
-        logger.warning(f"# Your input license : {input_license}")
-
-        parsed_args = main_parser.parse_args(['addheader', '--license', str(input_license)] + lic_path)
-        run(parsed_args, project)
-
-    # Print copyright license
-    if missing_copyright_filtered is not None and len(missing_copyright_filtered) > 0:
-        cop_path = []
-
-        for cop_file in sorted(missing_copyright_filtered):
-            cop_path.append(os.getcwd() + '/' + path_to_find + '/' + cop_file)
-        input_copyright = input("\n# Input Copyright to write in the copyright missing files (ex, (c) LGE) : ")
-        logger.warning(f"# Your input copyright : {input_copyright}")
-
-        parsed_args = main_parser.parse_args(['addheader', '--copyright', str(input_copyright)] + cop_path)
-        run(parsed_args, project)
-    logger.info("\n")
+    return missing_license_list, missing_copyright_list, error_occurred, prj
 
 
 def reuse_for_project(repository):
@@ -246,7 +164,7 @@ def reuse_for_project(repository):
     missing_copyright = []
     error_occured = False
 
-    oss_pkg_info_files, all_files = find_oss_pkg_info(repository)
+    oss_pkg_info_files = find_oss_pkg_info(repository)
 
     if _turn_on_default_reuse_config:
         need_rollback, temp_file_name, temp_dir_name = create_reuse_dep5_file(repository)
@@ -286,17 +204,13 @@ def reuse_for_project(repository):
             repository += "/"
         missing_copyright = [sub.replace(repository, '') for sub in missing_copyright]
 
-        # Print Skipped Files
-        missing_license_filtered, missing_copyright_filtered = \
-            check_license_and_copyright(repository, all_files, missing_license, missing_copyright)
-
     except Exception as ex:
         print_error('Error_Reuse_lint:' + str(ex))
         error_occured = True
 
     if _turn_on_default_reuse_config:
         remove_reuse_dep5_file(need_rollback, temp_file_name, temp_dir_name)
-    return result, missing_license_filtered, missing_copyright_filtered, oss_pkg_info_files, error_occured, project
+    return result, missing_license, missing_copyright, oss_pkg_info_files, error_occured, project
 
 
 def print_error(error_msg: str):
@@ -306,7 +220,7 @@ def print_error(error_msg: str):
     _root_xml_item.append(error_item)
 
 
-def result_for_summary(str_lint_result, oss_pkg_info, path, msg_missing_files, files_without_license, copyright_without_files, project):
+def result_for_summary(str_lint_result, oss_pkg_info, path, msg_missing_files):
     global _root_xml_item
 
     reuse_compliant = False
@@ -333,9 +247,6 @@ def result_for_summary(str_lint_result, oss_pkg_info, path, msg_missing_files, f
         _root_xml_item.append(items)
 
     logger.info(msg_missing_files + str_summary)
-
-    # Set missing license and copyright
-    set_missing_license_copyright(files_without_license, copyright_without_files, project, path)
 
 
 def result_for_missing_license_and_copyright_files(files_without_license, copyright_without_files, oss_pkg_info):
@@ -443,7 +354,7 @@ def run_lint(path_to_find, file, disable, result_file):
         init(path_to_find, result_file, file_to_check_list)
 
     if _check_only_file_mode:
-        license_missing_files, copyright_missing_files, error_occurred = reuse_for_files(path_to_find, file_to_check_list)
+        license_missing_files, copyright_missing_files, error_occurred, project = reuse_for_files(path_to_find, file_to_check_list)
         oss_pkg_info = []
     else:
         str_lint_result, license_missing_files, copyright_missing_files, oss_pkg_info, error_occurred, project \
@@ -457,8 +368,6 @@ def run_lint(path_to_find, file, disable, result_file):
             result_for_summary(str_lint_result,
                                oss_pkg_info,
                                path_to_find,
-                               msg_missing_files,
-                               license_missing_files,
-                               copyright_missing_files, project)
+                               msg_missing_files)
 
     write_xml_and_exit(result_file, _exit_code)
