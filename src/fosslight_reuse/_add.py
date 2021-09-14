@@ -99,25 +99,27 @@ def set_missing_license_copyright(missing_license_filtered, missing_copyright_fi
 
     # Print copyright
     if missing_copyright_filtered is not None and len(missing_copyright_filtered) > 0:
-        cop_path = []
+        missing_copyright_list = []
 
         logger.info("\n# Missing Copyright File(s) ")
         for cop_file in sorted(missing_copyright_filtered):
             logger.info(f"  * {cop_file}")
-            cop_path.append(os.getcwd() + '/' + path_to_find + '/' + cop_file)
+            missing_copyright_list.append(os.getcwd() + '/' + path_to_find + '/' + cop_file)
 
         if _auto_add_mode:
             # Automatic add mode
             input_copyright = copyright
         else:
             # Manual add Mode
-            input_copyright = input("# Input Copyright to write in the copyright missing files (ex, LGE) : ")
+            input_copyright = input("# Input Copyright to write in the copyright missing files (ex, 'Copyright <year> <name>'') : ")
             if input_copyright == 'Quit' or input_copyright == 'quit' or input_copyright == 'Q':
                 return
 
         if input_copyright != "":
-            logger.warning(f"  # Your input Copyright : (c) {input_copyright}")
-            parsed_args = main_parser.parse_args(['addheader', '--copyright', '(c) ' + str(input_copyright)] + cop_path)
+            logger.warning(f"  # Your input Copyright : {input_copyright}")
+            parsed_args = main_parser.parse_args(['addheader', '--copyright',
+                                                  'SPDX-FileCopyrightText: ' + str(input_copyright),
+                                                  '--exclude-year'] + missing_copyright_list)
             run(parsed_args, project)
 
     logger.info("\n")
@@ -139,11 +141,11 @@ def get_allfiles_list(path):
     return all_files
 
 
-def add_content(path_to_find, file, result_file, auto_mode, license="", copyright=""):
+def add_content(path_to_find, file, result_file, manual_mode, license="", copyright=""):
     global _check_only_file_mode, _auto_add_mode
     file_to_check_list = []
     input_license = ""
-    input_copylight = ""
+    input_copyright = ""
 
     if path_to_find == "":
         path_to_find = os.getcwd()
@@ -155,15 +157,15 @@ def add_content(path_to_find, file, result_file, auto_mode, license="", copyrigh
 
     if file != "":
         file_to_check_list = file.split(',')
-        input_copylight = copyright
+        input_copyright = copyright
         input_license = license
         _check_only_file_mode = True
 
-    if auto_mode and _check_only_file_mode is False:
+    if not manual_mode and _check_only_file_mode is False:
         if license == "" and copyright == "":
             logger.info(" You have to input license and copyright to add with -l and -c option")
             return
-        input_copylight = copyright
+        input_copyright = copyright
         input_license = license
         _auto_add_mode = True
 
@@ -177,8 +179,11 @@ def add_content(path_to_find, file, result_file, auto_mode, license="", copyrigh
             parsed_args = main_parser.parse_args(['addheader', '--license', str(input_license)] + missing_license_list)
             run(parsed_args, project)
         if missing_copyright_list is not None and len(missing_copyright_list) > 0:
-            logger.warning(f"  # Your input Copyright : (c) {input_copylight}")
-            parsed_args = main_parser.parse_args(['addheader', '--copyright', '(c) ' + str(input_copylight)] + missing_copyright_list)
+            logger.warning(f"  # Your input Copyright : {input_copyright}")
+            parsed_args = main_parser.parse_args(['addheader', '--copyright',
+                                                  'SPDX-FileCopyrightText: ' + str(input_copyright),
+                                                  '--exclude-year'] + missing_copyright_list)
+
             run(parsed_args, project)
     else:
         # Get all files List in path
@@ -196,4 +201,4 @@ def add_content(path_to_find, file, result_file, auto_mode, license="", copyrigh
                                       project,
                                       path_to_find,
                                       input_license,
-                                      input_copylight)
+                                      input_copyright)

@@ -25,8 +25,8 @@ _HELP_MESSAGE_REUSE = """
             -n\t\t\t    Don't exclude venv*, node_modules, and .*/ from the analysis
         Options for only 'add' mode
             -l <license>\t    License name(SPDX format) to add
-            -c <copyright>\t    Copyright to add
-            -a\t\t\t    Add automatically your input license and copyright (using with -l or -c option)  """
+            -c <copyright>\t    Copyright to add(ex, "Copyright 2015-2021 LGE Electronics")
+            -m\t\t\t    Add manually your input license and copyright (using without -l or -c option)  """
 
 
 def print_help_msg(exitOpt=True):

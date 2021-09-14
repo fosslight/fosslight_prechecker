@@ -16,7 +16,7 @@ def main():
     parser.add_argument('--file', '-f', help='Files to check', type=str, dest='file', default="")
     parser.add_argument('--output', '-o', help='Output file name', type=str, dest='output', default="")
     parser.add_argument('--no', '-n', help='Disable automatic exclude mode', action='store_true', dest='disable')
-    parser.add_argument('--auto', '-a', help='Automatic input mode', action='store_true', dest='auto')
+    parser.add_argument('--manual', '-m', help='Manual input mode', action='store_true', dest='manual')
     parser.add_argument('--license', '-l', help='License name to add', type=str, dest='license', default="")
     parser.add_argument('--copyright', '-c', help='Copyright to add', type=str, dest='copyright', default="")
     args = parser.parse_args()
@@ -26,7 +26,7 @@ def main():
     elif args.mode == "report":
         convert_report(args.path, args.file, args.output)
     elif args.mode == "add":
-        add_content(args.path, args.file, args.output, args.auto, args.license, args.copyright)
+        add_content(args.path, args.file, args.output, args.manual, args.license, args.copyright)
     else:
         pass
 
