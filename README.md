@@ -21,6 +21,8 @@ Here a short summary:
 
 - `report` --- Convert [oss-pkg-info.yaml](https://github.com/fosslight/fosslight_reuse/blob/main/tests/report/oss-pkg-info.yaml) to [FOSSLight-Report.xlsx](https://fosslight.org/fosslight-guide-en/learn/2_fosslight_report.html) and vice versa.
 
+- `add` --- Add copyright and license to missing file(s)
+
 
 ## 👏 How to report issue
 
