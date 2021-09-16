@@ -15,7 +15,6 @@ from reuse._comment import EXTENSION_COMMENT_STYLE_MAP_LOWERCASE
 from reuse._main import parser as reuse_arg_parser
 
 _PKG_NAME = "fosslight_reuse"
-_auto_add_mode = False
 _result_log = {}
 logger = logging.getLogger(constant.LOGGER_NAME)
 
@@ -68,10 +67,37 @@ def check_input_format(input_copyright):
     check_ok = True
 
     if regex.match(input_copyright) is None:
-        logger.warning(" You have to input with following format - 'Copyright <year> <name>'")
+        logger.warning(" You have to input with following format - Copyright <year> <name>")
         check_ok = False
 
     return check_ok
+
+
+def input_license_while_running():
+    input_license = ""
+
+    logger.info("# Select a license to write in the license missing files ")
+    select = input("   1.MIT,  2.Apache-2.0,  3.LGE-Proprietary,  4.Manaully Input,  5.Not select now : ")
+    if select == '1' or select == 'MIT':
+        input_license = 'MIT'
+    elif select == '2' or select == 'Apache-2.0':
+        input_license = 'Apache-2.0'
+    elif select == '3' or select == 'LGE Proprietary License':
+        input_license = 'LicenseRef-LGE-Proprietary'
+    elif select == '4' or select == 'Manually Input':
+        input_license = input("   ## Input your License : ")
+    elif select == '5' or select == 'Quit' or select == 'quit':
+        logger.info(" Not selected any license to write ")
+    return input_license
+
+
+def input_copyright_while_running():
+    input_copyright = ""
+    input_copyright = input("# Input Copyright to write in the copyright missing files (ex, Copyright <year> <name>) : ")
+    if input_copyright == 'Quit' or input_copyright == 'quit' or input_copyright == 'Q':
+        return
+
+    return input_copyright
 
 
 def set_missing_license_copyright(missing_license_filtered, missing_copyright_filtered, project, path_to_find, license, copyright):
@@ -85,7 +111,6 @@ def set_missing_license_copyright(missing_license_filtered, missing_copyright_fi
 
     # Print missing license
     if missing_license_filtered is not None and len(missing_license_filtered) > 0:
-        input_str = ""
         missing_license_list = []
 
         logger.info("# Missing license File(s) ")
@@ -93,25 +118,10 @@ def set_missing_license_copyright(missing_license_filtered, missing_copyright_fi
             logger.info(f"  * {lic_file}")
             missing_license_list.append(path_to_find + '/' + lic_file)
 
-        if _auto_add_mode:
-            # Automatic add mode
-            input_license = license
+        if license == "" and copyright == "":
+            input_license = input_license_while_running()
         else:
-            # Manual add Mode
-            logger.info("# Select a license to write in the license missing files ")
-            select = input("   1.MIT,  2.Apache-2.0,  3.LGE-Proprietary,  4.Manaully Input,  5.Not select now : ")
-            if select == '1' or select == 'MIT':
-                input_license = 'MIT'
-            elif select == '2' or select == 'Apache-2.0':
-                input_license = 'Apache-2.0'
-            elif select == '3' or select == 'LGE Proprietary License':
-                input_license = 'LicenseRef-LGE-Proprietary'
-            elif select == '4' or select == 'Manually Input':
-                input_str = input("   ## Input your License : ")
-                input_license = input_str
-            elif select == '5' or select == 'Quit' or select == 'quit':
-                logger.info(" Not selected any license to write ")
-                return
+            input_license = license
 
         if input_license != "":
             logger.warning(f"  * Your input license : {input_license}")
@@ -130,20 +140,17 @@ def set_missing_license_copyright(missing_license_filtered, missing_copyright_fi
             logger.info(f"  * {cop_file}")
             missing_copyright_list.append(os.getcwd() + '/' + path_to_find + '/' + cop_file)
 
-        if _auto_add_mode:
-            # Automatic add mode
-            input_copyright = copyright
-        else:
-            # Manual add Mode
-            input_copyright = input("# Input Copyright to write in the copyright missing files (ex, 'Copyright <year> <name>'') : ")
-            if input_copyright == 'Quit' or input_copyright == 'quit' or input_copyright == 'Q':
-                return
+        if license == "" and copyright == "":
+            input_copyright = input_copyright_while_running()
 
             input_ok = check_input_format(input_copyright)
             if input_ok is False:
                 return
+        else:
+            input_copyright = copyright
 
         if input_copyright != "":
+            input_copyright = 'Copyright ' + input_copyright
             logger.warning(f"  * Your input Copyright : {input_copyright}")
             parsed_args = main_parser.parse_args(['addheader', '--copyright',
                                                   'SPDX-FileCopyrightText: ' + str(input_copyright),
@@ -178,10 +185,9 @@ def save_result_log():
         logger.warning("Failed to print add result log. " + str(ex))
 
 
-def add_content(path_to_find, file, manual_mode, input_license="", input_copyright=""):
-    global _auto_add_mode, _result_log
+def add_content(path_to_find, file, input_license="", input_copyright=""):
+    global _result_log
     file_to_check_list = []
-    _auto_add_mode = False
     _check_only_file_mode = False
 
     if path_to_find == "":
@@ -192,43 +198,44 @@ def add_content(path_to_find, file, manual_mode, input_license="", input_copyrig
     logger, _result_log = init_log(os.path.join(output_dir, "fosslight_reuse_add_log_"+now+".txt"),
                                    True, logging.INFO, logging.DEBUG, _PKG_NAME, path_to_find)
 
-    if input_copyright != "" and manual_mode is False:
-        input_ok = check_input_format(input_copyright)
-        if input_ok is False:
-            return
-
     if file != "":
         file_to_check_list = file.split(',')
         _check_only_file_mode = True
 
-    if not manual_mode and _check_only_file_mode is False:
-        if input_license == "" and input_copyright == "":
-            logger.info(" You have to input license and copyright to add with -l and -c option")
-            return
-        _auto_add_mode = True
-
     if _check_only_file_mode:
         main_parser = reuse_arg_parser()
-
         missing_license_list, missing_copyright_list, error_occurred, project = reuse_for_files(path_to_find, file_to_check_list)
 
         if missing_license_list is not None and len(missing_license_list) > 0:
-            logger.warning(f"  * Your input license : {input_license}")
-            parsed_args = main_parser.parse_args(['addheader', '--license', str(input_license)] + missing_license_list)
-            try:
-                run(parsed_args, project)
-            except Exception as ex:
-                print_error('Error_call_run_in_license_file_only :' + str(ex))
+            if input_license == "" and input_copyright == "":
+                input_license = input_license_while_running()
+
+            if input_license != "":
+                logger.warning(f"  * Your input license : {input_license}")
+                parsed_args = main_parser.parse_args(['addheader', '--license', str(input_license)] + missing_license_list)
+                try:
+                    run(parsed_args, project)
+                except Exception as ex:
+                    print_error('Error_call_run_in_license_file_only :' + str(ex))
+        else:
+            logger.info("# There is no missing license file")
 
         if missing_copyright_list is not None and len(missing_copyright_list) > 0:
-            logger.warning(f"  * Your input Copyright : {input_copyright}")
-            parsed_args = main_parser.parse_args(['addheader', '--copyright',
-                                                  'SPDX-FileCopyrightText: ' + str(input_copyright),
-                                                  '--exclude-year'] + missing_copyright_list)
+            if input_license == "" and input_copyright == "":
+                input_copyright = input_copyright_while_running()
+
+            if input_copyright != "":
+                input_copyright = 'Copyright ' + input_copyright
+                logger.warning(f"  * Your input Copyright : {input_copyright}")
+                parsed_args = main_parser.parse_args(['addheader', '--copyright',
+                                                      'SPDX-FileCopyrightText: ' + str(input_copyright),
+                                                      '--exclude-year'] + missing_copyright_list)
             try:
                 run(parsed_args, project)
             except Exception as ex:
                 print_error('Error_call_run_in_copyright_file_only :' + str(ex))
+        else:
+            logger.info("# There is no missing copyright file\n")
     else:
         # Get all files List in path
         all_files_list = get_allfiles_list(path_to_find)
