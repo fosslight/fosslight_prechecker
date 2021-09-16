@@ -1,5 +1,17 @@
 # Changelog
 
+## v2.1.0 (16/09/2021)
+## Changes
+## 🚀 Features
+
+- Apply add mode to add license and copyright @bjk7119 (#30)
+
+## 🔧 Maintenance
+
+- Delete -m option @bjk7119 (#31)
+
+---
+
 ## v2.0.3 (26/08/2021)
 ## Changes
 ## 🐛 Hotfixes
