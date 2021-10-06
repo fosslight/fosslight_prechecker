@@ -130,6 +130,8 @@ def set_missing_license_copyright(missing_license_filtered, missing_copyright_fi
                 run(parsed_args, project)
             except Exception as ex:
                 print_error('Error_call_run_in_license :' + str(ex))
+    else:
+        logger.info("# There is no missing license file")
 
     # Print copyright
     if missing_copyright_filtered is not None and len(missing_copyright_filtered) > 0:
@@ -159,6 +161,8 @@ def set_missing_license_copyright(missing_license_filtered, missing_copyright_fi
                 run(parsed_args, project)
             except Exception as ex:
                 print_error('Error_call_run_in_copyright :' + str(ex))
+    else:
+        logger.info("# There is no missing copyright file\n")
 
 
 def get_allfiles_list(path):
