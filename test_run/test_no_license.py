@@ -1,6 +1,4 @@
 # SPDX-FileCopyrightText: Copyright 2019-2021 LG Electronics Inc.
-#
-# SPDX-License-Identifier: GPL-3.0-only
 
 import os
 from fosslight_util.set_log import init_log
