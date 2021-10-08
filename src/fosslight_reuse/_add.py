@@ -130,6 +130,8 @@ def set_missing_license_copyright(missing_license_filtered, missing_copyright_fi
                 run(parsed_args, project)
             except Exception as ex:
                 print_error('Error_call_run_in_license :' + str(ex))
+    else:
+        logger.info("# There is no missing license file")
 
     # Print copyright
     if missing_copyright_filtered is not None and len(missing_copyright_filtered) > 0:
@@ -142,14 +144,14 @@ def set_missing_license_copyright(missing_license_filtered, missing_copyright_fi
 
         if license == "" and copyright == "":
             input_copyright = input_copyright_while_running()
-
-            input_ok = check_input_format(input_copyright)
-            if input_ok is False:
-                return
         else:
             input_copyright = copyright
 
         if input_copyright != "":
+            input_copyright = 'Copyright ' + input_copyright
+            input_ok = check_input_format(input_copyright)
+            if input_ok is False:
+                return
             logger.warning(f"  * Your input Copyright : {input_copyright}")
             parsed_args = main_parser.parse_args(['addheader', '--copyright',
                                                   'SPDX-FileCopyrightText: ' + str(input_copyright),
@@ -158,6 +160,8 @@ def set_missing_license_copyright(missing_license_filtered, missing_copyright_fi
                 run(parsed_args, project)
             except Exception as ex:
                 print_error('Error_call_run_in_copyright :' + str(ex))
+    else:
+        logger.info("# There is no missing copyright file\n")
 
 
 def get_allfiles_list(path):
@@ -197,11 +201,6 @@ def add_content(path_to_find, file, input_license="", input_copyright=""):
     logger, _result_log = init_log(os.path.join(output_dir, "fosslight_reuse_add_log_"+now+".txt"),
                                    True, logging.INFO, logging.DEBUG, _PKG_NAME, path_to_find)
 
-    if input_copyright != "":
-        input_ok = check_input_format(input_copyright)
-        if input_ok is False:
-            return
-
     if file != "":
         file_to_check_list = file.split(',')
         _check_only_file_mode = True
@@ -221,12 +220,15 @@ def add_content(path_to_find, file, input_license="", input_copyright=""):
                     run(parsed_args, project)
                 except Exception as ex:
                     print_error('Error_call_run_in_license_file_only :' + str(ex))
+        else:
+            logger.info("# There is no missing license file")
 
         if missing_copyright_list is not None and len(missing_copyright_list) > 0:
             if input_license == "" and input_copyright == "":
                 input_copyright = input_copyright_while_running()
 
             if input_copyright != "":
+                input_copyright = 'Copyright ' + input_copyright
                 logger.warning(f"  * Your input Copyright : {input_copyright}")
                 parsed_args = main_parser.parse_args(['addheader', '--copyright',
                                                       'SPDX-FileCopyrightText: ' + str(input_copyright),
@@ -235,6 +237,8 @@ def add_content(path_to_find, file, input_license="", input_copyright=""):
                 run(parsed_args, project)
             except Exception as ex:
                 print_error('Error_call_run_in_copyright_file_only :' + str(ex))
+        else:
+            logger.info("# There is no missing copyright file\n")
     else:
         # Get all files List in path
         all_files_list = get_allfiles_list(path_to_find)
