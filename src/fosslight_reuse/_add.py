@@ -144,15 +144,14 @@ def set_missing_license_copyright(missing_license_filtered, missing_copyright_fi
 
         if license == "" and copyright == "":
             input_copyright = input_copyright_while_running()
-
-            input_ok = check_input_format(input_copyright)
-            if input_ok is False:
-                return
         else:
             input_copyright = copyright
 
         if input_copyright != "":
             input_copyright = 'Copyright ' + input_copyright
+            input_ok = check_input_format(input_copyright)
+            if input_ok is False:
+                return
             logger.warning(f"  * Your input Copyright : {input_copyright}")
             parsed_args = main_parser.parse_args(['addheader', '--copyright',
                                                   'SPDX-FileCopyrightText: ' + str(input_copyright),
