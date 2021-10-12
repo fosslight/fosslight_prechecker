@@ -21,12 +21,11 @@ def main():
     parser.add_argument('--help', '-h', help='Print help message', action='store_true', dest='help')
     try:
         args = parser.parse_args()
-    except:
+    except SystemExit:
         print_help_msg()
 
     if args.help:
         print_help_msg()
-
 
     if args.mode == "lint":
         run_lint(args.path, args.file, args.disable, args.output)
