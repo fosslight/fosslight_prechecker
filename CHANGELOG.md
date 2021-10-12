@@ -1,5 +1,18 @@
 # Changelog
 
+## v2.1.1 (12/10/2021)
+## Changes
+## 🐛 Hotfixes
+
+- Fix to Flake8 v4.0.0 bug -> using v3.9.2 (when using tox) @bjk7119 (#33)
+
+## 🔧 Maintenance
+
+- Modify to print help message one time @bjk7119 (#33)
+- Modify to test add mode @bjk7119 (#32)
+
+---
+
 ## v2.1.0 (16/09/2021)
 ## Changes
 ## 🚀 Features
