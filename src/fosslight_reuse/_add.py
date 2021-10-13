@@ -116,7 +116,7 @@ def set_missing_license_copyright(missing_license_filtered, missing_copyright_fi
         logger.info("# Missing license File(s) ")
         for lic_file in sorted(missing_license_filtered):
             logger.info(f"  * {lic_file}")
-            missing_license_list.append(path_to_find + '/' + lic_file)
+            missing_license_list.append(lic_file)
 
         if license == "" and copyright == "":
             input_license = input_license_while_running()
@@ -140,7 +140,7 @@ def set_missing_license_copyright(missing_license_filtered, missing_copyright_fi
         logger.info("# Missing Copyright File(s) ")
         for cop_file in sorted(missing_copyright_filtered):
             logger.info(f"  * {cop_file}")
-            missing_copyright_list.append(os.getcwd() + '/' + path_to_find + '/' + cop_file)
+            missing_copyright_list.append(cop_file)
 
         if license == "" and copyright == "":
             input_copyright = input_copyright_while_running()
@@ -195,6 +195,12 @@ def add_content(path_to_find, file, input_license="", input_copyright=""):
 
     if path_to_find == "":
         path_to_find = os.getcwd()
+    else:
+        path_to_find = os.path.abspath(path_to_find)
+
+    os.chdir(path_to_find)
+    if not path_to_find.endswith("/"):
+        path_to_find += "/"
 
     now = datetime.now().strftime('%Y%m%d_%H-%M-%S')
     output_dir = os.getcwd()
