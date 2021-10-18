@@ -199,8 +199,6 @@ def add_content(path_to_find, file, input_license="", input_copyright=""):
         path_to_find = os.path.abspath(path_to_find)
 
     os.chdir(path_to_find)
-    if not path_to_find.endswith("/"):
-        path_to_find += "/"
 
     now = datetime.now().strftime('%Y%m%d_%H-%M-%S')
     output_dir = os.getcwd()
