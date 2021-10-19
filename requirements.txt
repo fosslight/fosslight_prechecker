@@ -1,3 +1,4 @@
+python-debian==0.1.40
 binaryornot
 requests
 reuse
