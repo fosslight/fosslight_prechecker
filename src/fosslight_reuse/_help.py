@@ -14,7 +14,7 @@ _HELP_MESSAGE_REUSE = """
     Parameters:
         Mode
             lint\t\t    Check REUSE compliance
-            report\t\t    oss_pkg_info.yaml <-> FOSSLight-Report.xlsx
+            convert\t\t    Convert oss_pkg_info.yaml <-> FOSSLight-Report.xlsx
             add\t\t\t    Add missing license and copyright
 
         Options:
