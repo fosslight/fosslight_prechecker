@@ -1,5 +1,17 @@
 # Changelog
 
+## v2.1.2 (19/10/2021)
+## Changes
+## 🐛 Hotfixes
+
+- Bug fix to use with abspath and relpath @bjk7119 (#34)
+
+## 🔧 Maintenance
+
+- Use python-debian v0.1.40 @bjk7119 (#34)
+
+---
+
 ## v2.1.1 (12/10/2021)
 ## Changes
 ## 🐛 Hotfixes
