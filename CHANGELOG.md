@@ -1,5 +1,13 @@
 # Changelog
 
+## v2.1.3 (21/10/2021)
+## Changes
+## 🔧 Maintenance
+
+- Change mode name : report -> convert @bjk7119 (#35)
+
+---
+
 ## v2.1.2 (19/10/2021)
 ## Changes
 ## 🐛 Hotfixes
