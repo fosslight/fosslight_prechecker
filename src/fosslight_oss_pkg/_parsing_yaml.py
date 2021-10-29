@@ -78,6 +78,7 @@ def write_result_to_sheet(worksheet, print_list):
 
 def parsing_yml(yaml_file, base_path):
     oss_list = []
+    license_list = []
     idx = 1
     try:
         path_of_yml = os.path.normpath(os.path.dirname(yaml_file))
@@ -99,10 +100,11 @@ def parsing_yml(yaml_file, base_path):
                     for item_to_print in items_to_print:
                         item_to_print.insert(0, str(idx))
                     oss_list.extend(items_to_print)
+                    license_list.extend(item.licenses)
                     idx += 1
     except yaml.YAMLError as ex:
         _logger.error('Parsing yaml :' + str(ex))
-    return oss_list
+    return oss_list, license_list
 
 
 def find_all_oss_pkg_files(path_to_find, file_to_find):
