@@ -32,6 +32,7 @@ if __name__ == "__main__":
             "Programming Language :: Python :: 3.8",
             "Programming Language :: Python :: 3.9"],
         install_requires=required,
+        package_data={'fosslight_reuse': ['resources/convert_license.json']},
         include_package_data=True,
         entry_points={
             "console_scripts": [
