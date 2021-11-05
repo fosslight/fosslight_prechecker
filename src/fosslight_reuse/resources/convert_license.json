@@ -1,0 +1,21 @@
+{
+    "gpl-2.0": "GPL-2.0-only",
+    "gpl2.0": "GPL-2.0-only",
+    "gpl 2.0": "GPL-2.0-only",
+    "gpl-2.0-only": "GPL-2.0-only",
+    "gpl-3.0": "GPL-3.0-only",
+    "gpl3.0": "GPL-3.0-only",
+    "gpl 3.0": "GPL-3.0-only",
+    "gpl-3.0-only": "GPL-3.0-only",
+    "lgpl-2.1": "LGPL-2.1-only",
+    "lgpl-2.0": "LGPL-2.1-only",
+    "lgpl 2.0": "LGPL-2.1-only",
+    "lgpl 2.1": "LGPL-2.1-only",
+    "lgpl2.0": "LGPL-2.1-only",
+    "lgpl2.1": "LGPL-2.1-only",
+    "lgpl-2.1-only": "LGPL-2.1-only",
+    "apache-2.0": "Apache-2.0",
+    "apache2.0": "Apache-2.0",
+    "apache 2.0": "Apache-2.0",
+    "mit": "MIT"
+}

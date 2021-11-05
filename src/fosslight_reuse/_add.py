@@ -5,6 +5,9 @@
 import os
 import re
 import logging
+import shutil
+import json
+import sys
 import fosslight_util.constant as constant
 from yaml import safe_dump
 from fosslight_util.set_log import init_log
@@ -19,17 +22,35 @@ from reuse.project import Project
 from fosslight_oss_pkg._parsing_yaml import find_all_oss_pkg_files, parsing_yml
 
 
-_PKG_NAME = "fosslight_reuse"
-_LICENSE_INCLUDE_FILES = ["license", "license.md", "license.txt", "notice"]
-_GPL_2_0_ONLY = ["GPL-2.0", "gpl-2.0", "gpl2.0", "gpl 2.0"]
-_GPL_3_0_ONLY = ["GPL-3.0", "gpl-3.0", "gpl3.0", "gpl 3.0"]
-_LGPL_2_1_ONLY = ["LGPL-2.1", "lgpl-2.1", "LGPL-2.0", "lgpl-2.0", "lgpl 2.0", "lgpl 2.1", "lgpl2.0", "lgpl2.1"]
-_APACHE_2_0 = ["Apache-2.0", "apache-2.0", "apache2.0", "apache 2.0"]
-_MIT = ["MIT", "mit"]
-_exclude_directory = ["test", "tests", "doc", "docs", "/."]
+PKG_NAME = "fosslight_reuse"
+LICENSE_INCLUDE_FILES = ["license", "license.md", "license.txt", "notice"]
+EXCLUDE_DIR = ["test", "tests", "doc", "docs"]
+EXCLUDE_PREFIX = ("test", ".", "doc", "__")
+RESOURCES_DIR = 'resources'
+LICENSES_JSON_FILE = 'convert_license.json'
 _result_log = {}
-_SPDX_LICENSES = []
+spdx_licenses = []
+
 logger = logging.getLogger(constant.LOGGER_NAME)
+
+
+def get_licenses_from_json():
+    licenses = {}
+    licenses_file = os.path.join(RESOURCES_DIR, LICENSES_JSON_FILE)
+
+    try:
+        base_dir = sys._MEIPASS
+    except Exception:
+        base_dir = os.path.dirname(__file__)
+
+    file_withpath = os.path.join(base_dir, licenses_file)
+    try:
+        with open(file_withpath, 'r') as f:
+            licenses = json.load(f)
+    except Exception as ex:
+        print_error('Error to get license from json file :' + str(ex))
+
+    return licenses
 
 
 def check_file_extension(file_list):
@@ -37,38 +58,32 @@ def check_file_extension(file_list):
 
     if file_list != "":
         for file in file_list:
-            if is_exclude_dir(file):
-                file_list.remove(file)
-            else:
-                try:
-                    file_extension = os.path.splitext(file)[1].lower()
-                    if file_extension == "":
-                        logger.warning(" No extension file(s) : " + file)
-                    if file_extension in EXTENSION_COMMENT_STYLE_MAP_LOWERCASE:
-                        files_filtered.append(file)
-                except Exception as ex:
-                    logger.warning("Error - Unknown error to check file extension " + ex)
+            try:
+                file_extension = os.path.splitext(file)[1].lower()
+                if file_extension == "":
+                    logger.info(" No extension file(s) : " + file)
+                if file_extension in EXTENSION_COMMENT_STYLE_MAP_LOWERCASE:
+                    files_filtered.append(file)
+            except Exception as ex:
+                print_error("Error - Unknown error to check file extension - " + str(ex))
 
     return files_filtered
 
 
 def check_license_and_copyright(path_to_find, all_files, missing_license, missing_copyright):
-    logger.info("\n")
     # Check file extension for each list
     all_files_fitered = check_file_extension(all_files)
     missing_license_filtered = check_file_extension(missing_license)
     missing_copyright_filtered = check_file_extension(missing_copyright)
 
     skip_files = sorted(list(set(all_files_fitered) - set(missing_license_filtered) - set(missing_copyright_filtered)))
-    logger.info("\n# File list that have both license and copyright : {count} / {total}".format(
-            count=len(skip_files),
-            total=len(all_files)))
+    logger.info(f"\n# File list that have both license and copyright : {len(skip_files)} / {len(all_files)}")
 
+    file_list = list()
     for file in skip_files:
-        file_list = list()
         file_list.append(file)
 
-        _, _, _, _ = reuse_for_files(path_to_find, file_list)
+    reuse_for_files(path_to_find, file_list)
 
     return missing_license_filtered, missing_copyright_filtered
 
@@ -83,18 +98,19 @@ def check_input_license_format(input_license):
     if input_license.startswith('LicenseRef-'):
         return input_license
 
-    if input_license in _GPL_2_0_ONLY:
-        input_license = "GPL-2.0-only"
-    elif input_license in _GPL_3_0_ONLY:
-        input_license = "GPL-3.0-only"
-    elif input_license in _LGPL_2_1_ONLY:
-        input_license = "LGPL-2.1-only"
-    elif input_license in _APACHE_2_0:
-        input_license = "Apache-2.0"
-    elif input_license in _MIT:
-        input_license = "MIT"
+    input_license = input_license.lower()
 
-    if input_license not in _SPDX_LICENSES:
+    licensesfromJson = get_licenses_from_json()
+    if licensesfromJson == "":
+        print_error(" Error - Return Value to get license from Json is none ")
+
+    try:
+        # Get frequetly used license from json file
+        input_license = licensesfromJson.get(input_license)
+    except Exception as ex:
+        print_error(f"Error - Get frequetly used license : {ex}")
+
+    if input_license not in spdx_licenses:
         input_license = convert_to_spdx_style(input_license)
 
     return input_license
@@ -147,7 +163,7 @@ def set_missing_license_copyright(missing_license_filtered, missing_copyright_fi
     except Exception as ex:
         print_error('Error_get_arg_parser :' + str(ex))
 
-    # Print missing license
+    # Print missing License
     if missing_license_filtered is not None and len(missing_license_filtered) > 0:
         missing_license_list = []
 
@@ -170,9 +186,9 @@ def set_missing_license_copyright(missing_license_filtered, missing_copyright_fi
             except Exception as ex:
                 print_error('Error_call_run_in_license :' + str(ex))
     else:
-        logger.info("# There is no missing license file")
+        logger.info("# There is no missing license file\n")
 
-    # Print copyright
+    # Print missing Copyright
     if missing_copyright_filtered is not None and len(missing_copyright_filtered) > 0:
         missing_copyright_list = []
 
@@ -210,6 +226,10 @@ def get_allfiles_list(path):
 
     try:
         for root, dirs, files in os.walk(path):
+            for dir in dirs:
+                if dir.startswith(EXCLUDE_PREFIX):
+                    dirs.remove(dir)
+                    continue
             for file in files:
                 file_lower_case = file.lower()
                 file_abs_path = os.path.join(root, file_lower_case)
@@ -232,41 +252,45 @@ def save_result_log():
 def copy_to_root(input_license):
     lic_file = str(input_license) + '.txt'
     try:
-        os.system(f"cp LICENSES/{lic_file} LICENSE")
+        source = os.path.join('LICENSES', f'{lic_file}')
+        destination = 'LICENSE'
+        shutil.copyfile(source, destination)
     except Exception as ex:
         print_error("Error - Can't copy license file: " + str(ex))
 
 
-def find_representative_license(base_path, input_license):
+def find_representative_license(path_to_find, input_license):
     files = []
     found_file = []
     found_license_file = False
     main_parser = reuse_arg_parser()
-    prj = Project(base_path)
+    prj = Project(path_to_find)
 
-    all_items = os.listdir(os.getcwd())
+    all_items = os.listdir(path_to_find)
     for item in all_items:
-        path = os.path.join(os.getcwd(), item)
-        if not os.path.isdir(path):
-            files.append(os.path.basename(path))
+        if os.path.isfile(item):
+            files.append(os.path.basename(item))
 
     for file in files:
         file_lower_case = file.lower()
 
-        if file_lower_case in _LICENSE_INCLUDE_FILES or file_lower_case.startswith("license") or file_lower_case.startswith("notice"):
+        if file_lower_case in LICENSE_INCLUDE_FILES or file_lower_case.startswith("license") or file_lower_case.startswith("notice"):
             found_file.append(file)
             found_license_file = True
 
     if found_license_file:
         logger.warning(f" # Found representative license file : {found_file}")
     else:
+        input_license = check_input_license_format(input_license)
+
         logger.warning(f" Input License : {input_license}")
         parsed_args = main_parser.parse_args(['download', str(input_license)])
 
         try:
-            logger.warning(" # No representative license file and Download license text file")
+            logger.warning(" # There is no representative license file")
             reuse_download(parsed_args, prj)
             copy_to_root(input_license)
+            logger.warning(f" # Created Representative License File : {input_license}.txt")
         except Exception as ex:
             print_error('Error - download representative license text:' + str(ex))
 
@@ -278,7 +302,7 @@ def is_exclude_dir(dir_path):
             os.path.sep) else dir_path + os.path.sep
         dir_path = dir_path if dir_path.startswith(
             os.path.sep) else os.path.sep + dir_path
-        return any(dir_name in dir_path for dir_name in _exclude_directory)
+        return any(dir_name in dir_path for dir_name in EXCLUDE_DIR)
     return
 
 
@@ -299,10 +323,10 @@ def download_oss_info_license(base_path, input_license=""):
             found_oss_pkg_files.remove(file)
 
     if found_oss_pkg_files is None or len(found_oss_pkg_files) == 0:
-        logger.info(" # There is no OSS Package file in this path")
+        logger.info("\n # There is no OSS package Info file in this path\n")
         return
     else:
-        logger.info(f" # There is OSS Package file(s) : {found_oss_pkg_files}\n")
+        logger.info(f"\n # There is OSS Package Info file(s) : {found_oss_pkg_files}\n")
 
     for oss_pkg_file in found_oss_pkg_files:
         _, license_list = parsing_yml(oss_pkg_file, base_path)
@@ -337,31 +361,30 @@ def add_content(path_to_find="", file="", input_license="", input_copyright=""):
     now = datetime.now().strftime('%Y%m%d_%H-%M-%S')
     output_dir = os.getcwd()
     logger, _result_log = init_log(os.path.join(output_dir, "fosslight_reuse_add_log_"+now+".txt"),
-                                   True, logging.INFO, logging.DEBUG, _PKG_NAME, path_to_find)
+                                   True, logging.INFO, logging.DEBUG, PKG_NAME, path_to_find)
 
     if file != "":
         file_to_check_list = file.split(',')
         _check_only_file_mode = True
 
-    if input_license != "":
-        find_representative_license(os.getcwd(), input_license)
-
     # Get SPDX License List
     try:
         success, error_msg, licenses = get_spdx_licenses_json()
-        if success:
+        if success is False:
             print_error('Error to get SPDX Licesens : ' + str(error_msg))
 
         licenseInfo = licenses.get("licenses")
         for info in licenseInfo:
             shortID = info.get("licenseId")
-            _SPDX_LICENSES.append(shortID)
-
+            spdx_licenses.append(shortID)
     except Exception as ex:
         print_error('Error access to get_spdx_licenses_json : ' + str(ex))
 
+    if input_license != "":
+        find_representative_license(path_to_find, input_license)
+
     # Download license text file of OSS-pkg-info.yaml
-    download_oss_info_license(os.getcwd(), input_license)
+    download_oss_info_license(path_to_find, input_license)
 
     if _check_only_file_mode:
         main_parser = reuse_arg_parser()
@@ -407,6 +430,7 @@ def add_content(path_to_find="", file="", input_license="", input_copyright=""):
         # Get all files List in path
         all_files_list = get_allfiles_list(path_to_find)
 
+        # Get missing license / copyright file list
         _, missing_license, missing_copyright, _, _, project = reuse_for_project(path_to_find)
 
         # Print Skipped Files
