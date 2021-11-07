@@ -1,5 +1,13 @@
 # Changelog
 
+## v2.1.4 (07/11/2021)
+## Changes
+## 🚀 Features
+
+- Add code of downloading license text @bjk7119 (#38)
+
+---
+
 ## v2.1.3 (21/10/2021)
 ## Changes
 ## 🔧 Maintenance
