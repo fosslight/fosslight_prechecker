@@ -33,7 +33,7 @@ def convert_yml_to_excel(oss_pkg_files, output_file, file_option_on, base_path, 
 
                 if file_option_on:
                     base_path = os.path.dirname(oss_pkg_file)
-                items_to_print.extend(parsing_yml(oss_pkg_file, base_path))
+                items_to_print.extend(parsing_yml(oss_pkg_file, base_path)[0])
         except Exception as ex:
             _logger.error('Read yaml file:' + str(ex))
 
