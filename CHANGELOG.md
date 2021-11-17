@@ -1,5 +1,13 @@
 # Changelog
 
+## v2.1.5 (17/11/2021)
+## Changes
+## 🐛 Hotfixes
+
+- Bug fix to create .xlsx file @bjk7119 (#40)
+
+---
+
 ## v2.1.4 (07/11/2021)
 ## Changes
 ## 🚀 Features
