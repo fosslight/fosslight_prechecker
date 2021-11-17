@@ -19,7 +19,7 @@ Here a short summary:
 
 - `lint` --- Check whether the [source code's copyright and license writing rules][rule] are complied with.
 
-- `convert` --- Convert [oss-pkg-info.yaml](https://github.com/fosslight/fosslight_reuse/blob/main/tests/convert/oss-pkg-info.yaml) to [FOSSLight-Report.xlsx](https://fosslight.org/fosslight-guide-en/learn/2_fosslight_report.html) and vice versa.
+- `convert` --- Convert [oss-pkg-info.yaml](https://github.com/fosslight/fosslight_reuse/blob/main/tests/convert/oss-pkg-info.yaml) to [FOSSLight-Report.xlsx](https://fosslight.org/fosslight-guide-en/learn/1_fosslight_report.html) and vice versa.
 
 - `add` --- Add copyright and license to missing file(s)
 
