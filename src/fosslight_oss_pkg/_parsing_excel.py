@@ -45,7 +45,7 @@ def write_yaml_file(output_file, json_output):
 
 def read_oss_report(excel_file):
     _oss_report_items = []
-    _sheet_name_to_read = ["BIN (Android)", "BOM", "BIN(Android)"]
+    _sheet_name_to_read = ["BIN (Android)", "BOM", "BIN(Android)", "BIN (Yocto)", "BIN(Yocto)"]
     _xl_sheets = []
 
     try:
