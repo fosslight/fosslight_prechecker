@@ -1,5 +1,13 @@
 # Changelog
 
+## v2.1.6 (19/11/2021)
+## Changes
+## 🔧 Maintenance
+
+- Add sheet name(BIN(Yocto)) to use Yocto report @bjk7119 (#42)
+
+---
+
 ## v2.1.5 (17/11/2021)
 ## Changes
 ## 🐛 Hotfixes
