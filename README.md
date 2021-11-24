@@ -14,7 +14,7 @@ It uses [reuse-tool][ret] to check whether the [source code's copyright and lice
 
 
 ## 📖 User Guide
-Please see the [**User Guide**](https://fosslight.org/fosslight-guide-en/scanner/3_reuse.html) for more information on how to install and run it.    
+Please see the [**User Guide**](https://fosslight.org/fosslight-guide-en/scanner/1_reuse.html) for more information on how to install and run it.    
 Here a short summary:    
 
 - `lint` --- Check whether the [source code's copyright and license writing rules][rule] are complied with.
