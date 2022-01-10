@@ -44,6 +44,8 @@ class OssItem:
 
     def set_copyright(self, value):
         if value != "":
+            if isinstance(value, list):
+                value = "\n".join(value)
             value = value.strip()
         self.copyright = value
 
