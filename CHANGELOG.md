@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.1.7 (17/01/2022)
+🔧 Maintenance
+* When converting Yaml, modify it so that Copyright can be read as a list.
+
+---
+
 ## v2.1.6 (19/11/2021)
 ## Changes
 ## 🔧 Maintenance
