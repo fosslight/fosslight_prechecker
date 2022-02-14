@@ -11,7 +11,7 @@ from ._add import add_content
 
 def main():
     parser = argparse.ArgumentParser(description='FOSSLight Reuse', prog='fosslight_reuse', add_help=False)
-    parser.add_argument('mode', help='lint | convert | add')
+    parser.add_argument('mode', nargs='?', help='lint | convert | add', default="")
     parser.add_argument('--path', '-p', help='Path to check', type=str, dest='path', default="")
     parser.add_argument('--file', '-f', help='Files to check', type=str, dest='file', default="")
     parser.add_argument('--output', '-o', help='Output file name', type=str, dest='output', default="")
@@ -34,7 +34,7 @@ def main():
     elif args.mode == "add":
         add_content(args.path, args.file, args.license, args.copyright)
     else:
-        pass
+        print_help_msg()
 
 
 if __name__ == "__main__":
