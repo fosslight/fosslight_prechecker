@@ -1,7 +1,25 @@
 # Changelog
 
+## v2.1.8 (01/01/1970)
+## Changes
+## 🔧 Maintenance
+
+- Fix to print help message if don't write mode @bjk7119 (#43)
+
+---
+
+## v2.1.8 (24/02/2022)
+## Changes
+## 🔧 Maintenance
+
+- Comment out some sentences in the PR template @soimkim (#44)
+- Fix to print help message if don't write mode @bjk7119 (#43)
+
+---
+
 ## v2.1.7 (17/01/2022)
-🔧 Maintenance
+## Changes
+## 🔧 Maintenance
 * When converting Yaml, modify it so that Copyright can be read as a list.
 
 ---
@@ -95,10 +113,6 @@
 
 ---
 
-## v2.0.0 (22/07/2021)
-
----
-
 ## v2.0.1 (29/07/2021)
 ## Changes
 ## 🐛 Hotfixes
@@ -109,3 +123,7 @@
 
 - Remove waring in publish-release.yml @bjk7119 (#12)
 - Update version in setup.py when release @soimkim (#11)
+
+---
+
+## v2.0.0 (22/07/2021)
