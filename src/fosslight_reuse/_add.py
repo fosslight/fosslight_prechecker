@@ -48,7 +48,7 @@ def get_licenses_from_json():
         with open(file_withpath, 'r') as f:
             licenses = json.load(f)
     except Exception as ex:
-        print_error('Error to get license from json file :' + str(ex))
+        print_error(f"Error to get license from json file : {ex}")
 
     return licenses
 
@@ -61,11 +61,11 @@ def check_file_extension(file_list):
             try:
                 file_extension = os.path.splitext(file)[1].lower()
                 if file_extension == "":
-                    logger.info(" No extension file(s) : " + file)
+                    logger.info(f" No extension file(s) : {file}")
                 if file_extension in EXTENSION_COMMENT_STYLE_MAP_LOWERCASE:
                     files_filtered.append(file)
             except Exception as ex:
-                print_error("Error - Unknown error to check file extension - " + str(ex))
+                print_error(f"Error - Unknown error to check file extension: {ex}")
 
     return files_filtered
 
@@ -90,7 +90,7 @@ def check_license_and_copyright(path_to_find, all_files, missing_license, missin
 
 def convert_to_spdx_style(input_string):
     input_string = input_string.replace(" ", "-")
-    input_converted = "LicenseRef-" + input_string
+    input_converted = f"LicenseRef-{input_string}"
     return input_converted
 
 
@@ -103,7 +103,7 @@ def check_input_license_format(input_license):
 
     licensesfromJson = get_licenses_from_json()
     if licensesfromJson == "":
-        print_error(" Error - Return Value to get license from Json is none ")
+        print_error(" Error - Return Value to get license from Json is none")
 
     try:
         # Get frequetly used license from json file
@@ -161,13 +161,13 @@ def set_missing_license_copyright(missing_license_filtered, missing_copyright_fi
     try:
         main_parser = reuse_arg_parser()
     except Exception as ex:
-        print_error('Error_get_arg_parser :' + str(ex))
+        print_error(f"Error_get_arg_parser : {ex}")
 
     # Print missing License
     if missing_license_filtered is not None and len(missing_license_filtered) > 0:
         missing_license_list = []
 
-        logger.info("# Missing license File(s) ")
+        logger.info("# Missing license File(s)")
         for lic_file in sorted(missing_license_filtered):
             logger.info(f"  * {lic_file}")
             missing_license_list.append(lic_file)
@@ -184,7 +184,7 @@ def set_missing_license_copyright(missing_license_filtered, missing_copyright_fi
             try:
                 reuse_header(parsed_args, project)
             except Exception as ex:
-                print_error('Error_call_run_in_license :' + str(ex))
+                print_error(f"Error_call_run_in_license : {ex}")
     else:
         logger.info("# There is no missing license file\n")
 
@@ -203,7 +203,7 @@ def set_missing_license_copyright(missing_license_filtered, missing_copyright_fi
             input_copyright = copyright
 
         if input_copyright != "":
-            input_copyright = 'Copyright ' + input_copyright
+            input_copyright = f"Copyright {input_copyright}"
 
             input_ok = check_input_copyright_format(input_copyright)
             if input_ok is False:
@@ -211,12 +211,12 @@ def set_missing_license_copyright(missing_license_filtered, missing_copyright_fi
 
             logger.warning(f"  * Your input Copyright : {input_copyright}")
             parsed_args = main_parser.parse_args(['addheader', '--copyright',
-                                                  'SPDX-FileCopyrightText: ' + str(input_copyright),
+                                                  f'SPDX-FileCopyrightText: {input_copyright}',
                                                   '--exclude-year'] + missing_copyright_list)
             try:
                 reuse_header(parsed_args, project)
             except Exception as ex:
-                print_error('Error_call_run_in_copyright :' + str(ex))
+                print_error(f"Error_call_run_in_copyright : {ex}")
     else:
         logger.info("\n# There is no missing copyright file\n")
 
@@ -236,7 +236,7 @@ def get_allfiles_list(path):
                 file_rel_path = os.path.relpath(file_abs_path, path)
                 all_files.append(file_rel_path)
     except Exception as ex:
-        print_error('Error_Get_AllFiles : ' + str(ex))
+        print_error(f"Error_Get_AllFiles : {ex}")
 
     return all_files
 
@@ -246,17 +246,17 @@ def save_result_log():
         _str_final_result_log = safe_dump(_result_log, allow_unicode=True, sort_keys=True)
         logger.info(_str_final_result_log)
     except Exception as ex:
-        logger.warning("Failed to print add result log. " + str(ex))
+        logger.warning(f"Failed to print add result log. : {ex}")
 
 
 def copy_to_root(input_license):
-    lic_file = str(input_license) + '.txt'
+    lic_file = f"{input_license}.txt"
     try:
         source = os.path.join('LICENSES', f'{lic_file}')
         destination = 'LICENSE'
         shutil.copyfile(source, destination)
     except Exception as ex:
-        print_error("Error - Can't copy license file: " + str(ex))
+        print_error(f"Error - Can't copy license file: {ex}")
 
 
 def find_representative_license(path_to_find, input_license):
@@ -284,7 +284,7 @@ def find_representative_license(path_to_find, input_license):
         input_license = check_input_license_format(input_license)
 
         logger.info(f" Input License : {input_license}")
-        parsed_args = main_parser.parse_args(['download', str(input_license)])
+        parsed_args = main_parser.parse_args(['download', f"{input_license}"])
 
         try:
             logger.warning(" # There is no representative license file")
@@ -294,7 +294,7 @@ def find_representative_license(path_to_find, input_license):
                 logger.warning(f" # Created Representative License File : {input_license}.txt")
 
         except Exception as ex:
-            print_error('Error - download representative license text:' + str(ex))
+            print_error(f"Error - download representative license text: {ex}")
 
 
 def is_exclude_dir(dir_path):
@@ -338,7 +338,7 @@ def download_oss_info_license(base_path, input_license=""):
         try:
             reuse_download(parsed_args, prj)
         except Exception as ex:
-            print_error('Error - download license text in OSS-pkg-info.yml :' + str(ex))
+            print_error(f"Error - download license text in OSS-pkg-info.yml : {ex}")
     else:
         logger.info(" # There is no license in the path \n")
 
@@ -356,7 +356,7 @@ def add_content(path_to_find="", file="", input_license="", input_copyright=""):
 
     now = datetime.now().strftime('%Y%m%d_%H-%M-%S')
     output_dir = os.getcwd()
-    logger, _result_log = init_log(os.path.join(output_dir, "fosslight_reuse_add_log_"+now+".txt"),
+    logger, _result_log = init_log(os.path.join(output_dir, f"fosslight_reuse_add_log_{now}.txt"),
                                    True, logging.INFO, logging.DEBUG, PKG_NAME, path_to_find)
 
     if file != "":
@@ -367,7 +367,7 @@ def add_content(path_to_find="", file="", input_license="", input_copyright=""):
     try:
         success, error_msg, licenses = get_spdx_licenses_json()
         if success is False:
-            print_error('Error to get SPDX Licesens : ' + str(error_msg))
+            print_error(f"Error to get SPDX Licesens : {error_msg}")
 
         licenseInfo = licenses.get("licenses")
         for info in licenseInfo:
@@ -376,7 +376,7 @@ def add_content(path_to_find="", file="", input_license="", input_copyright=""):
             if isDeprecated is False:
                 spdx_licenses.append(shortID)
     except Exception as ex:
-        print_error('Error access to get_spdx_licenses_json : ' + str(ex))
+        print_error(f"Error access to get_spdx_licenses_json : {ex}")
 
     if input_license != "":
         find_representative_license(path_to_find, input_license)
@@ -396,11 +396,11 @@ def add_content(path_to_find="", file="", input_license="", input_copyright=""):
             if input_license != "":
                 converted_license = check_input_license_format(input_license)
                 logger.warning(f"  * Your input license : {converted_license}")
-                parsed_args = main_parser.parse_args(['addheader', '--license', str(converted_license)] + missing_license_list)
+                parsed_args = main_parser.parse_args(['addheader', '--license', f"{converted_license}"] + missing_license_list)
                 try:
                     reuse_header(parsed_args, project)
                 except Exception as ex:
-                    print_error('Error_call_run_in_license_file_only :' + str(ex))
+                    print_error(f"Error_call_run_in_license_file_only : {ex}")
         else:
             logger.info("# There is no missing license file")
 
@@ -409,7 +409,7 @@ def add_content(path_to_find="", file="", input_license="", input_copyright=""):
                 input_copyright = input_copyright_while_running()
 
             if input_copyright != "":
-                input_copyright = 'Copyright ' + input_copyright
+                input_copyright = f"Copyright {input_copyright}"
 
                 input_ok = check_input_copyright_format(input_copyright)
                 if input_ok is False:
@@ -417,12 +417,12 @@ def add_content(path_to_find="", file="", input_license="", input_copyright=""):
 
                 logger.warning(f"  * Your input Copyright : {input_copyright}")
                 parsed_args = main_parser.parse_args(['addheader', '--copyright',
-                                                      'SPDX-FileCopyrightText: ' + str(input_copyright),
+                                                      f"SPDX-FileCopyrightText: {input_copyright}",
                                                       '--exclude-year'] + missing_copyright_list)
             try:
                 reuse_header(parsed_args, project)
             except Exception as ex:
-                print_error('Error_call_run_in_copyright_file_only :' + str(ex))
+                print_error(f"Error_call_run_in_copyright_file_only : {ex}")
         else:
             logger.info("# There is no missing copyright file\n")
     # Path mode (-p option)
