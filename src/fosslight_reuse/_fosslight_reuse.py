@@ -61,7 +61,7 @@ def find_oss_pkg_info(path):
                         _DEFAULT_EXCLUDE_EXTENSION_FILES.append(file_rel_path)
 
     except Exception as ex:
-        print_error('Error_FIND_OSS_PKG :' + str(ex))
+        print_error(f"Error_FIND_OSS_PKG : {ex}")
 
     return oss_pkg_info
 
@@ -84,20 +84,20 @@ def create_reuse_dep5_file(path):
         else:
             dir_to_remove = ""
         if os.path.exists(reuse_config_file):
-            file_to_remove = reuse_config_file + "_" + _start_time + ".bk"
+            file_to_remove = f"{reuse_config_file}_{_start_time}.bk"
             shutil.copy2(reuse_config_file, file_to_remove)
             need_rollback = True
 
         _DEFAULT_EXCLUDE_EXTENSION_FILES.extend(_DEFAULT_EXCLUDE_FOLDERS)
         for file_to_exclude in _DEFAULT_EXCLUDE_EXTENSION_FILES:
-            str_contents += "\nFiles: " + file_to_exclude + "\nCopyright: -\nLicense: -\n"
+            str_contents += f"\nFiles: {file_to_exclude} \nCopyright: -\nLicense: -\n"
 
         with open(reuse_config_file, "a") as f:
             if not need_rollback:
                 f.write(_DEFAULT_CONFIG_PREFIX)
             f.write(str_contents)
     except Exception as ex:
-        print_error('Error_Create_Dep5 :' + str(ex))
+        print_error(f"Error_Create_Dep5 : {ex}")
 
     return need_rollback, file_to_remove, dir_to_remove
 
@@ -114,7 +114,7 @@ def remove_reuse_dep5_file(rollback, file_to_remove, temp_dir_name):
             os.rmdir(temp_dir_name)
 
     except Exception as ex:
-        print_error('Error_Remove_Dep5 :' + str(ex))
+        print_error(f"Error_Remove_Dep5 : {ex}")
 
 
 def reuse_for_files(path, files):
@@ -137,11 +137,11 @@ def reuse_for_files(path, files):
                     if extension in _DEFAULT_EXCLUDE_EXTENSION:
                         _DEFAULT_EXCLUDE_EXTENSION_FILES.append(file)
                     else:
-                        logger.info("# " + file)
+                        logger.info(f"# {file}")
                         rep = report.FileReport.generate(prj, file_abs_path)
 
-                        logger.info("* License: " + ", ".join(rep.spdxfile.licenses_in_file))
-                        logger.info("* Copyright: " + rep.spdxfile.copyright + "\n")
+                        logger.info(f"* License: {', '.join(rep.spdxfile.licenses_in_file)}")
+                        logger.info(f"* Copyright: {rep.spdxfile.copyright}\n")
 
                         if rep.spdxfile.licenses_in_file is None or len(rep.spdxfile.licenses_in_file) == 0:
                             missing_license_list.append(file)
@@ -149,10 +149,10 @@ def reuse_for_files(path, files):
                             missing_copyright_list.append(file)
 
             except Exception as ex:
-                print_error('Error_Reuse_for_file_to_read :' + str(ex))
+                print_error(f"Error_Reuse_for_file_to_read : {ex}")
 
     except Exception as ex:
-        print_error('Error_Reuse_for_file :' + str(ex))
+        print_error(f"Error_Reuse_for_file : {ex}")
         error_occurred = True
 
     return missing_license_list, missing_copyright_list, error_occurred, prj
@@ -236,7 +236,7 @@ def result_for_summary(str_lint_result, oss_pkg_info, path, msg_missing_files):
             reuse_compliant = True
             str_oss_pkg += ", ".join(oss_pkg_info)
     except Exception as ex:
-        print_error('Error_Print_OSS_PKG_INFO:' + str(ex))
+        print_error(f"Error_Print_OSS_PKG_INFO: {ex}")
 
     if msg_missing_files == "":
         reuse_compliant = True
@@ -244,7 +244,7 @@ def result_for_summary(str_lint_result, oss_pkg_info, path, msg_missing_files):
     # Add Summary Comment
     _SUMMARY_PREFIX = '# SUMMARY\n'
     _SUMMARY_SUFFIX = '\n\n' + _MSG_REFERENCE
-    str_summary = _SUMMARY_PREFIX + str_oss_pkg + '\n' + str_lint_result + _SUMMARY_SUFFIX
+    str_summary = f"{_SUMMARY_PREFIX}{str_oss_pkg}\n{str_lint_result}{_SUMMARY_SUFFIX}"
     items = ET.Element('error')
     items.set('id', 'rule_key_osc_checker_01')
     items.set('line', '0')
@@ -275,7 +275,7 @@ def result_for_missing_license_and_copyright_files(files_without_license, copyri
         items.set('msg', _MSG_FOLLOW_LIC_TXT)
         if _check_only_file_mode:
             _root_xml_item.append(items)
-        str_missing_lic_files += ("* " + file_name + "\n")
+        str_missing_lic_files += (f"* {file_name}\n")
 
     for file_name in copyright_without_files:
         items = ET.Element('error')
@@ -285,7 +285,7 @@ def result_for_missing_license_and_copyright_files(files_without_license, copyri
         items.set('msg', _MSG_FOLLOW_LIC_TXT)
         if _check_only_file_mode:
             _root_xml_item.append(items)
-        str_missing_cop_files += ("* " + file_name + "\n")
+        str_missing_cop_files += (f"* {file_name}\n")
 
     if _check_only_file_mode and _DEFAULT_EXCLUDE_EXTENSION_FILES is not None and len(
             _DEFAULT_EXCLUDE_EXTENSION_FILES) > 0:
@@ -311,13 +311,13 @@ def write_xml_and_exit(result_file: str, exit_code: int) -> None:
             for xml_item in error_items:
                 logger.warning(xml_item.text)
     except Exception as ex:
-        logger.error('Error_to_write_xml:', ex)
+        logger.error(f"Error_to_write_xml: {ex}")
         exit_code = os.EX_IOERR
     try:
         _str_final_result_log = safe_dump(_result_log, allow_unicode=True, sort_keys=True)
         logger.info(_str_final_result_log)
     except Exception as ex:
-        logger.warning("Failed to print result log. " + str(ex))
+        logger.warning(f"Failed to print result log. {ex}")
     sys.exit(exit_code)
 
 
@@ -326,7 +326,7 @@ def init(path_to_find, result_file, file_list):
 
     _start_time = datetime.now().strftime('%Y%m%d_%H-%M-%S')
     output_dir = os.path.dirname(os.path.abspath(result_file))
-    logger, _result_log = init_log(os.path.join(output_dir, "fosslight_reuse_log_"+_start_time+".txt"),
+    logger, _result_log = init_log(os.path.join(output_dir, f"fosslight_reuse_log_{_start_time}.txt"),
                                    True, logging.INFO, logging.DEBUG, _PKG_NAME, path_to_find)
     if file_list:
         _result_log["File list to check"] = file_list
