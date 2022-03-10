@@ -54,8 +54,6 @@ def get_licenses_from_json():
 
 
 def check_file_extension(file_list):
-    files_filtered = []
-
     if file_list != "":
         for file in file_list:
             try:
@@ -63,27 +61,21 @@ def check_file_extension(file_list):
                 if file_extension == "":
                     logger.info(f" No extension file(s) : {file}")
                 if file_extension in EXTENSION_COMMENT_STYLE_MAP_LOWERCASE:
-                    files_filtered.append(file)
+                    yield file
             except Exception as ex:
                 print_error(f"Error - Unknown error to check file extension: {ex}")
-
-    return files_filtered
 
 
 def check_license_and_copyright(path_to_find, all_files, missing_license, missing_copyright):
     # Check file extension for each list
-    all_files_fitered = check_file_extension(all_files)
-    missing_license_filtered = check_file_extension(missing_license)
-    missing_copyright_filtered = check_file_extension(missing_copyright)
+    all_files_filtered = check_file_extension(all_files)
+    missing_license_filtered = list(check_file_extension(missing_license))
+    missing_copyright_filtered = list(check_file_extension(missing_copyright))
 
-    skip_files = sorted(list(set(all_files_fitered) - set(missing_license_filtered) - set(missing_copyright_filtered)))
-    logger.info(f"\n# File list that have both license and copyright : {len(skip_files)} / {len(all_files)}")
+    skip_files = sorted(set(all_files_filtered) - set(missing_license_filtered) - set(missing_copyright_filtered))
+    logger.info(f"\n# File list that have both license and copyright : {len(skip_files)} / {len(list(all_files))}")
 
-    file_list = list()
-    for file in skip_files:
-        file_list.append(file)
-
-    reuse_for_files(path_to_find, file_list)
+    reuse_for_files(path_to_find, skip_files)
 
     return missing_license_filtered, missing_copyright_filtered
 
@@ -222,8 +214,6 @@ def set_missing_license_copyright(missing_license_filtered, missing_copyright_fi
 
 
 def get_allfiles_list(path):
-    all_files = []
-
     try:
         for root, dirs, files in os.walk(path):
             for dir in dirs:
@@ -234,11 +224,9 @@ def get_allfiles_list(path):
                 file_lower_case = file.lower()
                 file_abs_path = os.path.join(root, file_lower_case)
                 file_rel_path = os.path.relpath(file_abs_path, path)
-                all_files.append(file_rel_path)
+                yield file_rel_path
     except Exception as ex:
         print_error(f"Error_Get_AllFiles : {ex}")
-
-    return all_files
 
 
 def save_result_log():
