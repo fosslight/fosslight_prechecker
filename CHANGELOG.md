@@ -1,10 +1,11 @@
 # Changelog
 
-## v2.1.8 (01/01/1970)
+## v2.1.9 (11/03/2022)
 ## Changes
 ## 🔧 Maintenance
 
-- Fix to print help message if don't write mode @bjk7119 (#43)
+- Change appending list in for loop to using yield @bjk7119 (#46)
+- Apply f-string format @bjk7119 (#45)
 
 ---
 
