@@ -4,7 +4,8 @@ name: Pull requests fosslight_reuse
 
 on:
   pull_request:
-    branches: [ main ]
+    branches:
+       - '*'
 
 jobs:
   check-commit-message:
