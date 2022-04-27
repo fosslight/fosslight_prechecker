@@ -12,6 +12,7 @@ import fosslight_util.constant as constant
 from yaml import safe_dump
 from fosslight_util.set_log import init_log
 from fosslight_util.spdx_licenses import get_spdx_licenses_json
+from fosslight_util.parsing_yaml import find_all_oss_pkg_files, parsing_yml
 from datetime import datetime
 from ._fosslight_reuse import reuse_for_project, reuse_for_files, print_error
 from reuse.header import run as reuse_header
@@ -19,7 +20,6 @@ from reuse.download import run as reuse_download
 from reuse._comment import EXTENSION_COMMENT_STYLE_MAP_LOWERCASE
 from reuse._main import parser as reuse_arg_parser
 from reuse.project import Project
-from fosslight_oss_pkg._parsing_yaml import find_all_oss_pkg_files, parsing_yml
 
 
 PKG_NAME = "fosslight_reuse"

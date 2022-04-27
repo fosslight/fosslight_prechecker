@@ -8,11 +8,42 @@ import logging
 import os
 import json
 import yaml
+import csv
+import xlsxwriter
 from fosslight_util.constant import LOGGER_NAME
-from._common import OssItem, invalid
+from fosslight_util.oss_item import OssItem, invalid
+from fosslight_util.parsing_yaml import find_all_oss_pkg_files, parsing_yml
 
 _logger = logging.getLogger(LOGGER_NAME)
 _IDX_CANNOT_FOUND = -1
+_HEADER_ROW = ['ID', 'Source Name or Path', 'OSS Name', 'OSS Version', 'License',
+               'Download Location', 'Homepage', 'Copyright Text',
+               'License Text', 'Exclude', 'Comment']
+
+
+def convert_yml_to_excel(oss_pkg_files, output_file, file_option_on, base_path, window):
+    items_to_print = [_HEADER_ROW]
+
+    if not file_option_on:
+        oss_pkg_files = find_all_oss_pkg_files(base_path, oss_pkg_files)
+    else:
+        oss_pkg_files = [pkg_file for pkg_file in oss_pkg_files if pkg_file.endswith(('.yaml', '.yml'))]
+
+    for oss_pkg_file in oss_pkg_files:
+        try:
+            if os.path.isfile(oss_pkg_file):
+                _logger.warning("Read data from :" + oss_pkg_file)
+
+                if file_option_on:
+                    base_path = os.path.dirname(oss_pkg_file)
+                items_to_print.extend(parsing_yml(oss_pkg_file, base_path)[0])
+        except Exception as ex:
+            _logger.error('Read yaml file:' + str(ex))
+
+    if not window:
+        write_result_to_csv(items_to_print, output_file)
+    if len(items_to_print) > 1:
+        write_result_to_excel(items_to_print, output_file)
 
 
 def convert_excel_to_yaml(oss_report_to_read, output_file):
@@ -36,6 +67,39 @@ def convert_excel_to_yaml(oss_report_to_read, output_file):
             _logger.error("Convert yaml:"+str(error))
     else:
         _logger.error("Can't find a file :"+oss_report_to_read)
+
+
+def write_result_to_csv(row_list, output_file):
+    _file_extension = ".csv"
+    try:
+        output_file = output_file if output_file.endswith(_file_extension) else output_file + _file_extension
+        with open(output_file, 'w', newline='') as file:
+            writer = csv.writer(file, delimiter='\t')
+            writer.writerows(row_list)
+        _logger.warn("Output: " + output_file)
+    except Exception as ex:
+        _logger.error('Write csv:' + str(ex))
+
+
+def write_result_to_excel(list_to_print, output_file):
+    _file_extension = ".xlsx"
+    try:
+        output_file = output_file if output_file.endswith(_file_extension) else output_file + _file_extension
+        workbook = xlsxwriter.Workbook(output_file)
+        worksheet = workbook.add_worksheet("SRC")
+        write_result_to_sheet(worksheet, list_to_print)
+        workbook.close()
+        _logger.warn("Output: "+output_file)
+    except Exception as ex:
+        _logger.error('Write excel:' + str(ex))
+
+
+def write_result_to_sheet(worksheet, print_list):
+    row = 0  # Start from the first cell.
+    for item_to_print in print_list:
+        for col_num, value in enumerate(item_to_print):
+            worksheet.write(row, col_num, value)
+        row += 1
 
 
 def write_yaml_file(output_file, json_output):

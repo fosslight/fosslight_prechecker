@@ -11,8 +11,7 @@ from yaml import safe_dump
 from fosslight_reuse._help import print_help_msg
 from fosslight_util.constant import LOGGER_NAME
 from fosslight_util.set_log import init_log
-from ._parsing_yaml import convert_yml_to_excel
-from ._parsing_excel import convert_excel_to_yaml
+from ._parsing_excel import convert_excel_to_yaml, convert_yml_to_excel
 
 _PKG_NAME = "fosslight_reuse"
 logger = logging.getLogger(LOGGER_NAME)
