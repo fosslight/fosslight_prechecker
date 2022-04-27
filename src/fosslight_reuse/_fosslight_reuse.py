@@ -13,6 +13,7 @@ from binaryornot.check import is_binary
 import fosslight_util.constant as constant
 from fosslight_util.set_log import init_log
 from fosslight_util.timer_thread import TimerThread
+#from fosslight_util._parsing_yaml import parsing_yml, find_all_oss_pkg_files
 from yaml import safe_dump
 from reuse import report
 from reuse.project import Project
