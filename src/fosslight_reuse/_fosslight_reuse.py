@@ -13,6 +13,7 @@ from binaryornot.check import is_binary
 import fosslight_util.constant as constant
 from fosslight_util.set_log import init_log
 from fosslight_util.timer_thread import TimerThread
+from fosslight_util.parsing_yaml import parsing_yml, find_all_oss_pkg_files
 from yaml import safe_dump
 from reuse import report
 from reuse.project import Project
@@ -158,16 +159,44 @@ def reuse_for_files(path, files):
     return missing_license_list, missing_copyright_list, error_occurred, prj
 
 
-def reuse_for_project(repository):
+def extract_files_in_path(filepath):
+    extract_files = []
+    for path in filepath:
+        if os.path.isdir(path):
+            files = os.listdir(path)
+            files = [os.path.join(path, file) for file in files]
+            extract_files.extend(files)
+        elif os.path.isfile(path):
+            extract_files.append(path)
+    return extract_files
+
+
+def get_excluded_path_in_yaml(repository, yaml_files):
+    for file in yaml_files:
+        oss_list, _ = parsing_yml(file, repository)
+
+        # if exclude filed is True, yield 'file' in pkg-info.yaml file
+        for ossitem in oss_list:
+            # If 'Exclude' field is true,
+            if ossitem[9]:
+                yield ossitem[1]
+
+
+def get_only_pkg_info_yaml_file(pkg_info_files):
+    for yaml in pkg_info_files:
+        if yaml.split('/')[-1].startswith("oss-pkg-info"):
+            yield yaml
+
+
+def reuse_for_project(path_to_find):
     result = ""
     missing_license = []
     missing_copyright = []
     error_occured = False
 
-    oss_pkg_info_files = find_oss_pkg_info(repository)
-
+    oss_pkg_info_files = find_oss_pkg_info(path_to_find)
     if _turn_on_default_reuse_config:
-        need_rollback, temp_file_name, temp_dir_name = create_reuse_dep5_file(repository)
+        need_rollback, temp_file_name, temp_dir_name = create_reuse_dep5_file(path_to_find)
 
     try:
         # Use ProgressBar
@@ -175,8 +204,19 @@ def reuse_for_project(repository):
         timer.setDaemon(True)
         timer.start()
 
-        project = Project(repository)
+        project = Project(path_to_find)
         report = ProjectReport.generate(project)
+
+        pkg_info_yaml_files = find_all_oss_pkg_files(path_to_find, oss_pkg_info_files)
+        yaml_file = get_only_pkg_info_yaml_file(pkg_info_yaml_files)
+
+        # Get path to be excluded in yaml file
+        filepath_in_yaml = set(get_excluded_path_in_yaml(path_to_find, yaml_file))
+
+        # TO DO
+        # Get all file list in 'exclude_filepath' by using Regular expression
+        excluded_files = extract_files_in_path(filepath_in_yaml)
+
         file_total = len(report.file_reports)
         timer.stop = True
 
@@ -189,29 +229,29 @@ def reuse_for_project(repository):
             result += lic
 
         result += ("\n* Files with copyright information: {count} / {total}").format(
-            count=file_total - len(report.files_without_copyright),
+            count=file_total - len(report.files_without_copyright - set(excluded_files)),
             total=file_total
         )
 
         result += ("\n* Files with license information: {count} / {total}").format(
-            count=file_total - len(report.files_without_licenses),
+            count=file_total - len(report.files_without_licenses - set(excluded_files)),
             total=file_total
         )
 
         # File list that missing license text
         missing_license = [str(sub) for sub in set(report.files_without_licenses)]
-        if not repository.endswith("/"):
-            repository += "/"
-        missing_license = [sub.replace(repository, '') for sub in missing_license]
+        if not path_to_find.endswith("/"):
+            path_to_find += "/"
+        missing_license = [sub.replace(path_to_find, '') for sub in missing_license]
 
         # File list that missing copyright text
         missing_copyright = [str(sub) for sub in set(report.files_without_copyright)]
-        if not repository.endswith("/"):
-            repository += "/"
-        missing_copyright = [sub.replace(repository, '') for sub in missing_copyright]
+        if not path_to_find.endswith("/"):
+            path_to_find += "/"
+        missing_copyright = [sub.replace(path_to_find, '') for sub in missing_copyright]
 
     except Exception as ex:
-        print_error('Error_Reuse_lint:' + str(ex))
+        print_error(f"Error_Reuse_lint: {ex}")
         error_occured = True
 
     if _turn_on_default_reuse_config:
@@ -242,7 +282,7 @@ def result_for_summary(str_lint_result, oss_pkg_info, path, msg_missing_files):
         reuse_compliant = True
 
     # Add Summary Comment
-    _SUMMARY_PREFIX = '# SUMMARY\n'
+    _SUMMARY_PREFIX = '\n# SUMMARY\n'
     _SUMMARY_SUFFIX = '\n\n' + _MSG_REFERENCE
     str_summary = f"{_SUMMARY_PREFIX}{str_oss_pkg}\n{str_lint_result}{_SUMMARY_SUFFIX}"
     items = ET.Element('error')
@@ -255,7 +295,7 @@ def result_for_summary(str_lint_result, oss_pkg_info, path, msg_missing_files):
     logger.info(msg_missing_files + str_summary)
 
 
-def result_for_missing_license_and_copyright_files(files_without_license, copyright_without_files, oss_pkg_info):
+def result_for_missing_license_and_copyright_files(files_without_license, files_without_copyright, oss_pkg_info):
     global _root_xml_item
     message = ""
     # If the oss_pkg_file exists,
@@ -277,7 +317,7 @@ def result_for_missing_license_and_copyright_files(files_without_license, copyri
             _root_xml_item.append(items)
         str_missing_lic_files += (f"* {file_name}\n")
 
-    for file_name in copyright_without_files:
+    for file_name in files_without_copyright:
         items = ET.Element('error')
         items.set('file', file_name)
         items.set('id', 'rule_key_osc_checker_02')
@@ -295,7 +335,7 @@ def result_for_missing_license_and_copyright_files(files_without_license, copyri
     else:
         if print_mode and files_without_license is not None and len(files_without_license) > 0:
             message = "# MISSING LICENSES FROM FILE LIST TO CHECK\n" + str_missing_lic_files + "\n"
-        if print_mode and copyright_without_files is not None and len(copyright_without_files) > 0:
+        if print_mode and files_without_copyright is not None and len(files_without_copyright) > 0:
             message += "# MISSING COPYRIGHT FROM FILE LIST TO CHECK\n" + str_missing_cop_files + "\n"
 
     return message
@@ -341,7 +381,7 @@ def run_lint(path_to_find, file, disable, result_file):
     try:
         locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
     except Exception as ex:
-        print_error('Error' + str(ex))
+        print_error(f"Error - locale : {ex}")
 
     if file != "":
         file_to_check_list = file.split(',')
