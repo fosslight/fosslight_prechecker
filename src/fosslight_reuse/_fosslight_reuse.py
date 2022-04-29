@@ -13,7 +13,7 @@ from binaryornot.check import is_binary
 import fosslight_util.constant as constant
 from fosslight_util.set_log import init_log
 from fosslight_util.timer_thread import TimerThread
-#from fosslight_util._parsing_yaml import parsing_yml, find_all_oss_pkg_files
+from fosslight_util._parsing_yaml import parsing_yml, find_all_oss_pkg_files
 from yaml import safe_dump
 from reuse import report
 from reuse.project import Project
@@ -159,16 +159,52 @@ def reuse_for_files(path, files):
     return missing_license_list, missing_copyright_list, error_occurred, prj
 
 
-def reuse_for_project(repository):
+def extract_files_in_path(path_to_find, filepath):
+    extract_files = []
+    for path in filepath:
+        # logger.warning(f"path: {path}")
+        if os.path.isdir(path):
+            # logger.warning(f"Dir - {path}")
+            files = os.listdir(path)
+            files = [os.path.join(path, file) for file in files]
+            # logger.warning(f"files: {files}")
+            # change to yield ??
+            extract_files.extend(files)
+        elif os.path.isfile(path):
+            # logger.warning(f"File - {path}")
+            extract_files.append(path)
+    return extract_files
+
+
+def get_excluded_path_in_yaml(repository, yaml_files):
+    for file in yaml_files:
+        # logger.warning(f"file : {file}")
+        oss_list, _ = parsing_yml(file, repository)
+        
+        # logger.warning(f"oss_list : {oss_list}")
+        # if exclude filed is True, yield 'file' in pkg-info.yaml file
+        for ossitem in oss_list:
+            if ossitem[9]:
+                # logger.warning(f"ossitem[1] :{ossitem[1]}")
+                yield ossitem[1]
+
+
+def get_only_pkg_info_yaml_file(pkg_info_files):
+    for yaml in pkg_info_files:
+        # logger.warning(f"pkg file : {yaml.split('/')[-1]}")
+        if yaml.split('/')[-1].startswith("oss-pkg-info"):
+            yield yaml
+
+
+def reuse_for_project(path_to_find):
     result = ""
     missing_license = []
     missing_copyright = []
     error_occured = False
 
-    oss_pkg_info_files = find_oss_pkg_info(repository)
-
+    oss_pkg_info_files = find_oss_pkg_info(path_to_find)
     if _turn_on_default_reuse_config:
-        need_rollback, temp_file_name, temp_dir_name = create_reuse_dep5_file(repository)
+        need_rollback, temp_file_name, temp_dir_name = create_reuse_dep5_file(path_to_find)
 
     try:
         # Use ProgressBar
@@ -176,8 +212,21 @@ def reuse_for_project(repository):
         timer.setDaemon(True)
         timer.start()
 
-        project = Project(repository)
+        project = Project(path_to_find)
         report = ProjectReport.generate(project)
+        
+
+        pkg_info_yaml_files = find_all_oss_pkg_files(path_to_find, oss_pkg_info_files)
+        yaml_file = get_only_pkg_info_yaml_file(pkg_info_yaml_files)
+
+        # Get path to be excluded in yaml file
+        filepath_in_yaml = set(get_excluded_path_in_yaml(path_to_find, yaml_file))
+        
+        # TO DO
+        # Get all file list in 'exclude_filepath' by using Regular expression
+        excluded_files = extract_files_in_path(path_to_find, filepath_in_yaml)
+        logger.warning(f"excluded files : {excluded_files}")
+
         file_total = len(report.file_reports)
         timer.stop = True
 
@@ -190,29 +239,41 @@ def reuse_for_project(repository):
             result += lic
 
         result += ("\n* Files with copyright information: {count} / {total}").format(
-            count=file_total - len(report.files_without_copyright),
-            total=file_total
+            count = file_total - len(report.files_without_copyright) - len(excluded_files),
+            total = file_total
         )
 
         result += ("\n* Files with license information: {count} / {total}").format(
-            count=file_total - len(report.files_without_licenses),
-            total=file_total
+            count = file_total - len(report.files_without_licenses) - len(excluded_files),
+            total = file_total
         )
 
         # File list that missing license text
         missing_license = [str(sub) for sub in set(report.files_without_licenses)]
-        if not repository.endswith("/"):
-            repository += "/"
-        missing_license = [sub.replace(repository, '') for sub in missing_license]
+        if not path_to_find.endswith("/"):
+            path_to_find += "/"
+        missing_license = [sub.replace(path_to_find, '') for sub in missing_license]
+
+        # Print missing license files
+        missing_license = sorted(set(missing_license).difference(excluded_files))
+        logger.info("\n< Missing License Files >")
+        for missing_lic_file in missing_license:
+            logger.info(f" * {missing_lic_file}")    
 
         # File list that missing copyright text
         missing_copyright = [str(sub) for sub in set(report.files_without_copyright)]
-        if not repository.endswith("/"):
-            repository += "/"
-        missing_copyright = [sub.replace(repository, '') for sub in missing_copyright]
+        if not path_to_find.endswith("/"):
+            path_to_find += "/"
+        missing_copyright = [sub.replace(path_to_find, '') for sub in missing_copyright]
+
+        # Print copyright files
+        missing_copyright = sorted(set(missing_copyright).difference(excluded_files))
+        logger.info("\n< Missing Copyright Files >")
+        for missing_cop_file in missing_copyright:
+            logger.info(f" * {missing_cop_file}")    
 
     except Exception as ex:
-        print_error('Error_Reuse_lint:' + str(ex))
+        print_error(f"Error_Reuse_lint: {ex}")
         error_occured = True
 
     if _turn_on_default_reuse_config:
@@ -243,7 +304,7 @@ def result_for_summary(str_lint_result, oss_pkg_info, path, msg_missing_files):
         reuse_compliant = True
 
     # Add Summary Comment
-    _SUMMARY_PREFIX = '# SUMMARY\n'
+    _SUMMARY_PREFIX = '\n# SUMMARY\n'
     _SUMMARY_SUFFIX = '\n\n' + _MSG_REFERENCE
     str_summary = f"{_SUMMARY_PREFIX}{str_oss_pkg}\n{str_lint_result}{_SUMMARY_SUFFIX}"
     items = ET.Element('error')
