@@ -8,8 +8,8 @@ _HELP_MESSAGE_REUSE = """
     FOSSLight Reuse is a Tool to check REUSE compliance in source code.
 
     Usage: fosslight_reuse [Mode] [option1] <arg1> [option2] <arg2>...
-     ex) fosslight_reuse lint -p /home/test/ -f "notice/sample.py,src/init.py"
-         fosslight_reuse add -p /home/test/ -c "2019-2021 LG Electronics Inc." -l "GPL-3.0-only"
+     ex) fosslight_reuse lint -p /home/test/src/
+         fosslight_reuse add -p /home/test/test.py -c "2019-2021 LG Electronics Inc." -l "GPL-3.0-only"
 
     Parameters:
         Mode
@@ -20,7 +20,7 @@ _HELP_MESSAGE_REUSE = """
         Options:
             -h\t\t\t    Print help message
             -p <path>\t\t    Path to check
-            -f <file1,file2,..>\t    List of files to check
+            -f <format>\t\t    Result format(yaml, xml, html)
             -o <file_name>\t    Output file name
             -n\t\t\t    Don't exclude venv*, node_modules, and .*/ from the analysis
         Options for only 'add' mode

@@ -13,7 +13,7 @@ def main():
     parser = argparse.ArgumentParser(description='FOSSLight Reuse', prog='fosslight_reuse', add_help=False)
     parser.add_argument('mode', nargs='?', help='lint | convert | add', default="")
     parser.add_argument('--path', '-p', help='Path to check', type=str, dest='path', default="")
-    parser.add_argument('--file', '-f', help='Files to check', type=str, dest='file', default="")
+    parser.add_argument('--format', '-f', help='Format of ouput', type=str, dest='format', default="")
     parser.add_argument('--output', '-o', help='Output file name', type=str, dest='output', default="")
     parser.add_argument('--no', '-n', help='Disable automatic exclude mode', action='store_true', dest='disable')
     parser.add_argument('--license', '-l', help='License name to add', type=str, dest='license', default="")
@@ -28,11 +28,11 @@ def main():
         print_help_msg()
 
     if args.mode == "lint":
-        run_lint(args.path, args.file, args.disable, args.output)
+        run_lint(args.path, args.format, args.disable, args.output)
     elif args.mode == "convert":
-        convert_report(args.path, args.file, args.output)
+        convert_report(args.path, args.output)
     elif args.mode == "add":
-        add_content(args.path, args.file, args.license, args.copyright)
+        add_content(args.path, args.license, args.copyright)
     else:
         print_help_msg()
 

@@ -36,7 +36,7 @@ def find_report_file(path_to_find):
     return ""
 
 
-def convert_report(base_path, files, output_name):
+def convert_report(base_path, output_name):
     oss_pkg_files = ["oss-pkg-info.yml", "oss-pkg-info.yaml"]
     file_option_on = False
     convert_yml_mode = False
@@ -46,8 +46,8 @@ def convert_report(base_path, files, output_name):
     is_window = platform.system() == "Windows"
 
     if output_name == "":
-        output_report = "FOSSLight-Report_" + now
-        output_yaml = "oss-pkg-info_" + now
+        output_report = f"FOSSLight-Report_{now}"
+        output_yaml = f"oss-pkg-info_{now}"
         output_dir = os.getcwd()
     else:
         output_report = output_name
@@ -58,20 +58,20 @@ def convert_report(base_path, files, output_name):
         except Exception:
             pass
 
-    logger, _result_log = init_log(os.path.join(output_dir, "fosslight_reuse_log_"+now+".txt"),
+    logger, _result_log = init_log(os.path.join(output_dir, f"fosslight_reuse_log_{now}.txt"),
                                    True, logging.INFO, logging.DEBUG, _PKG_NAME, base_path)
 
-    if base_path != "":
+    if os.path.isdir(base_path):
         convert_yml_mode = True
-
-    if files != "":
-        if files.endswith(".xlsx"):
-            convert_excel_mode = True
-            report_to_read = files
-        else:
-            oss_pkg_files = files.split(',')
-            convert_yml_mode = True
-            file_option_on = True
+    else:
+        if base_path != "":
+            if base_path.endswith(".xlsx"):
+                convert_excel_mode = True
+                report_to_read = base_path
+            else:
+                oss_pkg_files = base_path.split(',')
+                convert_yml_mode = True
+                file_option_on = True
 
     if not convert_yml_mode and not convert_excel_mode:
         if is_window:
