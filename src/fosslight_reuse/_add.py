@@ -14,7 +14,7 @@ from fosslight_util.set_log import init_log
 from fosslight_util.spdx_licenses import get_spdx_licenses_json
 from fosslight_util.parsing_yaml import find_all_oss_pkg_files, parsing_yml
 from datetime import datetime
-from ._fosslight_reuse import reuse_for_project, reuse_for_files, print_error
+from ._fosslight_reuse import reuse_for_project, reuse_for_files, print_error, get_path_to_find
 from reuse.header import run as reuse_header
 from reuse.download import run as reuse_download
 from reuse._comment import EXTENSION_COMMENT_STYLE_MAP_LOWERCASE
@@ -331,25 +331,19 @@ def download_oss_info_license(base_path, input_license=""):
         logger.info(" # There is no license in the path \n")
 
 
-def add_content(path_to_find="", file="", input_license="", input_copyright=""):
+def add_content(target_path="", input_license="", input_copyright=""):
     global _result_log
-    file_to_check_list = []
     _check_only_file_mode = False
+    file_to_check_list = []
 
-    if path_to_find == "":
-        path_to_find = os.getcwd()
-    else:
-        path_to_find = os.path.abspath(path_to_find)
+    path_to_find, file_to_check_list, _check_only_file_mode = get_path_to_find(target_path, _check_only_file_mode)
+    if path_to_find != "":
         os.chdir(path_to_find)
 
     now = datetime.now().strftime('%Y%m%d_%H-%M-%S')
     output_dir = os.getcwd()
     logger, _result_log = init_log(os.path.join(output_dir, f"fosslight_reuse_add_log_{now}.txt"),
                                    True, logging.INFO, logging.DEBUG, PKG_NAME, path_to_find)
-
-    if file != "":
-        file_to_check_list = file.split(',')
-        _check_only_file_mode = True
 
     # Get SPDX License List
     try:

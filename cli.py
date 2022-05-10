@@ -5,4 +5,4 @@
 from fosslight_oss_pkg.fosslight_oss_pkg import convert_report
 
 if __name__ == '__main__':
-    convert_report("", "", "")
+    convert_report("", "")

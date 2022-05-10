@@ -10,10 +10,12 @@ import logging
 import locale
 from datetime import datetime
 from binaryornot.check import is_binary
+from pathlib import Path
 import fosslight_util.constant as constant
 from fosslight_util.set_log import init_log
 from fosslight_util.timer_thread import TimerThread
 from fosslight_util.parsing_yaml import parsing_yml, find_all_oss_pkg_files
+from fosslight_util.output_format import check_output_format
 from yaml import safe_dump
 from reuse import report
 from reuse.project import Project
@@ -28,6 +30,7 @@ _REUSE_CONFIG_FILE = ".reuse/dep5"
 _DEFAULT_EXCLUDE_EXTENSION_FILES = []  # Exclude files from reuse
 _DEFAULT_EXCLUDE_EXTENSION = ["jar", "png", "exe", "so", "a", "dll", "jpeg", "jpg", "ttf", "lib", "ttc", "pfb",
                               "pfm", "otf", "afm", "dfont", "json"]
+_CUSTOMIZED_FORMAT_FOR_REUSE = {'html': '.html', 'xml': '.xml', 'yaml': '.yaml'}
 _turn_on_default_reuse_config = True
 _check_only_file_mode = False
 _root_xml_item = ET.Element('results')
@@ -254,6 +257,8 @@ def reuse_for_project(path_to_find):
         print_error(f"Error_Reuse_lint: {ex}")
         error_occured = True
 
+    logger.warning(f"missing_license : {missing_license}")
+
     if _turn_on_default_reuse_config:
         remove_reuse_dep5_file(need_rollback, temp_file_name, temp_dir_name)
     return result, missing_license, missing_copyright, oss_pkg_info_files, error_occured, project
@@ -341,9 +346,11 @@ def result_for_missing_license_and_copyright_files(files_without_license, files_
     return message
 
 
-def write_xml_and_exit(result_file: str, exit_code: int) -> None:
+def write_result_xml(result_file: str, exit_code: int) -> None:
     # Create a new XML file with the results
     try:
+        output_dir = os.path.dirname(result_file)
+        Path(output_dir).mkdir(parents=True, exist_ok=True)
         ET.ElementTree(_root_xml_item).write(result_file, encoding="UTF-8", xml_declaration=True)
         error_items = ET.ElementTree(_root_xml_item).findall('system_error')
         if len(error_items) > 0:
@@ -358,46 +365,127 @@ def write_xml_and_exit(result_file: str, exit_code: int) -> None:
         logger.info(_str_final_result_log)
     except Exception as ex:
         logger.warning(f"Failed to print result log. {ex}")
-    sys.exit(exit_code)
+    return exit_code
 
 
-def init(path_to_find, result_file, file_list):
+def write_result_html(result_file: str, exit_code: int) -> None:
+    try:
+        logger.warning(f"write_result_html : {result_file}")
+    except Exception as ex:
+        logger.error(f"Error_to_write_html: {ex}")
+        exit_code = os.EX_IOERR
+    return exit_code
+
+
+def write_result_yaml(result_file: str, exit_code: int) -> None:
+    try:
+        logger.warning(f"write_result_yaml : {result_file}")
+    except Exception as ex:
+        logger.error(f"Error_to_write_yaml: {ex}")
+        exit_code = os.EX_IOERR
+    return exit_code
+
+
+def init(path_to_find, output_file_name, file_list):
     global logger, _start_time, _result_log
 
     _start_time = datetime.now().strftime('%Y%m%d_%H-%M-%S')
-    output_dir = os.path.dirname(os.path.abspath(result_file))
+    output_dir = os.path.dirname(os.path.abspath(output_file_name))
     logger, _result_log = init_log(os.path.join(output_dir, f"fosslight_reuse_log_{_start_time}.txt"),
                                    True, logging.INFO, logging.DEBUG, _PKG_NAME, path_to_find)
     if file_list:
         _result_log["File list to check"] = file_list
 
 
-def run_lint(path_to_find, file, disable, result_file):
+def create_result_file(output_file_name, format):
+    success, msg, output_path, output_file, output_extension = check_output_format(output_file_name, format, _CUSTOMIZED_FORMAT_FOR_REUSE)
+    if success:
+        result_file = ""
+        if output_path == "":
+            output_path = os.getcwd()
+        else:
+            output_path = os.path.abspath(output_path)
+
+        if output_file != "":
+            result_file = output_file
+        else:
+            if output_extension == '.xml':
+                result_file = f"FOSSLight_Reuse_{_start_time}.xml"
+            elif output_extension == '.html':
+                result_file = f"FOSSLight_Reuse_{_start_time}.html"
+            elif output_extension == '.yaml':
+                result_file = f"FOSSLight_Resue_{_start_time}.yaml"
+            else:
+                # todo: All file?
+                result_file = f"FOSSLight_Reuse_{_start_time}.xml"
+
+        result_file = os.path.join(output_path, result_file)
+    else:
+        logger.error(f"Format error - {msg}")
+        sys.exit(1)
+
+    return result_file
+
+
+def write_result_file(result_file, format, exit_code):
+    if format == "" or format == "xml":
+        exit_code = write_result_xml(result_file, exit_code)
+    elif format == "html":
+        exit_code = write_result_html(result_file, exit_code)
+    elif format == "yaml":
+        exit_code = write_result_yaml(result_file, exit_code)
+    else:
+        logger.info("Not supported file extension")
+    sys.exit(exit_code)
+
+
+def get_path_to_find(target_path, _check_only_file_mode):
+    is_file = False
+    is_folder = False
+    file_to_check_list = []
+    path_list = []
+
+    path_list = target_path.split(',')
+
+    # Check if all elements are only files or folder
+    for path in path_list:
+        if os.path.isdir(path) and not is_folder:
+            is_folder = True
+            if path == "":
+                path_to_find = os.getcwd()
+            else:
+                path_to_find = os.path.abspath(path)
+        elif os.path.isfile(path):
+            is_file = True
+            path_to_find = os.getcwd()
+
+    if is_file & is_folder:
+        logger.error("Input only a folder or files with -p option")
+    elif not is_folder and not is_file:
+        file_to_check_list = path_list
+        _check_only_file_mode = True
+
+    return path_to_find, file_to_check_list, _check_only_file_mode
+
+
+def run_lint(target_path, format, disable, output_file_name):
     global _turn_on_default_reuse_config, _check_only_file_mode
 
     file_to_check_list = []
     _exit_code = os.EX_OK
+    path_to_find = ""
 
     try:
         locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
     except Exception as ex:
         print_error(f"Error - locale : {ex}")
 
-    if file != "":
-        file_to_check_list = file.split(',')
-        _check_only_file_mode = True
-    if path_to_find == "":
-        path_to_find = os.getcwd()
-    if result_file == "":
-        result_file = "reuse_checker.xml"
-    _turn_on_default_reuse_config = not disable
+    path_to_find, file_to_check_list, _check_only_file_mode = get_path_to_find(target_path, _check_only_file_mode)
 
-    # reuse lint can only be executed on a directory.
-    if not os.path.isdir(path_to_find):
-        print_error("Error_-p param should be given a directory, not a file.")
-        write_xml_and_exit(result_file, os.EX_DATAERR)
-    else:
-        init(path_to_find, result_file, file_to_check_list)
+    init(path_to_find, output_file_name, file_to_check_list)
+    result_file = create_result_file(output_file_name, format)
+
+    _turn_on_default_reuse_config = not disable
 
     if _check_only_file_mode:
         license_missing_files, copyright_missing_files, error_occurred, project = reuse_for_files(path_to_find, file_to_check_list)
@@ -416,4 +504,4 @@ def run_lint(path_to_find, file, disable, result_file):
                                path_to_find,
                                msg_missing_files)
 
-    write_xml_and_exit(result_file, _exit_code)
+    write_result_file(result_file, format, _exit_code)
