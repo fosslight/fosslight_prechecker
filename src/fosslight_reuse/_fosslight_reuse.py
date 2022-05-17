@@ -3,24 +3,21 @@
 # Copyright (c) 2021 LG Electronics Inc.
 # SPDX-License-Identifier: GPL-3.0-only
 import os
-import shutil
 import sys
+import shutil
 import xml.etree.ElementTree as ET
 import logging
 import locale
 from datetime import datetime
 from binaryornot.check import is_binary
-from pathlib import Path
 import fosslight_util.constant as constant
 from fosslight_util.set_log import init_log
 from fosslight_util.timer_thread import TimerThread
 from fosslight_util.parsing_yaml import parsing_yml, find_all_oss_pkg_files
-from fosslight_util.output_format import check_output_format
-from yaml import safe_dump
 from reuse import report
 from reuse.project import Project
 from reuse.report import ProjectReport
-
+from ._result import write_result_file, create_result_file, ResultItem
 
 _PKG_NAME = "fosslight_reuse"
 _RULE_LINK = "https://oss.lge.com/guide/process/osc_process/1-identification/copyright_license_rule.html"
@@ -192,7 +189,7 @@ def get_only_pkg_info_yaml_file(pkg_info_files):
 
 
 def reuse_for_project(path_to_find):
-    result = ""
+    # result = ""
     missing_license = []
     missing_copyright = []
     error_occured = False
@@ -220,26 +217,7 @@ def reuse_for_project(path_to_find):
         # Get all file list in 'exclude_filepath' by using Regular expression
         excluded_files = extract_files_in_path(filepath_in_yaml)
 
-        file_total = len(report.file_reports)
         timer.stop = True
-
-        # Summary Message
-        result += "* Used licenses:"
-        for i, lic in enumerate(sorted(report.used_licenses)):
-            if i:
-                result += ","
-            result += " "
-            result += lic
-
-        result += ("\n* Files with copyright information: {count} / {total}").format(
-            count=file_total - len(report.files_without_copyright - set(excluded_files)),
-            total=file_total
-        )
-
-        result += ("\n* Files with license information: {count} / {total}").format(
-            count=file_total - len(report.files_without_licenses - set(excluded_files)),
-            total=file_total
-        )
 
         # File list that missing license text
         missing_license = [str(sub) for sub in set(report.files_without_licenses)]
@@ -259,7 +237,7 @@ def reuse_for_project(path_to_find):
 
     if _turn_on_default_reuse_config:
         remove_reuse_dep5_file(need_rollback, temp_file_name, temp_dir_name)
-    return result, missing_license, missing_copyright, oss_pkg_info_files, error_occured, project
+    return missing_license, missing_copyright, oss_pkg_info_files, error_occured, project, report, excluded_files
 
 
 def print_error(error_msg: str):
@@ -269,33 +247,40 @@ def print_error(error_msg: str):
     _root_xml_item.append(error_item)
 
 
-def result_for_summary(str_lint_result, oss_pkg_info, path, msg_missing_files):
+def result_for_summary(oss_pkg_info_files, license_missing_files, copyright_missing_files, report):
     global _root_xml_item
 
     reuse_compliant = False
-    str_oss_pkg = "* Open Source Package info: "
-    try:
-        if oss_pkg_info is not None and len(oss_pkg_info) > 0:
-            reuse_compliant = True
-            str_oss_pkg += ", ".join(oss_pkg_info)
-    except Exception as ex:
-        print_error(f"Error_Print_OSS_PKG_INFO: {ex}")
+    detected_lic = []
+    missing_both_files = []
+    file_total = len(report.file_reports)
 
-    if msg_missing_files == "":
+    # Get detected License
+    for i, lic in enumerate(sorted(report.used_licenses)):
+        detected_lic.append(lic)
+
+    if len(license_missing_files) == 0 and len(copyright_missing_files) == 0:
         reuse_compliant = True
 
-    # Add Summary Comment
-    _SUMMARY_PREFIX = '\n# SUMMARY\n'
-    _SUMMARY_SUFFIX = '\n\n' + _MSG_REFERENCE
-    str_summary = f"{_SUMMARY_PREFIX}{str_oss_pkg}\n{str_lint_result}{_SUMMARY_SUFFIX}"
-    items = ET.Element('error')
-    items.set('id', 'rule_key_osc_checker_01')
-    items.set('line', '0')
-    items.set('msg', str_summary)
-    if not reuse_compliant:
-        _root_xml_item.append(items)
+    missing_both_files = list(set(license_missing_files) & set(copyright_missing_files))
 
-    logger.info(msg_missing_files + str_summary)
+    # Save result items
+    result_item = ResultItem()
+    result_item.compliant_result = reuse_compliant
+    result_item.oss_pkg_files = oss_pkg_info_files
+    result_item.detected_licenses = detected_lic
+    result_item._count_total_files = file_total
+    result_item._count_without_lic = str(len(license_missing_files))
+    result_item._count_without_cop = str(len(copyright_missing_files))
+    result_item.files_without_both = sorted(missing_both_files)
+    result_item.files_without_lic = sorted(license_missing_files)
+    result_item.files_without_cop = sorted(copyright_missing_files)
+    result_item._fl_reuse_ver = _result_log["Tool Info"]
+    result_item._path_to_analyze = _result_log["Path to analyze"]
+    result_item._os_info = _result_log["OS"]
+    result_item._python_ver = _result_log["Python version"]
+
+    return result_item
 
 
 def result_for_missing_license_and_copyright_files(files_without_license, files_without_copyright, oss_pkg_info):
@@ -340,48 +325,7 @@ def result_for_missing_license_and_copyright_files(files_without_license, files_
             message = "# MISSING LICENSES FROM FILE LIST TO CHECK\n" + str_missing_lic_files + "\n"
         if print_mode and files_without_copyright is not None and len(files_without_copyright) > 0:
             message += "# MISSING COPYRIGHT FROM FILE LIST TO CHECK\n" + str_missing_cop_files + "\n"
-
     return message
-
-
-def write_result_xml(result_file: str, exit_code: int) -> None:
-    # Create a new XML file with the results
-    try:
-        output_dir = os.path.dirname(result_file)
-        Path(output_dir).mkdir(parents=True, exist_ok=True)
-        ET.ElementTree(_root_xml_item).write(result_file, encoding="UTF-8", xml_declaration=True)
-        error_items = ET.ElementTree(_root_xml_item).findall('system_error')
-        if len(error_items) > 0:
-            logger.warning("# SYSTEM ERRORS")
-            for xml_item in error_items:
-                logger.warning(xml_item.text)
-    except Exception as ex:
-        logger.error(f"Error_to_write_xml: {ex}")
-        exit_code = os.EX_IOERR
-    try:
-        _str_final_result_log = safe_dump(_result_log, allow_unicode=True, sort_keys=True)
-        logger.info(_str_final_result_log)
-    except Exception as ex:
-        logger.warning(f"Failed to print result log. {ex}")
-    return exit_code
-
-
-def write_result_html(result_file: str, exit_code: int) -> None:
-    try:
-        logger.warning(f"write_result_html : {result_file}")
-    except Exception as ex:
-        logger.error(f"Error_to_write_html: {ex}")
-        exit_code = os.EX_IOERR
-    return exit_code
-
-
-def write_result_yaml(result_file: str, exit_code: int) -> None:
-    try:
-        logger.warning(f"write_result_yaml : {result_file}")
-    except Exception as ex:
-        logger.error(f"Error_to_write_yaml: {ex}")
-        exit_code = os.EX_IOERR
-    return exit_code
 
 
 def init(path_to_find, output_file_name, file_list):
@@ -395,52 +339,12 @@ def init(path_to_find, output_file_name, file_list):
         _result_log["File list to check"] = file_list
 
 
-def create_result_file(output_file_name, format):
-    success, msg, output_path, output_file, output_extension = check_output_format(output_file_name, format, _CUSTOMIZED_FORMAT_FOR_REUSE)
-    if success:
-        result_file = ""
-        if output_path == "":
-            output_path = os.getcwd()
-        else:
-            output_path = os.path.abspath(output_path)
-
-        if output_file != "":
-            result_file = output_file
-        else:
-            if output_extension == '.yaml' or output_extension == "":
-                result_file = f"FOSSLight_Reuse_{_start_time}.yaml"
-            elif output_extension == '.html':
-                result_file = f"FOSSLight_Reuse_{_start_time}.html"
-            elif output_extension == '.xml':
-                result_file = f"FOSSLight_Reuse_{_start_time}.xml"
-            else:
-                logger.error("Not supported file extension")
-
-        result_file = os.path.join(output_path, result_file)
-    else:
-        logger.error(f"Format error - {msg}")
-        sys.exit(1)
-
-    return result_file
-
-
-def write_result_file(result_file, format, exit_code):
-    if format == "" or format == "xml":
-        exit_code = write_result_xml(result_file, exit_code)
-    elif format == "html":
-        exit_code = write_result_html(result_file, exit_code)
-    elif format == "yaml":
-        exit_code = write_result_yaml(result_file, exit_code)
-    else:
-        logger.info("Not supported file extension")
-    sys.exit(exit_code)
-
-
 def get_path_to_find(target_path, _check_only_file_mode):
     is_file = False
     is_folder = False
     file_to_check_list = []
     path_list = []
+    path_to_find = ""
 
     path_list = target_path.split(',')
 
@@ -471,6 +375,7 @@ def run_lint(target_path, format, disable, output_file_name):
     file_to_check_list = []
     _exit_code = os.EX_OK
     path_to_find = ""
+    success = False
 
     try:
         locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
@@ -480,7 +385,7 @@ def run_lint(target_path, format, disable, output_file_name):
     path_to_find, file_to_check_list, _check_only_file_mode = get_path_to_find(target_path, _check_only_file_mode)
 
     init(path_to_find, output_file_name, file_to_check_list)
-    result_file = create_result_file(output_file_name, format)
+    result_file = create_result_file(output_file_name, format, _start_time)
 
     _turn_on_default_reuse_config = not disable
 
@@ -488,17 +393,22 @@ def run_lint(target_path, format, disable, output_file_name):
         license_missing_files, copyright_missing_files, error_occurred, project = reuse_for_files(path_to_find, file_to_check_list)
         oss_pkg_info = []
     else:
-        str_lint_result, license_missing_files, copyright_missing_files, oss_pkg_info, error_occurred, project \
+        license_missing_files, copyright_missing_files, oss_pkg_info, error_occurred, project, report, excluded_files \
             = reuse_for_project(path_to_find)
 
     if error_occurred:  # In case reuse lint failed
         _exit_code = os.EX_SOFTWARE
     else:
-        msg_missing_files = result_for_missing_license_and_copyright_files(license_missing_files, copyright_missing_files, oss_pkg_info)
-        if not _check_only_file_mode:
-            result_for_summary(str_lint_result,
-                               oss_pkg_info,
-                               path_to_find,
-                               msg_missing_files)
+        result_for_missing_license_and_copyright_files(license_missing_files, copyright_missing_files, oss_pkg_info)
+        # if not _check_only_file_mode:
+        result_item = result_for_summary(oss_pkg_info,
+                                         license_missing_files,
+                                         copyright_missing_files,
+                                         report)
 
-    write_result_file(result_file, format, _exit_code)
+    success, exit_code = write_result_file(result_file, format, _exit_code, result_item, _result_log)
+    if success:
+        logger.info(f"\nCreated file name: {result_file}\n")
+    else:
+        logger.info("\nCan't make result file\n")
+    sys.exit(exit_code)
