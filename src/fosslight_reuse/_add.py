@@ -413,7 +413,7 @@ def add_content(target_path="", input_license="", input_copyright=""):
         all_files_list = get_allfiles_list(path_to_find)
 
         # Get missing license / copyright file list
-        _, missing_license, missing_copyright, _, _, project = reuse_for_project(path_to_find)
+        missing_license, missing_copyright, _, _, project, _, _ = reuse_for_project(path_to_find)
 
         # Print Skipped Files
         missing_license_filtered, missing_copyright_filtered = \
