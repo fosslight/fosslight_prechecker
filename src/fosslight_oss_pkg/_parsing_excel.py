@@ -173,7 +173,7 @@ def read_oss_report(excel_file):
                     _oss_report_items.append(item)
 
     except Exception as error:
-        _logger.error("Parsing a OSS Report:"+str(error))
+        _logger.error(f"Parsing a OSS Report: {error}")
     return _oss_report_items
 
 

@@ -5,7 +5,6 @@
 import os
 import sys
 import shutil
-import xml.etree.ElementTree as ET
 import logging
 import locale
 from datetime import datetime
@@ -17,20 +16,16 @@ from fosslight_util.parsing_yaml import parsing_yml, find_all_oss_pkg_files
 from reuse import report
 from reuse.project import Project
 from reuse.report import ProjectReport
-from ._result import write_result_file, create_result_file, ResultItem
+from fosslight_reuse._result import write_result_file, create_result_file, result_for_summary
 
-_PKG_NAME = "fosslight_reuse"
-_RULE_LINK = "https://oss.lge.com/guide/process/osc_process/1-identification/copyright_license_rule.html"
-_MSG_REFERENCE = "Ref. Copyright and License Writing Rules in Source Code. : " + _RULE_LINK
-_MSG_FOLLOW_LIC_TXT = "Follow the Copyright and License Writing Rules in Source Code. : " + _RULE_LINK
-_REUSE_CONFIG_FILE = ".reuse/dep5"
-_DEFAULT_EXCLUDE_EXTENSION_FILES = []  # Exclude files from reuse
-_DEFAULT_EXCLUDE_EXTENSION = ["jar", "png", "exe", "so", "a", "dll", "jpeg", "jpg", "ttf", "lib", "ttc", "pfb",
-                              "pfm", "otf", "afm", "dfont", "json"]
-_CUSTOMIZED_FORMAT_FOR_REUSE = {'html': '.html', 'xml': '.xml', 'yaml': '.yaml'}
+PKG_NAME = "fosslight_reuse"
+REUSE_CONFIG_FILE = ".reuse/dep5"
+DEFAULT_EXCLUDE_EXTENSION_FILES = []  # Exclude files from reuse
+DEFAULT_EXCLUDE_EXTENSION = ["jar", "png", "exe", "so", "a", "dll", "jpeg", "jpg", "ttf", "lib", "ttc", "pfb",
+                             "pfm", "otf", "afm", "dfont", "json"]
 _turn_on_default_reuse_config = True
 _check_only_file_mode = False
-_root_xml_item = ET.Element('results')
+error_items = []
 _start_time = ""
 _result_log = {}
 
@@ -38,7 +33,7 @@ logger = logging.getLogger(constant.LOGGER_NAME)
 
 
 def find_oss_pkg_info(path):
-    global _DEFAULT_EXCLUDE_EXTENSION_FILES
+    global DEFAULT_EXCLUDE_EXTENSION_FILES
     _OSS_PKG_INFO_FILES = ["oss-pkg-info.yaml", "oss-pkg-info.yml", "oss-package.info", "requirement.txt",
                            "requirements.txt", "package.json", "pom.xml",
                            "build.gradle",
@@ -55,14 +50,14 @@ def find_oss_pkg_info(path):
                 if file_lower_case in _OSS_PKG_INFO_FILES or file_lower_case.startswith("module_license_"):
                     oss_pkg_info.append(file_rel_path)
                 elif is_binary(file_abs_path):
-                    _DEFAULT_EXCLUDE_EXTENSION_FILES.append(file_rel_path)
+                    DEFAULT_EXCLUDE_EXTENSION_FILES.append(file_rel_path)
                 else:
                     extension = file_lower_case.split(".")[-1]
-                    if extension in _DEFAULT_EXCLUDE_EXTENSION:
-                        _DEFAULT_EXCLUDE_EXTENSION_FILES.append(file_rel_path)
+                    if extension in DEFAULT_EXCLUDE_EXTENSION:
+                        DEFAULT_EXCLUDE_EXTENSION_FILES.append(file_rel_path)
 
     except Exception as ex:
-        print_error(f"Error_FIND_OSS_PKG : {ex}")
+        dump_error_msg(f"Error_FIND_OSS_PKG : {ex}")
 
     return oss_pkg_info
 
@@ -73,7 +68,7 @@ def create_reuse_dep5_file(path):
                         reuse\nUpstream-Contact: Carmen Bianca Bakker <carmenbianca@fsfe.org>\nSource: https://github.com/fsfe/reuse-tool\n"
     _DEFAULT_EXCLUDE_FOLDERS = ["venv*/*", "node_modules*/*", ".*/*"]
 
-    reuse_config_file = os.path.join(path, _REUSE_CONFIG_FILE)
+    reuse_config_file = os.path.join(path, REUSE_CONFIG_FILE)
     file_to_remove = reuse_config_file
     dir_to_remove = os.path.dirname(reuse_config_file)
     need_rollback = False
@@ -89,8 +84,8 @@ def create_reuse_dep5_file(path):
             shutil.copy2(reuse_config_file, file_to_remove)
             need_rollback = True
 
-        _DEFAULT_EXCLUDE_EXTENSION_FILES.extend(_DEFAULT_EXCLUDE_FOLDERS)
-        for file_to_exclude in _DEFAULT_EXCLUDE_EXTENSION_FILES:
+        DEFAULT_EXCLUDE_EXTENSION_FILES.extend(_DEFAULT_EXCLUDE_FOLDERS)
+        for file_to_exclude in DEFAULT_EXCLUDE_EXTENSION_FILES:
             str_contents += f"\nFiles: {file_to_exclude} \nCopyright: -\nLicense: -\n"
 
         with open(reuse_config_file, "a") as f:
@@ -98,7 +93,7 @@ def create_reuse_dep5_file(path):
                 f.write(_DEFAULT_CONFIG_PREFIX)
             f.write(str_contents)
     except Exception as ex:
-        print_error(f"Error_Create_Dep5 : {ex}")
+        dump_error_msg(f"Error_Create_Dep5 : {ex}")
 
     return need_rollback, file_to_remove, dir_to_remove
 
@@ -106,7 +101,7 @@ def create_reuse_dep5_file(path):
 def remove_reuse_dep5_file(rollback, file_to_remove, temp_dir_name):
     try:
         if rollback:
-            _origin_file = os.path.join(os.path.dirname(file_to_remove), os.path.basename(_REUSE_CONFIG_FILE))
+            _origin_file = os.path.join(os.path.dirname(file_to_remove), os.path.basename(REUSE_CONFIG_FILE))
             shutil.copy2(file_to_remove, _origin_file)
 
         os.remove(file_to_remove)
@@ -115,11 +110,11 @@ def remove_reuse_dep5_file(rollback, file_to_remove, temp_dir_name):
             os.rmdir(temp_dir_name)
 
     except Exception as ex:
-        print_error(f"Error_Remove_Dep5 : {ex}")
+        dump_error_msg(f"Error_Remove_Dep5 : {ex}")
 
 
 def reuse_for_files(path, files):
-    global _DEFAULT_EXCLUDE_EXTENSION_FILES
+    global DEFAULT_EXCLUDE_EXTENSION_FILES
 
     missing_license_list = []
     missing_copyright_list = []
@@ -132,11 +127,11 @@ def reuse_for_files(path, files):
             try:
                 file_abs_path = os.path.join(path, file)
                 if not os.path.isfile(file_abs_path) or is_binary(file_abs_path):
-                    _DEFAULT_EXCLUDE_EXTENSION_FILES.append(file)
+                    DEFAULT_EXCLUDE_EXTENSION_FILES.append(file)
                 else:
                     extension = file.split(".")[-1]
-                    if extension in _DEFAULT_EXCLUDE_EXTENSION:
-                        _DEFAULT_EXCLUDE_EXTENSION_FILES.append(file)
+                    if extension in DEFAULT_EXCLUDE_EXTENSION:
+                        DEFAULT_EXCLUDE_EXTENSION_FILES.append(file)
                     else:
                         logger.info(f"# {file}")
                         rep = report.FileReport.generate(prj, file_abs_path)
@@ -150,10 +145,10 @@ def reuse_for_files(path, files):
                             missing_copyright_list.append(file)
 
             except Exception as ex:
-                print_error(f"Error_Reuse_for_file_to_read : {ex}")
+                dump_error_msg(f"Error_Reuse_for_file_to_read : {ex}")
 
     except Exception as ex:
-        print_error(f"Error_Reuse_for_file : {ex}")
+        dump_error_msg(f"Error_Reuse_for_file : {ex}")
         error_occurred = True
 
     return missing_license_list, missing_copyright_list, error_occurred, prj
@@ -232,7 +227,7 @@ def reuse_for_project(path_to_find):
         missing_copyright = [sub.replace(path_to_find, '') for sub in missing_copyright]
 
     except Exception as ex:
-        print_error(f"Error_Reuse_lint: {ex}")
+        dump_error_msg(f"Error_Reuse_lint: {ex}")
         error_occured = True
 
     if _turn_on_default_reuse_config:
@@ -240,92 +235,9 @@ def reuse_for_project(path_to_find):
     return missing_license, missing_copyright, oss_pkg_info_files, error_occured, project, report, excluded_files
 
 
-def print_error(error_msg: str):
-    global _root_xml_item
-    error_item = ET.Element('system_error')
-    error_item.text = error_msg
-    _root_xml_item.append(error_item)
-
-
-def result_for_summary(oss_pkg_info_files, license_missing_files, copyright_missing_files, report):
-    global _root_xml_item
-
-    reuse_compliant = False
-    detected_lic = []
-    missing_both_files = []
-    file_total = len(report.file_reports)
-
-    # Get detected License
-    for i, lic in enumerate(sorted(report.used_licenses)):
-        detected_lic.append(lic)
-
-    if len(license_missing_files) == 0 and len(copyright_missing_files) == 0:
-        reuse_compliant = True
-
-    missing_both_files = list(set(license_missing_files) & set(copyright_missing_files))
-
-    # Save result items
-    result_item = ResultItem()
-    result_item.compliant_result = reuse_compliant
-    result_item.oss_pkg_files = oss_pkg_info_files
-    result_item.detected_licenses = detected_lic
-    result_item._count_total_files = file_total
-    result_item._count_without_lic = str(len(license_missing_files))
-    result_item._count_without_cop = str(len(copyright_missing_files))
-    result_item.files_without_both = sorted(missing_both_files)
-    result_item.files_without_lic = sorted(license_missing_files)
-    result_item.files_without_cop = sorted(copyright_missing_files)
-    result_item._fl_reuse_ver = _result_log["Tool Info"]
-    result_item._path_to_analyze = _result_log["Path to analyze"]
-    result_item._os_info = _result_log["OS"]
-    result_item._python_ver = _result_log["Python version"]
-
-    return result_item
-
-
-def result_for_missing_license_and_copyright_files(files_without_license, files_without_copyright, oss_pkg_info):
-    global _root_xml_item
-    message = ""
-    # If the oss_pkg_file exists,
-    # it is unnecessary to print the result for each file without a license.
-    if oss_pkg_info is not None and len(oss_pkg_info) > 0:
-        print_mode = False
-    else:
-        print_mode = True
-
-    str_missing_lic_files = ""
-    str_missing_cop_files = ""
-    for file_name in files_without_license:
-        items = ET.Element('error')
-        items.set('file', file_name)
-        items.set('id', 'rule_key_osc_checker_02')
-        items.set('line', '0')
-        items.set('msg', _MSG_FOLLOW_LIC_TXT)
-        if _check_only_file_mode:
-            _root_xml_item.append(items)
-        str_missing_lic_files += (f"* {file_name}\n")
-
-    for file_name in files_without_copyright:
-        items = ET.Element('error')
-        items.set('file', file_name)
-        items.set('id', 'rule_key_osc_checker_02')
-        items.set('line', '0')
-        items.set('msg', _MSG_FOLLOW_LIC_TXT)
-        if _check_only_file_mode:
-            _root_xml_item.append(items)
-        str_missing_cop_files += (f"* {file_name}\n")
-
-    if _check_only_file_mode and _DEFAULT_EXCLUDE_EXTENSION_FILES is not None and len(
-            _DEFAULT_EXCLUDE_EXTENSION_FILES) > 0:
-        logger.info("# FILES EXCLUDED - NOT SUBJECT TO REUSE")
-        logger.info('* %s' % '\n* '.join(map(str, _DEFAULT_EXCLUDE_EXTENSION_FILES)))
-        logger.info("\n" + _MSG_REFERENCE)
-    else:
-        if print_mode and files_without_license is not None and len(files_without_license) > 0:
-            message = "# MISSING LICENSES FROM FILE LIST TO CHECK\n" + str_missing_lic_files + "\n"
-        if print_mode and files_without_copyright is not None and len(files_without_copyright) > 0:
-            message += "# MISSING COPYRIGHT FROM FILE LIST TO CHECK\n" + str_missing_cop_files + "\n"
-    return message
+def dump_error_msg(error_msg: str):
+    global error_items
+    error_items.append(error_msg)
 
 
 def init(path_to_find, output_file_name, file_list):
@@ -334,7 +246,7 @@ def init(path_to_find, output_file_name, file_list):
     _start_time = datetime.now().strftime('%Y%m%d_%H-%M-%S')
     output_dir = os.path.dirname(os.path.abspath(output_file_name))
     logger, _result_log = init_log(os.path.join(output_dir, f"fosslight_reuse_log_{_start_time}.txt"),
-                                   True, logging.INFO, logging.DEBUG, _PKG_NAME, path_to_find)
+                                   True, logging.INFO, logging.DEBUG, PKG_NAME, path_to_find)
     if file_list:
         _result_log["File list to check"] = file_list
 
@@ -347,7 +259,6 @@ def get_path_to_find(target_path, _check_only_file_mode):
     path_to_find = ""
 
     path_list = target_path.split(',')
-
     # Check if all elements are only files or folder
     for path in path_list:
         if os.path.isdir(path) and not is_folder:
@@ -360,9 +271,9 @@ def get_path_to_find(target_path, _check_only_file_mode):
             is_file = True
             path_to_find = os.getcwd()
 
-    if is_file & is_folder:
+    if is_file and is_folder:
         logger.error("Input only a folder or files with -p option")
-    elif not is_folder and not is_file:
+    elif not is_folder and is_file:
         file_to_check_list = path_list
         _check_only_file_mode = True
 
@@ -375,12 +286,13 @@ def run_lint(target_path, format, disable, output_file_name):
     file_to_check_list = []
     _exit_code = os.EX_OK
     path_to_find = ""
+    report = ProjectReport()
     success = False
 
     try:
         locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
     except Exception as ex:
-        print_error(f"Error - locale : {ex}")
+        dump_error_msg(f"Error - locale : {ex}")
 
     path_to_find, file_to_check_list, _check_only_file_mode = get_path_to_find(target_path, _check_only_file_mode)
 
@@ -399,14 +311,15 @@ def run_lint(target_path, format, disable, output_file_name):
     if error_occurred:  # In case reuse lint failed
         _exit_code = os.EX_SOFTWARE
     else:
-        result_for_missing_license_and_copyright_files(license_missing_files, copyright_missing_files, oss_pkg_info)
-        # if not _check_only_file_mode:
         result_item = result_for_summary(oss_pkg_info,
                                          license_missing_files,
                                          copyright_missing_files,
-                                         report)
+                                         report,
+                                         _result_log,
+                                         _check_only_file_mode,
+                                         file_to_check_list)
 
-    success, exit_code = write_result_file(result_file, format, _exit_code, result_item, _result_log)
+    success, exit_code = write_result_file(result_file, format, _exit_code, result_item, _result_log, error_items)
     if success:
         logger.info(f"\nCreated file name: {result_file}\n")
     else:

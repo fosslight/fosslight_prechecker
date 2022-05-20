@@ -14,7 +14,7 @@ from fosslight_util.set_log import init_log
 from fosslight_util.spdx_licenses import get_spdx_licenses_json
 from fosslight_util.parsing_yaml import find_all_oss_pkg_files, parsing_yml
 from datetime import datetime
-from ._fosslight_reuse import reuse_for_project, reuse_for_files, print_error, get_path_to_find
+from fosslight_reuse._fosslight_reuse import reuse_for_project, reuse_for_files, dump_error_msg, get_path_to_find
 from reuse.header import run as reuse_header
 from reuse.download import run as reuse_download
 from reuse._comment import EXTENSION_COMMENT_STYLE_MAP_LOWERCASE
@@ -48,7 +48,7 @@ def get_licenses_from_json():
         with open(file_withpath, 'r') as f:
             licenses = json.load(f)
     except Exception as ex:
-        print_error(f"Error to get license from json file : {ex}")
+        dump_error_msg(f"Error to get license from json file : {ex}")
 
     return licenses
 
@@ -63,7 +63,7 @@ def check_file_extension(file_list):
                 if file_extension in EXTENSION_COMMENT_STYLE_MAP_LOWERCASE:
                     yield file
             except Exception as ex:
-                print_error(f"Error - Unknown error to check file extension: {ex}")
+                dump_error_msg(f"Error - Unknown error to check file extension: {ex}")
 
 
 def check_license_and_copyright(path_to_find, all_files, missing_license, missing_copyright):
@@ -95,7 +95,7 @@ def check_input_license_format(input_license):
 
     licensesfromJson = get_licenses_from_json()
     if licensesfromJson == "":
-        print_error(" Error - Return Value to get license from Json is none")
+        dump_error_msg(" Error - Return Value to get license from Json is none")
 
     try:
         # Get frequetly used license from json file
@@ -103,7 +103,7 @@ def check_input_license_format(input_license):
         if converted_license is None:
             converted_license = convert_to_spdx_style(input_license)
     except Exception as ex:
-        print_error(f"Error - Get frequetly used license : {ex}")
+        dump_error_msg(f"Error - Get frequetly used license : {ex}")
 
     return converted_license
 
@@ -153,7 +153,7 @@ def set_missing_license_copyright(missing_license_filtered, missing_copyright_fi
     try:
         main_parser = reuse_arg_parser()
     except Exception as ex:
-        print_error(f"Error_get_arg_parser : {ex}")
+        dump_error_msg(f"Error_get_arg_parser : {ex}")
 
     # Print missing License
     if missing_license_filtered is not None and len(missing_license_filtered) > 0:
@@ -176,7 +176,7 @@ def set_missing_license_copyright(missing_license_filtered, missing_copyright_fi
             try:
                 reuse_header(parsed_args, project)
             except Exception as ex:
-                print_error(f"Error_call_run_in_license : {ex}")
+                dump_error_msg(f"Error_call_run_in_license : {ex}")
     else:
         logger.info("# There is no missing license file\n")
 
@@ -208,7 +208,7 @@ def set_missing_license_copyright(missing_license_filtered, missing_copyright_fi
             try:
                 reuse_header(parsed_args, project)
             except Exception as ex:
-                print_error(f"Error_call_run_in_copyright : {ex}")
+                dump_error_msg(f"Error_call_run_in_copyright : {ex}")
     else:
         logger.info("\n# There is no missing copyright file\n")
 
@@ -226,7 +226,7 @@ def get_allfiles_list(path):
                 file_rel_path = os.path.relpath(file_abs_path, path)
                 yield file_rel_path
     except Exception as ex:
-        print_error(f"Error_Get_AllFiles : {ex}")
+        dump_error_msg(f"Error_Get_AllFiles : {ex}")
 
 
 def save_result_log():
@@ -244,7 +244,7 @@ def copy_to_root(input_license):
         destination = 'LICENSE'
         shutil.copyfile(source, destination)
     except Exception as ex:
-        print_error(f"Error - Can't copy license file: {ex}")
+        dump_error_msg(f"Error - Can't copy license file: {ex}")
 
 
 def find_representative_license(path_to_find, input_license):
@@ -282,7 +282,7 @@ def find_representative_license(path_to_find, input_license):
                 logger.warning(f" # Created Representative License File : {input_license}.txt")
 
         except Exception as ex:
-            print_error(f"Error - download representative license text: {ex}")
+            dump_error_msg(f"Error - download representative license text: {ex}")
 
 
 def is_exclude_dir(dir_path):
@@ -326,7 +326,7 @@ def download_oss_info_license(base_path, input_license=""):
         try:
             reuse_download(parsed_args, prj)
         except Exception as ex:
-            print_error(f"Error - download license text in OSS-pkg-info.yml : {ex}")
+            dump_error_msg(f"Error - download license text in OSS-pkg-info.yml : {ex}")
     else:
         logger.info(" # There is no license in the path \n")
 
@@ -349,7 +349,7 @@ def add_content(target_path="", input_license="", input_copyright=""):
     try:
         success, error_msg, licenses = get_spdx_licenses_json()
         if success is False:
-            print_error(f"Error to get SPDX Licesens : {error_msg}")
+            dump_error_msg(f"Error to get SPDX Licesens : {error_msg}")
 
         licenseInfo = licenses.get("licenses")
         for info in licenseInfo:
@@ -358,7 +358,7 @@ def add_content(target_path="", input_license="", input_copyright=""):
             if isDeprecated is False:
                 spdx_licenses.append(shortID)
     except Exception as ex:
-        print_error(f"Error access to get_spdx_licenses_json : {ex}")
+        dump_error_msg(f"Error access to get_spdx_licenses_json : {ex}")
 
     if input_license != "":
         find_representative_license(path_to_find, input_license)
@@ -382,7 +382,7 @@ def add_content(target_path="", input_license="", input_copyright=""):
                 try:
                     reuse_header(parsed_args, project)
                 except Exception as ex:
-                    print_error(f"Error_call_run_in_license_file_only : {ex}")
+                    dump_error_msg(f"Error_call_run_in_license_file_only : {ex}")
         else:
             logger.info("# There is no missing license file")
 
@@ -404,7 +404,7 @@ def add_content(target_path="", input_license="", input_copyright=""):
             try:
                 reuse_header(parsed_args, project)
             except Exception as ex:
-                print_error(f"Error_call_run_in_copyright_file_only : {ex}")
+                dump_error_msg(f"Error_call_run_in_copyright_file_only : {ex}")
         else:
             logger.info("# There is no missing copyright file\n")
     # Path mode (-p option)
