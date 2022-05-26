@@ -13,10 +13,12 @@ from fosslight_util.output_format import check_output_format
 from yaml import safe_dump
 from pathlib import Path
 
-_CUSTOMIZED_FORMAT_FOR_REUSE = {'html': '.html', 'xml': '.xml', 'yaml': '.yaml'}
+CUSTOMIZED_FORMAT_FOR_REUSE = {'html': '.html', 'xml': '.xml', 'yaml': '.yaml'}
+RULE_LINK = "https://oss.lge.com/guide/process/osc_process/1-identification/copyright_license_rule.html"
+MSG_REFERENCE = "Ref. Copyright and License Writing Rules in Source Code. : " + RULE_LINK
+MSG_FOLLOW_LIC_TXT = "Follow the Copyright and License Writing Rules in Source Code. : " + RULE_LINK
 
 logger = logging.getLogger(constant.LOGGER_NAME)
-_root_xml_item = ET.Element('results')
 
 
 class ResultItem:
@@ -35,6 +37,8 @@ class ResultItem:
         self._path_to_analyze = ""
         self._python_ver = ""
         self._fl_reuse_ver = ""
+        self._log_msg = ""
+        self._check_only_file_mode = False
 
     @property
     def compliant_result(self):
@@ -51,70 +55,19 @@ class ResultItem:
     def oss_pkg_files(self):
         return self._oss_pkg_files
 
-    @oss_pkg_files.setter
-    def oss_pkg_files(self, file):
-        if not file:
-            self._oss_pkg_files = "N/A"
-        else:
-            self._oss_pkg_files = file
-
-    @property
-    def detected_licenses(self):
-        return self._detected_licenses
-
-    @detected_licenses.setter
-    def detected_licenses(self, lic):
-        if not lic:
-            self._detected_licenses = "N/A"
-        else:
-            self._detected_licenses = lic
-
-    @property
-    def files_without_both(self):
-        return self._files_without_both
-
-    @files_without_both.setter
-    def files_without_both(self, file):
-        if not file:
-            self._files_without_both = "N/A"
-        else:
-            self._files_without_both = file
-
-    @property
-    def files_without_lic(self):
-        return self._files_without_lic
-
-    @files_without_lic.setter
-    def files_without_lic(self, file):
-        if not file:
-            self._files_without_lic = "N/A"
-        else:
-            self._files_without_lic = file
-
-    @property
-    def files_without_cop(self):
-        return self._files_without_cop
-
-    @files_without_cop.setter
-    def files_without_cop(self, file):
-        if not file:
-            self._files_without_cop = "N/A"
-        else:
-            self._files_without_cop = file
-
     def get_print_yaml(self):
         result_item = {}
         result_item["Compliant"] = self._compliant_result
         result_summary_item = {}
-        result_summary_item["Open Source Package File"] = self.oss_pkg_files
-        result_summary_item["Detected Licenses"] = self.detected_licenses
+        result_summary_item["Open Source Package File"] = self._oss_pkg_files
+        result_summary_item["Detected Licenses"] = is_list_empty(self._detected_licenses)
         result_summary_item["Count without license / Total"] = f"{self._count_without_lic} / {self._count_total_files}"
         result_summary_item["Count without copyright / Total"] = f"{self._count_without_cop} / {self._count_total_files}"
 
         result_item["Summary"] = result_summary_item
-        result_item["Files without license and copyright"] = self.files_without_both
-        result_item["Files without license"] = self.files_without_lic
-        result_item["Files without copyright"] = self.files_without_cop
+        result_item["Files without license and copyright"] = is_list_empty(self._files_without_both)
+        result_item["Files without license"] = is_list_empty(self._files_without_lic)
+        result_item["Files without copyright"] = is_list_empty(self._files_without_cop)
 
         result_tool_item = {}
         result_tool_item["OS Info"] = self._os_info
@@ -127,18 +80,66 @@ class ResultItem:
         return root_item
 
 
-def write_result_xml(result_file: str, exit_code: int, _result_log: str) -> None:
+def is_list_empty(list: list):
+    if list:
+        return list
+    else:
+        return "N/A"
+
+
+def result_for_xml(result_item: ResultItem):
+    str_xml_result = ""
+    _root_xml_item = ET.Element('results')
+
+    if result_item.compliant_result != "OK":
+        if not result_item._check_only_file_mode:
+            _SUMMARY_PREFIX = "\n# SUMMARY\n"
+            str_xml_result = f"* Open Source Package File: {', '.join(result_item._oss_pkg_files)}\n \
+                               * Detected Licenses : {', '.join(result_item._detected_licenses)}\n \
+                               * Files without copyright : {result_item._count_without_cop} / {result_item._count_total_files}\n \
+                               * Files without license : {result_item._count_without_lic} / {result_item._count_total_files}\n"
+
+            _SUMMARY_SUFFIX = '\n\n' + MSG_REFERENCE
+            str_summary = f"{_SUMMARY_PREFIX}{str_xml_result}{_SUMMARY_SUFFIX}"
+            items = ET.Element('error')
+            items.set('id', 'rule_key_osc_checker_01')
+            items.set('line', '0')
+            items.set('msg', str_summary)
+            _root_xml_item.append(items)
+        else:
+            for file_name in (set(result_item._files_without_lic) | set(result_item._files_without_cop)):
+                items = ET.Element('error')
+                items.set('file', file_name)
+                items.set('id', 'rule_key_osc_checker_02')
+                items.set('line', '0')
+                items.set('msg', MSG_FOLLOW_LIC_TXT)
+                _root_xml_item.append(items)
+
+            for file_name in result_item._files_without_cop:
+                items = ET.Element('error')
+                items.set('file', file_name)
+                items.set('id', 'rule_key_osc_checker_02')
+                items.set('line', '0')
+                items.set('msg', MSG_FOLLOW_LIC_TXT)
+                _root_xml_item.append(items)
+    return _root_xml_item
+
+
+def print_error(error_items):
+    if error_items:
+        logger.warning("# SYSTEM ERRORS")
+        for item in error_items:
+            logger.warning(item)
+
+
+def write_result_xml(result_file: str, exit_code: int, result_item: ResultItem, _result_log: str) -> None:
     success = False
     # Create a new XML file with the results
     try:
         output_dir = os.path.dirname(result_file)
         Path(output_dir).mkdir(parents=True, exist_ok=True)
+        _root_xml_item = result_for_xml(result_item)
         ET.ElementTree(_root_xml_item).write(result_file, encoding="UTF-8", xml_declaration=True)
-        error_items = ET.ElementTree(_root_xml_item).findall('system_error')
-        if len(error_items) > 0:
-            logger.warning("# SYSTEM ERRORS")
-            for xml_item in error_items:
-                logger.warning(xml_item.text)
     except Exception as ex:
         logger.error(f"Error_to_write_xml: {ex}")
         exit_code = os.EX_IOERR
@@ -180,7 +181,7 @@ def write_result_yaml(result_file: str, exit_code: int, result_item: ResultItem)
 
 
 def create_result_file(output_file_name, format, _start_time=""):
-    success, msg, output_path, output_file, output_extension = check_output_format(output_file_name, format, _CUSTOMIZED_FORMAT_FOR_REUSE)
+    success, msg, output_path, output_file, output_extension = check_output_format(output_file_name, format, CUSTOMIZED_FORMAT_FOR_REUSE)
     if success:
         result_file = ""
         if output_path == "":
@@ -208,14 +209,53 @@ def create_result_file(output_file_name, format, _start_time=""):
     return result_file
 
 
-def write_result_file(result_file, format, exit_code, result_item, _result_log):
+def result_for_summary(oss_pkg_info_files, license_missing_files, copyright_missing_files,
+                       report, _result_log, _check_only_file_mode, file_to_check_list):
+    reuse_compliant = False
+    detected_lic = []
+    missing_both_files = []
+    file_total = ""
+
+    if _check_only_file_mode:
+        file_total = len(file_to_check_list)
+    else:
+        file_total = len(report.file_reports)
+        # Get detected License
+        for i, lic in enumerate(sorted(report.used_licenses)):
+            detected_lic.append(lic)
+
+    if len(license_missing_files) == 0 and len(copyright_missing_files) == 0:
+        reuse_compliant = True
+
+    missing_both_files = list(set(license_missing_files) & set(copyright_missing_files))
+
+    # Save result items
+    result_item = ResultItem()
+    result_item.compliant_result = reuse_compliant
+    result_item._oss_pkg_files = oss_pkg_info_files
+    result_item._detected_licenses = detected_lic
+    result_item._count_total_files = file_total
+    result_item._count_without_lic = str(len(license_missing_files))
+    result_item._count_without_cop = str(len(copyright_missing_files))
+    result_item._files_without_both = sorted(missing_both_files)
+    result_item._files_without_lic = sorted(license_missing_files)
+    result_item._files_without_cop = sorted(copyright_missing_files)
+    result_item._fl_reuse_ver = _result_log["Tool Info"]
+    result_item._path_to_analyze = _result_log["Path to analyze"]
+    result_item._os_info = _result_log["OS"]
+    result_item._python_ver = _result_log["Python version"]
+    result_item._check_only_file_mode = _check_only_file_mode
+    return result_item
+
+
+def write_result_file(result_file, format, exit_code, result_item, _result_log, error_items):
     success = False
     if format == "" or format == "yaml":
         success, exit_code = write_result_yaml(result_file, exit_code, result_item)
     elif format == "html":
         success, exit_code = write_result_html(result_file, exit_code, _result_log)
     elif format == "xml":
-        success, exit_code = write_result_xml(result_file, exit_code, _result_log)
+        success, exit_code = write_result_xml(result_file, exit_code, result_item, _result_log)
     else:
         logger.info("Not supported file extension")
 
@@ -223,5 +263,7 @@ def write_result_file(result_file, format, exit_code, result_item, _result_log):
         # Print yaml result
         yaml_result = result_item.get_print_yaml()
         yaml.dump(yaml_result, sys.stdout, default_flow_style=False, sort_keys=False)
+
+    print_error(error_items)
 
     return success, exit_code
