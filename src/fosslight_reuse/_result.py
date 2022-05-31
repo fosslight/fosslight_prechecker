@@ -10,7 +10,6 @@ import xml.etree.ElementTree as ET
 import logging
 import fosslight_util.constant as constant
 from fosslight_util.output_format import check_output_format
-from yaml import safe_dump
 from pathlib import Path
 
 CUSTOMIZED_FORMAT_FOR_REUSE = {'html': '.html', 'xml': '.xml', 'yaml': '.yaml'}
@@ -39,6 +38,7 @@ class ResultItem:
         self._fl_reuse_ver = ""
         self._log_msg = ""
         self._check_only_file_mode = False
+        self.excution_error = []
 
     @property
     def compliant_result(self):
@@ -75,7 +75,8 @@ class ResultItem:
         result_tool_item["Python Version"] = self._python_ver
         result_tool_item["FL Reuse Version"] = self._fl_reuse_ver
         result_item["Tool Info"] = result_tool_item
-
+        if self.excution_error:
+            result_item["Excution Error"] = self.excution_error
         root_item = {"Checking copyright/license writing rules": result_item}
         return root_item
 
@@ -122,14 +123,14 @@ def result_for_xml(result_item: ResultItem):
                 items.set('line', '0')
                 items.set('msg', MSG_FOLLOW_LIC_TXT)
                 _root_xml_item.append(items)
+
+    if result_item.excution_error:
+        error_xml = ET.Element('execution_errors')
+        for error in result_item.excution_error:
+            error_xml_sub = ET.SubElement(error_xml, 'execution_error')
+            error_xml_sub.text = error
+        _root_xml_item.append(error_xml)
     return _root_xml_item
-
-
-def print_error(error_items):
-    if error_items:
-        logger.warning("# SYSTEM ERRORS")
-        for item in error_items:
-            logger.warning(item)
 
 
 def write_result_xml(result_file: str, exit_code: int, result_item: ResultItem, _result_log: str) -> None:
@@ -140,15 +141,10 @@ def write_result_xml(result_file: str, exit_code: int, result_item: ResultItem, 
         Path(output_dir).mkdir(parents=True, exist_ok=True)
         _root_xml_item = result_for_xml(result_item)
         ET.ElementTree(_root_xml_item).write(result_file, encoding="UTF-8", xml_declaration=True)
+        success = True
     except Exception as ex:
         logger.error(f"Error_to_write_xml: {ex}")
         exit_code = os.EX_IOERR
-    try:
-        _str_final_result_log = safe_dump(_result_log, allow_unicode=True, sort_keys=True)
-        logger.info(_str_final_result_log)
-        success = True
-    except Exception as ex:
-        logger.warning(f"Failed to print result log. {ex}")
     return success, exit_code
 
 
@@ -190,7 +186,7 @@ def create_result_file(output_file_name, format, _start_time=""):
             output_path = os.path.abspath(output_path)
 
         if output_file != "":
-            result_file = f"{output_file}.{format}"
+            result_file = f"{output_file}{output_extension}"
         else:
             if output_extension == '.yaml' or output_extension == "":
                 result_file = f"FOSSLight_Reuse_{_start_time}.yaml"
@@ -210,7 +206,7 @@ def create_result_file(output_file_name, format, _start_time=""):
 
 
 def result_for_summary(oss_pkg_info_files, license_missing_files, copyright_missing_files,
-                       report, _result_log, _check_only_file_mode, file_to_check_list):
+                       report, _result_log, _check_only_file_mode, file_to_check_list, error_items):
     reuse_compliant = False
     detected_lic = []
     missing_both_files = []
@@ -245,10 +241,11 @@ def result_for_summary(oss_pkg_info_files, license_missing_files, copyright_miss
     result_item._os_info = _result_log["OS"]
     result_item._python_ver = _result_log["Python version"]
     result_item._check_only_file_mode = _check_only_file_mode
+    result_item.excution_error = error_items
     return result_item
 
 
-def write_result_file(result_file, format, exit_code, result_item, _result_log, error_items):
+def write_result_file(result_file, format, exit_code, result_item, _result_log):
     success = False
     if format == "" or format == "yaml":
         success, exit_code = write_result_yaml(result_file, exit_code, result_item)
@@ -263,7 +260,5 @@ def write_result_file(result_file, format, exit_code, result_item, _result_log, 
         # Print yaml result
         yaml_result = result_item.get_print_yaml()
         yaml.dump(yaml_result, sys.stdout, default_flow_style=False, sort_keys=False)
-
-    print_error(error_items)
 
     return success, exit_code

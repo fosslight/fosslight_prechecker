@@ -16,7 +16,7 @@ from fosslight_util.parsing_yaml import parsing_yml, find_all_oss_pkg_files
 from reuse import report
 from reuse.project import Project
 from reuse.report import ProjectReport
-from fosslight_reuse._result import write_result_file, create_result_file, result_for_summary
+from fosslight_reuse._result import write_result_file, create_result_file, result_for_summary, ResultItem
 
 PKG_NAME = "fosslight_reuse"
 REUSE_CONFIG_FILE = ".reuse/dep5"
@@ -287,6 +287,7 @@ def run_lint(target_path, format, disable, output_file_name):
     _exit_code = os.EX_OK
     path_to_find = ""
     report = ProjectReport()
+    result_item = ResultItem()
     success = False
 
     try:
@@ -317,9 +318,10 @@ def run_lint(target_path, format, disable, output_file_name):
                                          report,
                                          _result_log,
                                          _check_only_file_mode,
-                                         file_to_check_list)
+                                         file_to_check_list,
+                                         error_items)
 
-    success, exit_code = write_result_file(result_file, format, _exit_code, result_item, _result_log, error_items)
+    success, exit_code = write_result_file(result_file, format, _exit_code, result_item, _result_log)
     if success:
         logger.info(f"\nCreated file name: {result_file}\n")
     else:
