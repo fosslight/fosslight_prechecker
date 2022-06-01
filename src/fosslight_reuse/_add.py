@@ -369,7 +369,7 @@ def add_content(target_path="", input_license="", input_copyright=""):
     # File Only mode (-f option)
     if _check_only_file_mode:
         main_parser = reuse_arg_parser()
-        missing_license_list, missing_copyright_list, error_occurred, project = reuse_for_files(path_to_find, file_to_check_list)
+        missing_license_list, missing_copyright_list, project = reuse_for_files(path_to_find, file_to_check_list)
 
         if missing_license_list is not None and len(missing_license_list) > 0:
             if input_license == "" and input_copyright == "":
@@ -413,7 +413,7 @@ def add_content(target_path="", input_license="", input_copyright=""):
         all_files_list = get_allfiles_list(path_to_find)
 
         # Get missing license / copyright file list
-        missing_license, missing_copyright, _, _, project, _, _ = reuse_for_project(path_to_find)
+        missing_license, missing_copyright, _, project, _, _ = reuse_for_project(path_to_find)
 
         # Print Skipped Files
         missing_license_filtered, missing_copyright_filtered = \

@@ -1,4 +1,4 @@
-Open Source Package:
+Open Source Software Package:
 - name: glibc
   version: 2.3
   source: https://github.com/fsfe/glibc

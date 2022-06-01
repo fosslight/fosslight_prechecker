@@ -118,7 +118,6 @@ def reuse_for_files(path, files):
 
     missing_license_list = []
     missing_copyright_list = []
-    error_occurred = False
 
     try:
         prj = Project(path)
@@ -145,13 +144,12 @@ def reuse_for_files(path, files):
                             missing_copyright_list.append(file)
 
             except Exception as ex:
-                dump_error_msg(f"Error_Reuse_for_file_to_read : {ex}")
+                dump_error_msg(f"Error_Reuse_for_file_to_read : {ex}", True)
 
     except Exception as ex:
-        dump_error_msg(f"Error_Reuse_for_file : {ex}")
-        error_occurred = True
+        dump_error_msg(f"Error_Reuse_for_file : {ex}", True)
 
-    return missing_license_list, missing_copyright_list, error_occurred, prj
+    return missing_license_list, missing_copyright_list, prj
 
 
 def extract_files_in_path(filepath):
@@ -184,10 +182,9 @@ def get_only_pkg_info_yaml_file(pkg_info_files):
 
 
 def reuse_for_project(path_to_find):
-    # result = ""
+    excluded_files = []
     missing_license = []
     missing_copyright = []
-    error_occured = False
 
     oss_pkg_info_files = find_oss_pkg_info(path_to_find)
     if _turn_on_default_reuse_config:
@@ -227,17 +224,19 @@ def reuse_for_project(path_to_find):
         missing_copyright = [sub.replace(path_to_find, '') for sub in missing_copyright]
 
     except Exception as ex:
-        dump_error_msg(f"Error_Reuse_lint: {ex}")
-        error_occured = True
+        dump_error_msg(f"Error_Reuse_lint: {ex}", True)
 
     if _turn_on_default_reuse_config:
         remove_reuse_dep5_file(need_rollback, temp_file_name, temp_dir_name)
-    return missing_license, missing_copyright, oss_pkg_info_files, error_occured, project, report, excluded_files
+    return missing_license, missing_copyright, oss_pkg_info_files, project, report, excluded_files
 
 
-def dump_error_msg(error_msg: str):
+def dump_error_msg(error_msg: str, exit=False):
     global error_items
     error_items.append(error_msg)
+    if exit:
+        logger.error(error_msg)
+        sys.exit(1)
 
 
 def init(path_to_find, output_file_name, file_list):
@@ -303,23 +302,20 @@ def run_lint(target_path, format, disable, output_file_name):
     _turn_on_default_reuse_config = not disable
 
     if _check_only_file_mode:
-        license_missing_files, copyright_missing_files, error_occurred, project = reuse_for_files(path_to_find, file_to_check_list)
+        license_missing_files, copyright_missing_files, project = reuse_for_files(path_to_find, file_to_check_list)
         oss_pkg_info = []
     else:
-        license_missing_files, copyright_missing_files, oss_pkg_info, error_occurred, project, report, excluded_files \
+        license_missing_files, copyright_missing_files, oss_pkg_info, project, report, excluded_files \
             = reuse_for_project(path_to_find)
 
-    if error_occurred:  # In case reuse lint failed
-        _exit_code = os.EX_SOFTWARE
-    else:
-        result_item = result_for_summary(oss_pkg_info,
-                                         license_missing_files,
-                                         copyright_missing_files,
-                                         report,
-                                         _result_log,
-                                         _check_only_file_mode,
-                                         file_to_check_list,
-                                         error_items)
+    result_item = result_for_summary(oss_pkg_info,
+                                     license_missing_files,
+                                     copyright_missing_files,
+                                     report,
+                                     _result_log,
+                                     _check_only_file_mode,
+                                     file_to_check_list,
+                                     error_items)
 
     success, exit_code = write_result_file(result_file, format, _exit_code, result_item, _result_log)
     if success:
