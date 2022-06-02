@@ -8,21 +8,18 @@ import logging
 import os
 import json
 import yaml
-import csv
-import xlsxwriter
 from fosslight_util.constant import LOGGER_NAME
 from fosslight_util.oss_item import OssItem
-from fosslight_util.parsing_yaml import find_all_oss_pkg_files, parsing_yml
+from fosslight_util.parsing_yaml import find_all_oss_pkg_files, parsing_yml, set_value_switch
+from fosslight_util.write_excel import write_result_to_excel, write_result_to_csv
 
 logger = logging.getLogger(LOGGER_NAME)
 IDX_CANNOT_FOUND = -1
-HEADER_ROW = ['ID', 'Source Name or Path', 'OSS Name', 'OSS Version', 'License',
-              'Download Location', 'Homepage', 'Copyright Text',
-              'License Text', 'Exclude', 'Comment']
 
 
 def convert_yml_to_excel(oss_pkg_files, output_file, file_option_on, base_path, window):
-    items_to_print = [HEADER_ROW]
+    items_to_print = []
+    sheet_list = {}
 
     if not file_option_on:
         oss_pkg_files = find_all_oss_pkg_files(base_path, oss_pkg_files)
@@ -41,16 +38,26 @@ def convert_yml_to_excel(oss_pkg_files, output_file, file_option_on, base_path, 
             logger.error(f"Read yaml file: {ex}")
 
     if not window:
-        write_result_to_csv(items_to_print, output_file)
+        try:
+            sheet_list["SRC_FL_Reuse"] = items_to_print
+            write_result_to_csv(f"{output_file}.csv", sheet_list, True)
+            logger.warning(f"Output: {output_file}_SRC_FL_Reuse.csv")
+        except Exception as ex:
+            logger.error(f"Write .xlsx file : {ex}")
     if len(items_to_print) > 1:
-        write_result_to_excel(items_to_print, output_file)
+        try:
+            sheet_list["SRC_FL_Reuse"] = items_to_print
+            write_result_to_excel(f"{output_file}.xlsx", sheet_list)
+            logger.warning(f"Output: {output_file}.xlsx")
+        except Exception as ex:
+            logger.error(f"Write .csv file : {ex}")
 
 
 def convert_excel_to_yaml(oss_report_to_read, output_file):
     _file_extension = ".yaml"
     _output_json = {}
     _row_to_print = []
-    _json_root_key = "Open Source Package"
+    _json_root_key = "Open Source Software Package"
 
     if os.path.isfile(oss_report_to_read):
         try:
@@ -66,40 +73,7 @@ def convert_excel_to_yaml(oss_report_to_read, output_file):
         except Exception as error:
             logger.error(f"Convert yaml: {error}")
     else:
-        logger.error("Can't find a file :"+oss_report_to_read)
-
-
-def write_result_to_csv(row_list, output_file):
-    _file_extension = ".csv"
-    try:
-        output_file = output_file if output_file.endswith(_file_extension) else output_file + _file_extension
-        with open(output_file, 'w', newline='') as file:
-            writer = csv.writer(file, delimiter='\t')
-            writer.writerows(row_list)
-        logger.warning(f"Output: {output_file}")
-    except Exception as ex:
-        logger.error(f"Write csv: {ex}")
-
-
-def write_result_to_excel(list_to_print, output_file):
-    _file_extension = ".xlsx"
-    try:
-        output_file = output_file if output_file.endswith(_file_extension) else output_file + _file_extension
-        workbook = xlsxwriter.Workbook(output_file)
-        worksheet = workbook.add_worksheet("SRC")
-        write_result_to_sheet(worksheet, list_to_print)
-        workbook.close()
-        logger.warning(f"Output: {output_file}")
-    except Exception as ex:
-        logger.error(f"Write excel: {ex}")
-
-
-def write_result_to_sheet(worksheet, print_list):
-    row = 0  # Start from the first cell.
-    for item_to_print in print_list:
-        for col_num, value in enumerate(item_to_print):
-            worksheet.write(row, col_num, value)
-        row += 1
+        logger.error(f"Can't find a file: {oss_report_to_read}")
 
 
 def write_yaml_file(output_file, json_output):
@@ -166,6 +140,8 @@ def read_oss_report(excel_file):
                         cell_value = cell_obj.value
                         if cell_value != "":
                             if column_key != "ID":
+                                if column_key:
+                                    column_key = column_key.lower().strip()
                                 set_value_switch(item, column_key, cell_value)
                                 load_data_cnt += 1
                             else:
@@ -176,26 +152,3 @@ def read_oss_report(excel_file):
     except Exception as error:
         logger.error(f"Parsing a OSS Report: {error}")
     return _oss_report_items
-
-
-def set_value_switch(oss, key, value):
-    if key == 'OSS Name':
-        oss.name = value
-    elif key == 'OSS Version':
-        oss.version = value
-    elif key == 'Download Location':
-        oss.download_location = value
-    elif key == 'License':
-        oss.license = value
-    elif key == 'Binary Name':
-        oss.source_name_or_path = value
-    elif key == 'File Name or Path':
-        oss.source_name_or_path = value
-    elif key == 'Copyright Text':
-        oss.copyright = value
-    elif key == 'Exclude':
-        oss.exclude = value
-    elif key == 'Comment':
-        oss.comment = value
-    elif key == 'Homepage':
-        oss.homepage = value
