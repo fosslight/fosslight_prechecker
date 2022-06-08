@@ -166,13 +166,11 @@ def extract_files_in_path(filepath):
 
 def get_excluded_path_in_yaml(repository, yaml_files):
     for file in yaml_files:
-        oss_list, _ = parsing_yml(file, repository)
-
-        # if exclude filed is True, yield 'file' in pkg-info.yaml file
-        for ossitem in oss_list:
-            # If 'Exclude' field is true,
-            if ossitem[9]:
-                yield ossitem[1]
+        oss_items, _ = parsing_yml(file, repository)
+        for oss_item in oss_items:
+            if oss_item.exclude:
+                for source_name_or_path in oss_item.source_name_or_path:
+                    yield os.path.join(oss_item.relative_path, source_name_or_path}
 
 
 def get_only_pkg_info_yaml_file(pkg_info_files):
@@ -185,6 +183,8 @@ def reuse_for_project(path_to_find):
     excluded_files = []
     missing_license = []
     missing_copyright = []
+    pkg_info_yaml_files = []
+    yaml_file = []
 
     oss_pkg_info_files = find_oss_pkg_info(path_to_find)
     if _turn_on_default_reuse_config:
@@ -199,17 +199,18 @@ def reuse_for_project(path_to_find):
         project = Project(path_to_find)
         report = ProjectReport.generate(project)
 
-        pkg_info_yaml_files = find_all_oss_pkg_files(path_to_find, oss_pkg_info_files)
-        yaml_file = get_only_pkg_info_yaml_file(pkg_info_yaml_files)
-
-        # Get path to be excluded in yaml file
-        filepath_in_yaml = set(get_excluded_path_in_yaml(path_to_find, yaml_file))
-
-        # TO DO
-        # Get all file list in 'exclude_filepath' by using Regular expression
-        excluded_files = extract_files_in_path(filepath_in_yaml)
-
         timer.stop = True
+
+        if oss_pkg_info_files:
+            pkg_info_yaml_files = find_all_oss_pkg_files(path_to_find, oss_pkg_info_files)
+            yaml_file = get_only_pkg_info_yaml_file(pkg_info_yaml_files)
+
+            # Get path to be excluded in yaml file
+            filepath_in_yaml = set(get_excluded_path_in_yaml(path_to_find, yaml_file))
+
+            # TO DO
+            # Get all file list in 'exclude_filepath' by using Regular expression
+            excluded_files = extract_files_in_path(filepath_in_yaml)
 
         # File list that missing license text
         missing_license = [str(sub) for sub in set(report.files_without_licenses)]
@@ -299,27 +300,31 @@ def run_lint(target_path, format, disable, output_file_name):
     init(path_to_find, output_file_name, file_to_check_list)
     result_file = create_result_file(output_file_name, format, _start_time)
 
-    _turn_on_default_reuse_config = not disable
+    if os.path.isdir(path_to_find):
+        _turn_on_default_reuse_config = not disable
 
-    if _check_only_file_mode:
-        license_missing_files, copyright_missing_files, project = reuse_for_files(path_to_find, file_to_check_list)
-        oss_pkg_info = []
+        if _check_only_file_mode:
+            license_missing_files, copyright_missing_files, project = reuse_for_files(path_to_find, file_to_check_list)
+            oss_pkg_info = []
+        else:
+            license_missing_files, copyright_missing_files, oss_pkg_info, project, report, excluded_files \
+                = reuse_for_project(path_to_find)
+
+        result_item = result_for_summary(oss_pkg_info,
+                                        license_missing_files,
+                                        copyright_missing_files,
+                                        report,
+                                        _result_log,
+                                        _check_only_file_mode,
+                                        file_to_check_list,
+                                        error_items)
+
+        success, exit_code = write_result_file(result_file, format, _exit_code, result_item, _result_log)
+        if success:
+            logger.info(f"\nCreated file name: {result_file}\n")
+        else:
+            logger.info("\nCan't make result file\n")
+        sys.exit(exit_code)
     else:
-        license_missing_files, copyright_missing_files, oss_pkg_info, project, report, excluded_files \
-            = reuse_for_project(path_to_find)
-
-    result_item = result_for_summary(oss_pkg_info,
-                                     license_missing_files,
-                                     copyright_missing_files,
-                                     report,
-                                     _result_log,
-                                     _check_only_file_mode,
-                                     file_to_check_list,
-                                     error_items)
-
-    success, exit_code = write_result_file(result_file, format, _exit_code, result_item, _result_log)
-    if success:
-        logger.info(f"\nCreated file name: {result_file}\n")
-    else:
-        logger.info("\nCan't make result file\n")
-    sys.exit(exit_code)
+        logger.error(f"Check the path to find : {path_to_find}")
+        sys.exit(1)

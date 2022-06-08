@@ -345,6 +345,10 @@ def add_content(target_path="", input_license="", input_copyright=""):
     logger, _result_log = init_log(os.path.join(output_dir, f"fosslight_reuse_add_log_{now}.txt"),
                                    True, logging.INFO, logging.DEBUG, PKG_NAME, path_to_find)
 
+    if not os.path.isdir(path_to_find):
+        logger.error(f"Check the path to find : {path_to_find}")
+        sys.exit(1)
+
     # Get SPDX License List
     try:
         success, error_msg, licenses = get_spdx_licenses_json()
@@ -362,9 +366,6 @@ def add_content(target_path="", input_license="", input_copyright=""):
 
     if input_license != "":
         find_representative_license(path_to_find, input_license)
-
-    # Download license text file of OSS-pkg-info.yaml
-    download_oss_info_license(path_to_find, input_license)
 
     # File Only mode (-f option)
     if _check_only_file_mode:
@@ -409,6 +410,9 @@ def add_content(target_path="", input_license="", input_copyright=""):
             logger.info("# There is no missing copyright file\n")
     # Path mode (-p option)
     else:
+        # Download license text file of OSS-pkg-info.yaml
+        download_oss_info_license(path_to_find, input_license)
+
         # Get all files List in path
         all_files_list = get_allfiles_list(path_to_find)
 

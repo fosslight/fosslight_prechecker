@@ -12,6 +12,7 @@ from fosslight_util.constant import LOGGER_NAME
 from fosslight_util.oss_item import OssItem
 from fosslight_util.parsing_yaml import find_all_oss_pkg_files, parsing_yml, set_value_switch
 from fosslight_util.write_excel import write_result_to_excel, write_result_to_csv
+from fosslight_util.write_yaml import write_yaml, create_yaml_with_ossitem
 
 logger = logging.getLogger(LOGGER_NAME)
 IDX_CANNOT_FOUND = -1
@@ -33,7 +34,9 @@ def convert_yml_to_excel(oss_pkg_files, output_file, file_option_on, base_path, 
 
                 if file_option_on:
                     base_path = os.path.dirname(oss_pkg_file)
-                items_to_print.extend(parsing_yml(oss_pkg_file, base_path)[0])
+                oss_items = parsing_yml(oss_pkg_file, base_path)[0]
+                for item in oss_items:
+                    items_to_print.extend(item.get_print_array())
         except Exception as ex:
             logger.error(f"Read yaml file: {ex}")
 
@@ -55,20 +58,17 @@ def convert_yml_to_excel(oss_pkg_files, output_file, file_option_on, base_path, 
 
 def convert_excel_to_yaml(oss_report_to_read, output_file):
     _file_extension = ".yaml"
-    _output_json = {}
-    _row_to_print = []
-    _json_root_key = "Open Source Software Package"
+    yaml_dict = {}
 
     if os.path.isfile(oss_report_to_read):
         try:
             logger.warning(f"Read data from : {oss_report_to_read}")
             items = read_oss_report(oss_report_to_read)
             for item in items:
-                _row_to_print.append(item.get_print_json())
-            if len(_row_to_print) > 0:
+                yaml_dict = create_yaml_with_ossitem(item, yaml_dict)
+            if yaml_dict:
                 output_file = output_file if output_file.endswith(_file_extension) else output_file + _file_extension
-                _output_json[_json_root_key] = _row_to_print
-                write_yaml_file(output_file, _output_json)
+                write_yaml_file(output_file, yaml_dict)
                 logger.warning(f"Output: {output_file}")
         except Exception as error:
             logger.error(f"Convert yaml: {error}")

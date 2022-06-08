@@ -177,6 +177,10 @@ def write_result_yaml(result_file: str, exit_code: int, result_item: ResultItem)
 
 
 def create_result_file(output_file_name, format, _start_time=""):
+    if format == "":
+        logger.info(" * Default result format : yaml")
+        format = "yaml"
+
     success, msg, output_path, output_file, output_extension = check_output_format(output_file_name, format, CUSTOMIZED_FORMAT_FOR_REUSE)
     if success:
         result_file = ""
