@@ -170,9 +170,7 @@ def get_excluded_path_in_yaml(repository, yaml_files):
         for oss_item in oss_items:
             if oss_item.exclude:
                 for source_name_or_path in oss_item.source_name_or_path:
-                    if oss_item.relative_path != "" and not str(oss_item.relative_path).endswith("/"):
-                        oss_item.relative_path += "/"
-                    yield f"{oss_item.relative_path}{source_name_or_path}"
+                    yield os.path.join(oss_item.relative_path, source_name_or_path}
 
 
 def get_only_pkg_info_yaml_file(pkg_info_files):
