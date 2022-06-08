@@ -34,7 +34,7 @@ def convert_yml_to_excel(oss_pkg_files, output_file, file_option_on, base_path, 
 
                 if file_option_on:
                     base_path = os.path.dirname(oss_pkg_file)
-                oss_items = parsing_yml(oss_pkg_file, base_path)[0]
+                oss_items, _= parsing_yml(oss_pkg_file, base_path)
                 for item in oss_items:
                     items_to_print.extend(item.get_print_array())
         except Exception as ex:
@@ -83,24 +83,26 @@ def write_yaml_file(output_file, json_output):
 
 def read_oss_report(excel_file):
     _oss_report_items = []
-    _sheet_name_to_read = ["BIN (Android)", "BOM", "BIN(Android)", "BIN (Yocto)", "BIN(Yocto)"]
     _xl_sheets = []
+    SHEET_PREFIX_TO_READ = ["BIN", "BOM", "SRC"]
 
     try:
         # Open the workbook
         xl_workbook = xlrd.open_workbook(excel_file)
-        for sheet_name in _sheet_name_to_read:
+        for sheet_name in xl_workbook.sheet_names():
             try:
-                sheet = xl_workbook.sheet_by_name(sheet_name)
-                if sheet:
-                    logger.info(f"Load a sheet: {sheet_name}")
-                    _xl_sheets.append(sheet)
+                if any(sheet_name.startswith(sheet_prefix) for sheet_prefix in SHEET_PREFIX_TO_READ):
+                    sheet = xl_workbook.sheet_by_name(sheet_name)
+                    if sheet:
+                        logger.info(f"Load a sheet: {sheet_name}")
+                        _xl_sheets.append(sheet)
             except Exception as error:
                 logger.debug(f"Failed to load sheet: {sheet_name} {error}")
 
         for xl_sheet in _xl_sheets:
             _item_idx = {
                 "ID": IDX_CANNOT_FOUND,
+                "Source Name or Path": IDX_CANNOT_FOUND,
                 "Binary Name": IDX_CANNOT_FOUND,
                 "OSS Name": IDX_CANNOT_FOUND,
                 "OSS Version": IDX_CANNOT_FOUND,
