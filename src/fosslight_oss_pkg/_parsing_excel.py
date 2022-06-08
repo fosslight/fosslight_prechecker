@@ -47,7 +47,7 @@ def convert_yml_to_excel(oss_pkg_files, output_file, file_option_on, base_path, 
             logger.warning(f"Output: {output_file}_SRC_FL_Reuse.csv")
         except Exception as ex:
             logger.error(f"Write .xlsx file : {ex}")
-    if len(items_to_print) > 1:
+    if items_to_print and len(items_to_print) > 0:
         try:
             sheet_list["SRC_FL_Reuse"] = items_to_print
             write_result_to_excel(f"{output_file}.xlsx", sheet_list)
