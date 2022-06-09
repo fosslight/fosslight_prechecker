@@ -208,8 +208,7 @@ def reuse_for_project(path_to_find):
             # Get path to be excluded in yaml file
             filepath_in_yaml = set(get_excluded_path_in_yaml(path_to_find, yaml_file))
 
-            # TO DO
-            # Get all file list in 'exclude_filepath' by using Regular expression
+            # TODO : Get all file list in 'exclude_filepath' by using Regular expression
             excluded_files = extract_files_in_path(filepath_in_yaml)
 
         # File list that missing license text
@@ -317,7 +316,8 @@ def run_lint(target_path, format, disable, output_file_name):
                                         _result_log,
                                         _check_only_file_mode,
                                         file_to_check_list,
-                                        error_items)
+                                        error_items,
+                                        excluded_files)
 
         success, exit_code = write_result_file(result_file, format, _exit_code, result_item, _result_log)
         if success:

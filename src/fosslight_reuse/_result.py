@@ -210,7 +210,7 @@ def create_result_file(output_file_name, format, _start_time=""):
 
 
 def result_for_summary(oss_pkg_info_files, license_missing_files, copyright_missing_files,
-                       report, _result_log, _check_only_file_mode, file_to_check_list, error_items):
+                       report, _result_log, _check_only_file_mode, file_to_check_list, error_items, excluded_files):
     reuse_compliant = False
     detected_lic = []
     missing_both_files = []
@@ -227,7 +227,14 @@ def result_for_summary(oss_pkg_info_files, license_missing_files, copyright_miss
     if len(license_missing_files) == 0 and len(copyright_missing_files) == 0:
         reuse_compliant = True
 
+    # Subtract excluded file
+    license_missing_files = list(set(license_missing_files) - set(excluded_files))
+    copyright_missing_files = list(set(copyright_missing_files) - set(excluded_files))
+
+    # Remove duplicated file
     missing_both_files = list(set(license_missing_files) & set(copyright_missing_files))
+    license_missing_files = list(set(license_missing_files) - set(missing_both_files))
+    copyright_missing_files = list(set(copyright_missing_files) - set(missing_both_files))
 
     # Save result items
     result_item = ResultItem()

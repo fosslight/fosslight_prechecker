@@ -68,12 +68,12 @@ def check_file_extension(file_list):
 
 def check_license_and_copyright(path_to_find, all_files, missing_license, missing_copyright):
     # Check file extension for each list
-    all_files_filtered = check_file_extension(all_files)
+    all_files_filtered = list(check_file_extension(all_files))
     missing_license_filtered = list(check_file_extension(missing_license))
     missing_copyright_filtered = list(check_file_extension(missing_copyright))
 
     skip_files = sorted(set(all_files_filtered) - set(missing_license_filtered) - set(missing_copyright_filtered))
-    logger.info(f"\n# File list that have both license and copyright : {len(skip_files)} / {len(list(all_files))}")
+    logger.info(f"\n# File list that have both license and copyright : {len(skip_files)} / {len(all_files_filtered)}")
 
     reuse_for_files(path_to_find, skip_files)
 
