@@ -350,9 +350,9 @@ def run_lint(target_path, disable, output_file_name, format=''):
 
         success, exit_code = write_result_file(result_file, output_extension, _exit_code, result_item, _result_log)
         if success:
-            logger.info(f"\nCreated file name: {result_file}\n")
+            logger.warning(f"Created file name: {result_file}\n")
         else:
-            logger.info("\nCan't make result file\n")
+            logger.warning("Can't make result file\n")
         sys.exit(exit_code)
     else:
         logger.error(f"Check the path to find : {path_to_find}")
