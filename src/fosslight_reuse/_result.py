@@ -205,7 +205,7 @@ def create_result_file(output_file_name, format='', _start_time=""):
         logger.error(f"Format error - {msg}")
         sys.exit(1)
 
-    return result_file, output_extension
+    return result_file, output_path, output_extension
 
 
 def result_for_summary(oss_pkg_info_files, license_missing_files, copyright_missing_files,

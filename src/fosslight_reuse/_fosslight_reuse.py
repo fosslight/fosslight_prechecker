@@ -263,12 +263,11 @@ def dump_error_msg(error_msg: str, exit=False):
         sys.exit(1)
 
 
-def init(path_to_find, output_file_name, file_list):
+def init(path_to_find, file_list):
     global logger, _start_time, _result_log
 
     _start_time = datetime.now().strftime('%Y%m%d_%H-%M-%S')
-    output_dir = os.path.dirname(os.path.abspath(output_file_name))
-    logger, _result_log = init_log(os.path.join(output_dir, f"fosslight_reuse_log_{_start_time}.txt"),
+    logger, _result_log = init_log(os.path.join(path_to_find, f"fosslight_reuse_log_{_start_time}.txt"),
                                    True, logging.INFO, logging.DEBUG, PKG_NAME, path_to_find)
     if file_list:
         _result_log["File list to check"] = file_list
@@ -321,8 +320,8 @@ def run_lint(target_path, disable, output_file_name, format=''):
 
     path_to_find, file_to_check_list, _check_only_file_mode = get_path_to_find(target_path, _check_only_file_mode)
 
-    init(path_to_find, output_file_name, file_to_check_list)
-    result_file, output_extension = create_result_file(output_file_name, format, _start_time)
+    result_file, output_path, output_extension = create_result_file(output_file_name, format, _start_time)
+    init(output_path, file_to_check_list)
 
     if os.path.isdir(path_to_find):
         lic_present_files_in_yaml = []
