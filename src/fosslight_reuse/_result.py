@@ -210,7 +210,8 @@ def create_result_file(output_file_name, format, _start_time=""):
 
 
 def result_for_summary(oss_pkg_info_files, license_missing_files, copyright_missing_files,
-                       report, _result_log, _check_only_file_mode, file_to_check_list, error_items, excluded_files):
+                       report, _result_log, _check_only_file_mode, file_to_check_list, error_items,
+                       excluded_files, lic_present_files_in_yaml, cop_present_files_in_yaml):
     reuse_compliant = False
     detected_lic = []
     missing_both_files = []
@@ -223,6 +224,10 @@ def result_for_summary(oss_pkg_info_files, license_missing_files, copyright_miss
         # Get detected License
         for i, lic in enumerate(sorted(report.used_licenses)):
             detected_lic.append(lic)
+
+    # Subtract license or copyright presenting file
+    license_missing_files = list(set(license_missing_files) - set(lic_present_files_in_yaml))
+    copyright_missing_files = list(set(copyright_missing_files) - set(cop_present_files_in_yaml))
 
     if len(license_missing_files) == 0 and len(copyright_missing_files) == 0:
         reuse_compliant = True

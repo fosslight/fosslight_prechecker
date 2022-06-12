@@ -152,25 +152,49 @@ def reuse_for_files(path, files):
     return missing_license_list, missing_copyright_list, prj
 
 
-def extract_files_in_path(filepath):
+def extract_files_in_path(repository, filepath):
     extract_files = []
     for path in filepath:
+        if not repository.endswith("/"):
+            repository += "/"
         if os.path.isdir(path):
             files = os.listdir(path)
             files = [os.path.join(path, file) for file in files]
+            files = [sub.replace(repository, '') for sub in files]
             extract_files.extend(files)
         elif os.path.isfile(path):
+            path = path.replace(repository, '')
             extract_files.append(path)
     return extract_files
 
 
-def get_excluded_path_in_yaml(repository, yaml_files):
+def get_rel_path_in_yaml(oss_item):
+    for source_name_or_path in oss_item.source_name_or_path:
+        yield os.path.join(oss_item.relative_path, source_name_or_path)
+
+
+# TODO : Get all file list in 'exclude_filepath' by using Regular expression
+def get_excluded_file_in_yaml(repository, yaml_files):
+    excluded_path = []
+    excluded_list = []
+    lic_present_path = []
+    lic_present_list = []
+    cop_present_path = []
+    cop_present_list = []
+
     for file in yaml_files:
         oss_items, _ = parsing_yml(file, repository)
         for oss_item in oss_items:
             if oss_item.exclude:
-                for source_name_or_path in oss_item.source_name_or_path:
-                    yield os.path.join(oss_item.relative_path, source_name_or_path)
+                excluded_path = get_rel_path_in_yaml(oss_item)
+                excluded_list.extend(extract_files_in_path(repository, excluded_path))
+            if oss_item.license:
+                lic_present_path = get_rel_path_in_yaml(oss_item)
+                lic_present_list.extend(extract_files_in_path(repository, lic_present_path))
+            if oss_item.copyright:
+                cop_present_path = get_rel_path_in_yaml(oss_item)
+                cop_present_list.extend(extract_files_in_path(repository, cop_present_path))
+    return excluded_list, lic_present_list, cop_present_list
 
 
 def get_only_pkg_info_yaml_file(pkg_info_files):
@@ -180,10 +204,12 @@ def get_only_pkg_info_yaml_file(pkg_info_files):
 
 
 def reuse_for_project(path_to_find):
-    excluded_files = []
     missing_license = []
     missing_copyright = []
     pkg_info_yaml_files = []
+    excluded_files = []
+    lic_present_files_in_yaml = []
+    cop_present_files_in_yaml = []
     yaml_file = []
 
     oss_pkg_info_files = find_oss_pkg_info(path_to_find)
@@ -206,10 +232,7 @@ def reuse_for_project(path_to_find):
             yaml_file = get_only_pkg_info_yaml_file(pkg_info_yaml_files)
 
             # Get path to be excluded in yaml file
-            filepath_in_yaml = set(get_excluded_path_in_yaml(path_to_find, yaml_file))
-
-            # TODO : Get all file list in 'exclude_filepath' by using Regular expression
-            excluded_files = extract_files_in_path(filepath_in_yaml)
+            excluded_files, lic_present_files_in_yaml, cop_present_files_in_yaml = get_excluded_file_in_yaml(path_to_find, yaml_file)
 
         # File list that missing license text
         missing_license = [str(sub) for sub in set(report.files_without_licenses)]
@@ -228,7 +251,8 @@ def reuse_for_project(path_to_find):
 
     if _turn_on_default_reuse_config:
         remove_reuse_dep5_file(need_rollback, temp_file_name, temp_dir_name)
-    return missing_license, missing_copyright, oss_pkg_info_files, project, report, excluded_files
+    return missing_license, missing_copyright, oss_pkg_info_files, project, \
+           report, excluded_files, lic_present_files_in_yaml, cop_present_files_in_yaml
 
 
 def dump_error_msg(error_msg: str, exit=False):
@@ -265,7 +289,8 @@ def get_path_to_find(target_path, _check_only_file_mode):
             if path == "":
                 path_to_find = os.getcwd()
             else:
-                path_to_find = os.path.abspath(path)
+                # path_to_find = os.path.abspath(path)
+                path_to_find = os.path.relpath(path)
         elif os.path.isfile(path):
             is_file = True
             path_to_find = os.getcwd()
@@ -300,13 +325,16 @@ def run_lint(target_path, format, disable, output_file_name):
     result_file = create_result_file(output_file_name, format, _start_time)
 
     if os.path.isdir(path_to_find):
+        lic_present_files_in_yaml = []
+        cop_present_files_in_yaml = []
         _turn_on_default_reuse_config = not disable
 
         if _check_only_file_mode:
             license_missing_files, copyright_missing_files, project = reuse_for_files(path_to_find, file_to_check_list)
             oss_pkg_info = []
         else:
-            license_missing_files, copyright_missing_files, oss_pkg_info, project, report, excluded_files \
+            license_missing_files, copyright_missing_files, oss_pkg_info, project,\
+            report, excluded_files, lic_present_files_in_yaml, cop_present_files_in_yaml \
                 = reuse_for_project(path_to_find)
 
         result_item = result_for_summary(oss_pkg_info,
@@ -317,7 +345,9 @@ def run_lint(target_path, format, disable, output_file_name):
                                         _check_only_file_mode,
                                         file_to_check_list,
                                         error_items,
-                                        excluded_files)
+                                        excluded_files,
+                                        lic_present_files_in_yaml,
+                                        cop_present_files_in_yaml)
 
         success, exit_code = write_result_file(result_file, format, _exit_code, result_item, _result_log)
         if success:
