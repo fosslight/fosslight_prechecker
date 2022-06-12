@@ -288,7 +288,6 @@ def get_path_to_find(target_path, _check_only_file_mode):
             if path == "":
                 path_to_find = os.getcwd()
             else:
-                # path_to_find = os.path.abspath(path)
                 path_to_find = os.path.relpath(path)
         elif os.path.isfile(path):
             is_file = True

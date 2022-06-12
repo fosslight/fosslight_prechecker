@@ -243,8 +243,8 @@ def result_for_summary(oss_pkg_info_files, license_missing_files, copyright_miss
     result_item._oss_pkg_files = oss_pkg_info_files
     result_item._detected_licenses = detected_lic
     result_item._count_total_files = file_total
-    result_item._count_without_lic = str(len(license_missing_files))
-    result_item._count_without_cop = str(len(copyright_missing_files))
+    result_item._count_without_lic = str(len(license_missing_files) + len(missing_both_files))
+    result_item._count_without_cop = str(len(copyright_missing_files) + len(missing_both_files))
     result_item._files_without_both = sorted(missing_both_files)
     result_item._files_without_lic = sorted(license_missing_files)
     result_item._files_without_cop = sorted(copyright_missing_files)

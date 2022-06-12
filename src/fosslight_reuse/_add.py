@@ -341,8 +341,7 @@ def add_content(target_path="", input_license="", input_copyright=""):
         os.chdir(path_to_find)
 
     now = datetime.now().strftime('%Y%m%d_%H-%M-%S')
-    output_dir = os.getcwd()
-    logger, _result_log = init_log(os.path.join(output_dir, f"fosslight_reuse_add_log_{now}.txt"),
+    logger, _result_log = init_log(os.path.join(path_to_find, f"fosslight_reuse_add_log_{now}.txt"),
                                    True, logging.INFO, logging.DEBUG, PKG_NAME, path_to_find)
 
     if not os.path.isdir(path_to_find):
@@ -417,7 +416,7 @@ def add_content(target_path="", input_license="", input_copyright=""):
         all_files_list = get_allfiles_list(path_to_find)
 
         # Get missing license / copyright file list
-        missing_license, missing_copyright, _, project, _, _ = reuse_for_project(path_to_find)
+        missing_license, missing_copyright, _, project, _, _, _, _ = reuse_for_project(path_to_find)
 
         # Print Skipped Files
         missing_license_filtered, missing_copyright_filtered = \
