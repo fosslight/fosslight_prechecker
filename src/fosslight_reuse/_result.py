@@ -179,11 +179,7 @@ def write_result_yaml(result_file: str, exit_code: int, result_item: ResultItem)
     return success, exit_code
 
 
-def create_result_file(output_file_name, format, _start_time=""):
-    if format == "":
-        logger.info(" * Default result format : yaml")
-        format = "yaml"
-
+def create_result_file(output_file_name, format='', _start_time=""):
     success, msg, output_path, output_file, output_extension = check_output_format(output_file_name, format, CUSTOMIZED_FORMAT_FOR_REUSE)
     if success:
         result_file = ""
@@ -209,7 +205,7 @@ def create_result_file(output_file_name, format, _start_time=""):
         logger.error(f"Format error - {msg}")
         sys.exit(1)
 
-    return result_file
+    return result_file, output_extension
 
 
 def result_for_summary(oss_pkg_info_files, license_missing_files, copyright_missing_files,
@@ -265,13 +261,13 @@ def result_for_summary(oss_pkg_info_files, license_missing_files, copyright_miss
     return result_item
 
 
-def write_result_file(result_file, format, exit_code, result_item, _result_log):
+def write_result_file(result_file, output_extension, exit_code, result_item, _result_log):
     success = False
-    if format == "" or format == "yaml":
+    if output_extension == ".yaml" or output_extension == "":
         success, exit_code = write_result_yaml(result_file, exit_code, result_item)
-    elif format == "html":
+    elif output_extension == ".html":
         success, exit_code = write_result_html(result_file, exit_code, _result_log)
-    elif format == "xml":
+    elif output_extension == ".xml":
         success, exit_code = write_result_xml(result_file, exit_code, result_item, _result_log)
     else:
         logger.info("Not supported file extension")

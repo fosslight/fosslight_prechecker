@@ -304,7 +304,7 @@ def get_path_to_find(target_path, _check_only_file_mode):
     return path_to_find, file_to_check_list, _check_only_file_mode
 
 
-def run_lint(target_path, format, disable, output_file_name):
+def run_lint(target_path, disable, output_file_name, format=''):
     global _turn_on_default_reuse_config, _check_only_file_mode
 
     file_to_check_list = []
@@ -322,7 +322,7 @@ def run_lint(target_path, format, disable, output_file_name):
     path_to_find, file_to_check_list, _check_only_file_mode = get_path_to_find(target_path, _check_only_file_mode)
 
     init(path_to_find, output_file_name, file_to_check_list)
-    result_file = create_result_file(output_file_name, format, _start_time)
+    result_file, output_extension = create_result_file(output_file_name, format, _start_time)
 
     if os.path.isdir(path_to_find):
         lic_present_files_in_yaml = []
@@ -349,7 +349,7 @@ def run_lint(target_path, format, disable, output_file_name):
                                         lic_present_files_in_yaml,
                                         cop_present_files_in_yaml)
 
-        success, exit_code = write_result_file(result_file, format, _exit_code, result_item, _result_log)
+        success, exit_code = write_result_file(result_file, output_extension, _exit_code, result_item, _result_log)
         if success:
             logger.info(f"\nCreated file name: {result_file}\n")
         else:
