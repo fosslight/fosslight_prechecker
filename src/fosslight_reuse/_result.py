@@ -27,6 +27,7 @@ class ResultItem:
         self._oss_pkg_files = []
         self._detected_licenses = []
         self._count_total_files = ""
+        self._count_without_both = ""
         self._count_without_lic = ""
         self._count_without_cop = ""
         self._files_without_both = []
@@ -61,6 +62,7 @@ class ResultItem:
         result_summary_item = {}
         result_summary_item["Open Source Package File"] = self._oss_pkg_files
         result_summary_item["Detected Licenses"] = is_list_empty(self._detected_licenses)
+        result_summary_item["Count without both license and copyright / Total"] = f"{self._count_without_both} / {self._count_total_files}"
         result_summary_item["Count without license / Total"] = f"{self._count_without_lic} / {self._count_total_files}"
         result_summary_item["Count without copyright / Total"] = f"{self._count_without_cop} / {self._count_total_files}"
 
@@ -97,6 +99,7 @@ def result_for_xml(result_item: ResultItem):
             _SUMMARY_PREFIX = "\n# SUMMARY\n"
             str_xml_result = f"* Open Source Package File: {', '.join(result_item._oss_pkg_files)}\n \
                                * Detected Licenses : {', '.join(result_item._detected_licenses)}\n \
+                               * Files without both license and copyright : {result_item._count_without_both} / {result_item._count_total_files}\n \
                                * Files without copyright : {result_item._count_without_cop} / {result_item._count_total_files}\n \
                                * Files without license : {result_item._count_without_lic} / {result_item._count_total_files}\n"
 
@@ -247,6 +250,7 @@ def result_for_summary(oss_pkg_info_files, license_missing_files, copyright_miss
     result_item._oss_pkg_files = oss_pkg_info_files
     result_item._detected_licenses = detected_lic
     result_item._count_total_files = file_total
+    result_item._count_without_both = str(len(missing_both_files))
     result_item._count_without_lic = str(len(license_missing_files))
     result_item._count_without_cop = str(len(copyright_missing_files))
     result_item._files_without_both = sorted(missing_both_files)
