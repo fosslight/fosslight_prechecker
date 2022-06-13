@@ -245,7 +245,6 @@ def reuse_for_project(path_to_find):
         if not path_to_find.endswith("/"):
             path_to_find += "/"
         missing_copyright = [sub.replace(path_to_find, '') for sub in missing_copyright]
-
     except Exception as ex:
         dump_error_msg(f"Error_Reuse_lint: {ex}", True)
 
