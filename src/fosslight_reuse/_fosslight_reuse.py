@@ -263,9 +263,7 @@ def dump_error_msg(error_msg: str, exit=False):
 
 
 def init(path_to_find, file_list):
-    global logger, _start_time, _result_log
-
-    _start_time = datetime.now().strftime('%Y%m%d_%H-%M-%S')
+    global logger, _result_log
     logger, _result_log = init_log(os.path.join(path_to_find, f"fosslight_reuse_log_{_start_time}.txt"),
                                    True, logging.INFO, logging.DEBUG, PKG_NAME, path_to_find)
     if file_list:
@@ -302,7 +300,7 @@ def get_path_to_find(target_path, _check_only_file_mode):
 
 
 def run_lint(target_path, disable, output_file_name, format=''):
-    global _turn_on_default_reuse_config, _check_only_file_mode
+    global _turn_on_default_reuse_config, _check_only_file_mode, _start_time
 
     file_to_check_list = []
     _exit_code = os.EX_OK
@@ -310,6 +308,7 @@ def run_lint(target_path, disable, output_file_name, format=''):
     report = ProjectReport()
     result_item = ResultItem()
     success = False
+    _start_time = datetime.now().strftime('%Y%m%d_%H-%M-%S')
 
     try:
         locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
