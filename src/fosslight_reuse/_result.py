@@ -271,6 +271,6 @@ def write_result_file(result_file, output_extension, exit_code, result_item, _re
     if success:
         # Print yaml result
         yaml_result = result_item.get_print_yaml()
-        yaml.dump(yaml_result, sys.stdout, default_flow_style=False, sort_keys=False)
-
+        str_yaml_result = yaml.safe_dump(yaml_result, allow_unicode=True, sort_keys=True)
+        logger.info(str_yaml_result)
     return success, exit_code
