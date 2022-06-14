@@ -225,12 +225,12 @@ def result_for_summary(oss_pkg_info_files, license_missing_files, copyright_miss
     license_missing_files = list(set(license_missing_files) - set(lic_present_files_in_yaml))
     copyright_missing_files = list(set(copyright_missing_files) - set(cop_present_files_in_yaml))
 
-    if len(license_missing_files) == 0 and len(copyright_missing_files) == 0:
-        reuse_compliant = True
-
     # Subtract excluded file
     license_missing_files = list(set(license_missing_files) - set(excluded_files))
     copyright_missing_files = list(set(copyright_missing_files) - set(excluded_files))
+
+    if len(license_missing_files) == 0 and len(copyright_missing_files) == 0:
+        reuse_compliant = True
 
     # Remove duplicated file
     missing_both_files = list(set(license_missing_files) & set(copyright_missing_files))
