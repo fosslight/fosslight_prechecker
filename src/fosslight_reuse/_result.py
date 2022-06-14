@@ -39,7 +39,7 @@ class ResultItem:
         self._fl_reuse_ver = ""
         self._log_msg = ""
         self._check_only_file_mode = False
-        self.excution_error = []
+        self.execution_error = []
 
     @property
     def compliant_result(self):
@@ -76,8 +76,8 @@ class ResultItem:
         result_tool_item["Python Version"] = self._python_ver
         result_tool_item["FL Reuse Version"] = self._fl_reuse_ver
         result_item["Tool Info"] = result_tool_item
-        if self.excution_error:
-            result_item["Excution Error"] = self.excution_error
+        if self.execution_error:
+            result_item["Execution Error"] = self.execution_error
         root_item = {"Checking copyright/license writing rules": result_item}
         return root_item
 
@@ -125,9 +125,9 @@ def result_for_xml(result_item: ResultItem):
                 items.set('msg', MSG_FOLLOW_LIC_TXT)
                 _root_xml_item.append(items)
 
-    if result_item.excution_error:
+    if result_item.execution_error:
         error_xml = ET.Element('execution_errors')
-        for error in result_item.excution_error:
+        for error in result_item.execution_error:
             error_xml_sub = ET.SubElement(error_xml, 'execution_error')
             error_xml_sub.text = error
         _root_xml_item.append(error_xml)
@@ -256,7 +256,7 @@ def result_for_summary(oss_pkg_info_files, license_missing_files, copyright_miss
     result_item._os_info = _result_log["OS"]
     result_item._python_ver = _result_log["Python version"]
     result_item._check_only_file_mode = _check_only_file_mode
-    result_item.excution_error = error_items
+    result_item.execution_error = error_items
     return result_item
 
 
