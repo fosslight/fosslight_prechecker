@@ -17,12 +17,11 @@ from reuse import report
 from reuse.project import Project
 from reuse.report import ProjectReport
 from fosslight_reuse._result import write_result_file, create_result_file, result_for_summary, ResultItem
+from fosslight_reuse._constant import DEFAULT_EXCLUDE_EXTENSION, OSS_PKG_INFO_FILES
 
 PKG_NAME = "fosslight_reuse"
 REUSE_CONFIG_FILE = ".reuse/dep5"
 DEFAULT_EXCLUDE_EXTENSION_FILES = []  # Exclude files from reuse
-DEFAULT_EXCLUDE_EXTENSION = ["jar", "png", "exe", "so", "a", "dll", "jpeg", "jpg", "ttf", "lib", "ttc", "pfb",
-                             "pfm", "otf", "afm", "dfont", "json"]
 _turn_on_default_reuse_config = True
 _check_only_file_mode = False
 error_items = []
@@ -34,10 +33,6 @@ logger = logging.getLogger(constant.LOGGER_NAME)
 
 def find_oss_pkg_info(path):
     global DEFAULT_EXCLUDE_EXTENSION_FILES
-    _OSS_PKG_INFO_FILES = ["oss-pkg-info.yaml", "oss-pkg-info.yml", "oss-package.info", "requirement.txt",
-                           "requirements.txt", "package.json", "pom.xml",
-                           "build.gradle",
-                           "podfile.lock", "cartfile.resolved"]
     oss_pkg_info = []
 
     try:
@@ -47,7 +42,7 @@ def find_oss_pkg_info(path):
                 file_abs_path = os.path.join(root, file)
                 file_rel_path = os.path.relpath(file_abs_path, path)
 
-                if file_lower_case in _OSS_PKG_INFO_FILES or file_lower_case.startswith("module_license_"):
+                if file_lower_case in OSS_PKG_INFO_FILES or file_lower_case.startswith("module_license_"):
                     oss_pkg_info.append(file_rel_path)
                 elif is_binary(file_abs_path):
                     DEFAULT_EXCLUDE_EXTENSION_FILES.append(file_rel_path)
