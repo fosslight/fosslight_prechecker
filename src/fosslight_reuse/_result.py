@@ -176,11 +176,7 @@ def write_result_yaml(result_file: str, exit_code: int, result_item: ResultItem)
     return success, exit_code
 
 
-def create_result_file(output_file_name, format, _start_time=""):
-    if format == "":
-        logger.info(" * Default result format : yaml")
-        format = "yaml"
-
+def create_result_file(output_file_name, format='', _start_time=""):
     success, msg, output_path, output_file, output_extension = check_output_format(output_file_name, format, CUSTOMIZED_FORMAT_FOR_REUSE)
     if success:
         result_file = ""
@@ -206,11 +202,12 @@ def create_result_file(output_file_name, format, _start_time=""):
         logger.error(f"Format error - {msg}")
         sys.exit(1)
 
-    return result_file
+    return result_file, output_path, output_extension
 
 
 def result_for_summary(oss_pkg_info_files, license_missing_files, copyright_missing_files,
-                       report, _result_log, _check_only_file_mode, file_to_check_list, error_items):
+                       report, _result_log, _check_only_file_mode, file_to_check_list, error_items,
+                       excluded_files, lic_present_files_in_yaml, cop_present_files_in_yaml):
     reuse_compliant = False
     detected_lic = []
     missing_both_files = []
@@ -224,10 +221,21 @@ def result_for_summary(oss_pkg_info_files, license_missing_files, copyright_miss
         for i, lic in enumerate(sorted(report.used_licenses)):
             detected_lic.append(lic)
 
+    # Subtract license or copyright presenting file
+    license_missing_files = list(set(license_missing_files) - set(lic_present_files_in_yaml))
+    copyright_missing_files = list(set(copyright_missing_files) - set(cop_present_files_in_yaml))
+
     if len(license_missing_files) == 0 and len(copyright_missing_files) == 0:
         reuse_compliant = True
 
+    # Subtract excluded file
+    license_missing_files = list(set(license_missing_files) - set(excluded_files))
+    copyright_missing_files = list(set(copyright_missing_files) - set(excluded_files))
+
+    # Remove duplicated file
     missing_both_files = list(set(license_missing_files) & set(copyright_missing_files))
+    license_missing_files = list(set(license_missing_files) - set(missing_both_files))
+    copyright_missing_files = list(set(copyright_missing_files) - set(missing_both_files))
 
     # Save result items
     result_item = ResultItem()
@@ -235,8 +243,8 @@ def result_for_summary(oss_pkg_info_files, license_missing_files, copyright_miss
     result_item._oss_pkg_files = oss_pkg_info_files
     result_item._detected_licenses = detected_lic
     result_item._count_total_files = file_total
-    result_item._count_without_lic = str(len(license_missing_files))
-    result_item._count_without_cop = str(len(copyright_missing_files))
+    result_item._count_without_lic = str(len(license_missing_files) + len(missing_both_files))
+    result_item._count_without_cop = str(len(copyright_missing_files) + len(missing_both_files))
     result_item._files_without_both = sorted(missing_both_files)
     result_item._files_without_lic = sorted(license_missing_files)
     result_item._files_without_cop = sorted(copyright_missing_files)
@@ -249,13 +257,13 @@ def result_for_summary(oss_pkg_info_files, license_missing_files, copyright_miss
     return result_item
 
 
-def write_result_file(result_file, format, exit_code, result_item, _result_log):
+def write_result_file(result_file, output_extension, exit_code, result_item, _result_log):
     success = False
-    if format == "" or format == "yaml":
+    if output_extension == ".yaml" or output_extension == "":
         success, exit_code = write_result_yaml(result_file, exit_code, result_item)
-    elif format == "html":
+    elif output_extension == ".html":
         success, exit_code = write_result_html(result_file, exit_code, _result_log)
-    elif format == "xml":
+    elif output_extension == ".xml":
         success, exit_code = write_result_xml(result_file, exit_code, result_item, _result_log)
     else:
         logger.info("Not supported file extension")
@@ -263,6 +271,6 @@ def write_result_file(result_file, format, exit_code, result_item, _result_log):
     if success:
         # Print yaml result
         yaml_result = result_item.get_print_yaml()
-        yaml.dump(yaml_result, sys.stdout, default_flow_style=False, sort_keys=False)
-
+        str_yaml_result = yaml.safe_dump(yaml_result, allow_unicode=True, sort_keys=True)
+        logger.info(str_yaml_result)
     return success, exit_code

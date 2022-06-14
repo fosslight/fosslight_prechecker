@@ -28,7 +28,7 @@ def main():
         print_help_msg()
 
     if args.mode == "lint":
-        run_lint(args.path, args.format, args.disable, args.output)
+        run_lint(args.path, args.disable, args.output, args.format)
     elif args.mode == "convert":
         convert_report(args.path, args.output)
     elif args.mode == "add":

@@ -3,6 +3,7 @@
 # Copyright (c) 2020 LG Electronics Inc.
 # SPDX-License-Identifier: GPL-3.0-only
 import os
+import sys
 import logging
 import platform
 from datetime import datetime
@@ -11,8 +12,10 @@ from yaml import safe_dump
 from fosslight_reuse._help import print_help_msg
 from fosslight_util.constant import LOGGER_NAME
 from fosslight_util.set_log import init_log
+from fosslight_util.output_format import check_output_format
 from ._parsing_excel import convert_excel_to_yaml, convert_yml_to_excel
 
+CUSTOMIZED_FORMAT_FOR_REUSE = {'yaml': '.yaml', 'excel': '.xlsx'}
 _PKG_NAME = "fosslight_reuse"
 logger = logging.getLogger(LOGGER_NAME)
 
@@ -42,26 +45,37 @@ def convert_report(base_path, output_name):
     convert_yml_mode = False
     convert_excel_mode = False
     report_to_read = ""
+    output_report = ""
+    output_yaml = ""
     now = datetime.now().strftime('%Y%m%d_%H-%M-%S')
     is_window = platform.system() == "Windows"
 
-    if output_name == "":
-        output_report = f"FOSSLight-Report_{now}"
-        output_yaml = f"oss-pkg-info_{now}"
-        output_dir = os.getcwd()
-    else:
-        output_report = output_name
-        output_yaml = output_name
-        try:
-            output_dir = os.path.dirname(output_name)
-            Path(output_dir).mkdir(parents=True, exist_ok=True)
-        except Exception:
-            pass
+    success, msg, output_path, output_name, output_extension = check_output_format(output_name, '', CUSTOMIZED_FORMAT_FOR_REUSE)
 
-    logger, _result_log = init_log(os.path.join(output_dir, f"fosslight_reuse_log_{now}.txt"),
+    logger, _result_log = init_log(os.path.join(output_path, f"fosslight_reuse_log_{now}.txt"),
                                    True, logging.INFO, logging.DEBUG, _PKG_NAME, base_path)
+    if success:
+        if output_path == "":
+            output_path = os.getcwd()
+        else:
+            try:
+                Path(output_path).mkdir(parents=True, exist_ok=True)
+            except Exception:
+                pass
+        if output_name != "":
+            output_report = os.path.join(output_path, output_name)
+            output_yaml = os.path.join(output_path, output_name)
+        else:
+            output_report = os.path.join(output_path, f"FOSSLight-Report_{now}")
+            output_yaml = os.path.join(output_path, f"oss-pkg-info_{now}")
+    else:
+        logger.error(f"Format error - {msg}")
+        sys.exit(1)
 
     if os.path.isdir(base_path):
+        if output_extension == ".yaml":
+            logger.error(f"Format error - can make only .xlsx file")
+            sys.exit(1)
         convert_yml_mode = True
     else:
         if base_path != "":

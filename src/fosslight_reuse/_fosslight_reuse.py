@@ -152,25 +152,49 @@ def reuse_for_files(path, files):
     return missing_license_list, missing_copyright_list, prj
 
 
-def extract_files_in_path(filepath):
+def extract_files_in_path(repository, filepath):
     extract_files = []
     for path in filepath:
+        if not repository.endswith("/"):
+            repository += "/"
         if os.path.isdir(path):
             files = os.listdir(path)
             files = [os.path.join(path, file) for file in files]
+            files = [sub.replace(repository, '') for sub in files]
             extract_files.extend(files)
         elif os.path.isfile(path):
+            path = path.replace(repository, '')
             extract_files.append(path)
     return extract_files
 
 
-def get_excluded_path_in_yaml(repository, yaml_files):
+def get_rel_path_in_yaml(oss_item):
+    for source_name_or_path in oss_item.source_name_or_path:
+        yield os.path.join(oss_item.relative_path, source_name_or_path)
+
+
+# TODO : Get all file list in 'exclude_filepath' by using Regular expression
+def get_excluded_file_in_yaml(repository, yaml_files):
+    excluded_path = []
+    excluded_list = []
+    lic_present_path = []
+    lic_present_list = []
+    cop_present_path = []
+    cop_present_list = []
+
     for file in yaml_files:
         oss_items, _ = parsing_yml(file, repository)
         for oss_item in oss_items:
             if oss_item.exclude:
-                for source_name_or_path in oss_item.source_name_or_path:
-                    yield os.path.join(oss_item.relative_path, source_name_or_path)
+                excluded_path = get_rel_path_in_yaml(oss_item)
+                excluded_list.extend(extract_files_in_path(repository, excluded_path))
+            if oss_item.license:
+                lic_present_path = get_rel_path_in_yaml(oss_item)
+                lic_present_list.extend(extract_files_in_path(repository, lic_present_path))
+            if oss_item.copyright:
+                cop_present_path = get_rel_path_in_yaml(oss_item)
+                cop_present_list.extend(extract_files_in_path(repository, cop_present_path))
+    return excluded_list, lic_present_list, cop_present_list
 
 
 def get_only_pkg_info_yaml_file(pkg_info_files):
@@ -180,10 +204,12 @@ def get_only_pkg_info_yaml_file(pkg_info_files):
 
 
 def reuse_for_project(path_to_find):
-    excluded_files = []
     missing_license = []
     missing_copyright = []
     pkg_info_yaml_files = []
+    excluded_files = []
+    lic_present_files_in_yaml = []
+    cop_present_files_in_yaml = []
     yaml_file = []
 
     oss_pkg_info_files = find_oss_pkg_info(path_to_find)
@@ -206,11 +232,7 @@ def reuse_for_project(path_to_find):
             yaml_file = get_only_pkg_info_yaml_file(pkg_info_yaml_files)
 
             # Get path to be excluded in yaml file
-            filepath_in_yaml = set(get_excluded_path_in_yaml(path_to_find, yaml_file))
-
-            # TO DO
-            # Get all file list in 'exclude_filepath' by using Regular expression
-            excluded_files = extract_files_in_path(filepath_in_yaml)
+            excluded_files, lic_present_files_in_yaml, cop_present_files_in_yaml = get_excluded_file_in_yaml(path_to_find, yaml_file)
 
         # File list that missing license text
         missing_license = [str(sub) for sub in set(report.files_without_licenses)]
@@ -223,13 +245,13 @@ def reuse_for_project(path_to_find):
         if not path_to_find.endswith("/"):
             path_to_find += "/"
         missing_copyright = [sub.replace(path_to_find, '') for sub in missing_copyright]
-
     except Exception as ex:
         dump_error_msg(f"Error_Reuse_lint: {ex}", True)
 
     if _turn_on_default_reuse_config:
         remove_reuse_dep5_file(need_rollback, temp_file_name, temp_dir_name)
-    return missing_license, missing_copyright, oss_pkg_info_files, project, report, excluded_files
+    return missing_license, missing_copyright, oss_pkg_info_files, project, \
+           report, excluded_files, lic_present_files_in_yaml, cop_present_files_in_yaml
 
 
 def dump_error_msg(error_msg: str, exit=False):
@@ -240,12 +262,9 @@ def dump_error_msg(error_msg: str, exit=False):
         sys.exit(1)
 
 
-def init(path_to_find, output_file_name, file_list):
-    global logger, _start_time, _result_log
-
-    _start_time = datetime.now().strftime('%Y%m%d_%H-%M-%S')
-    output_dir = os.path.dirname(os.path.abspath(output_file_name))
-    logger, _result_log = init_log(os.path.join(output_dir, f"fosslight_reuse_log_{_start_time}.txt"),
+def init(path_to_find, file_list):
+    global logger, _result_log
+    logger, _result_log = init_log(os.path.join(path_to_find, f"fosslight_reuse_log_{_start_time}.txt"),
                                    True, logging.INFO, logging.DEBUG, PKG_NAME, path_to_find)
     if file_list:
         _result_log["File list to check"] = file_list
@@ -266,7 +285,7 @@ def get_path_to_find(target_path, _check_only_file_mode):
             if path == "":
                 path_to_find = os.getcwd()
             else:
-                path_to_find = os.path.abspath(path)
+                path_to_find = os.path.relpath(path)
         elif os.path.isfile(path):
             is_file = True
             path_to_find = os.getcwd()
@@ -280,8 +299,8 @@ def get_path_to_find(target_path, _check_only_file_mode):
     return path_to_find, file_to_check_list, _check_only_file_mode
 
 
-def run_lint(target_path, format, disable, output_file_name):
-    global _turn_on_default_reuse_config, _check_only_file_mode
+def run_lint(target_path, disable, output_file_name, format=''):
+    global _turn_on_default_reuse_config, _check_only_file_mode, _start_time
 
     file_to_check_list = []
     _exit_code = os.EX_OK
@@ -289,6 +308,7 @@ def run_lint(target_path, format, disable, output_file_name):
     report = ProjectReport()
     result_item = ResultItem()
     success = False
+    _start_time = datetime.now().strftime('%Y%m%d_%H-%M-%S')
 
     try:
         locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
@@ -297,17 +317,20 @@ def run_lint(target_path, format, disable, output_file_name):
 
     path_to_find, file_to_check_list, _check_only_file_mode = get_path_to_find(target_path, _check_only_file_mode)
 
-    init(path_to_find, output_file_name, file_to_check_list)
-    result_file = create_result_file(output_file_name, format, _start_time)
+    result_file, output_path, output_extension = create_result_file(output_file_name, format, _start_time)
+    init(output_path, file_to_check_list)
 
     if os.path.isdir(path_to_find):
+        lic_present_files_in_yaml = []
+        cop_present_files_in_yaml = []
         _turn_on_default_reuse_config = not disable
 
         if _check_only_file_mode:
             license_missing_files, copyright_missing_files, project = reuse_for_files(path_to_find, file_to_check_list)
             oss_pkg_info = []
         else:
-            license_missing_files, copyright_missing_files, oss_pkg_info, project, report, excluded_files \
+            license_missing_files, copyright_missing_files, oss_pkg_info, project,\
+            report, excluded_files, lic_present_files_in_yaml, cop_present_files_in_yaml \
                 = reuse_for_project(path_to_find)
 
         result_item = result_for_summary(oss_pkg_info,
@@ -317,13 +340,16 @@ def run_lint(target_path, format, disable, output_file_name):
                                         _result_log,
                                         _check_only_file_mode,
                                         file_to_check_list,
-                                        error_items)
+                                        error_items,
+                                        excluded_files,
+                                        lic_present_files_in_yaml,
+                                        cop_present_files_in_yaml)
 
-        success, exit_code = write_result_file(result_file, format, _exit_code, result_item, _result_log)
+        success, exit_code = write_result_file(result_file, output_extension, _exit_code, result_item, _result_log)
         if success:
-            logger.info(f"\nCreated file name: {result_file}\n")
+            logger.warning(f"Created file name: {result_file}\n")
         else:
-            logger.info("\nCan't make result file\n")
+            logger.warning("Can't make result file\n")
         sys.exit(exit_code)
     else:
         logger.error(f"Check the path to find : {path_to_find}")

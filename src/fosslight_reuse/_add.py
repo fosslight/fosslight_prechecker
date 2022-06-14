@@ -68,12 +68,12 @@ def check_file_extension(file_list):
 
 def check_license_and_copyright(path_to_find, all_files, missing_license, missing_copyright):
     # Check file extension for each list
-    all_files_filtered = check_file_extension(all_files)
+    all_files_filtered = list(check_file_extension(all_files))
     missing_license_filtered = list(check_file_extension(missing_license))
     missing_copyright_filtered = list(check_file_extension(missing_copyright))
 
     skip_files = sorted(set(all_files_filtered) - set(missing_license_filtered) - set(missing_copyright_filtered))
-    logger.info(f"\n# File list that have both license and copyright : {len(skip_files)} / {len(list(all_files))}")
+    logger.info(f"\n# File list that have both license and copyright : {len(skip_files)} / {len(all_files_filtered)}")
 
     reuse_for_files(path_to_find, skip_files)
 
@@ -162,7 +162,7 @@ def set_missing_license_copyright(missing_license_filtered, missing_copyright_fi
         logger.info("# Missing license File(s)")
         for lic_file in sorted(missing_license_filtered):
             logger.info(f"  * {lic_file}")
-            missing_license_list.append(lic_file)
+            missing_license_list.append(os.path.join(path_to_find, lic_file))
 
         if license == "" and copyright == "":
             input_license = input_license_while_running()
@@ -337,12 +337,9 @@ def add_content(target_path="", input_license="", input_copyright=""):
     file_to_check_list = []
 
     path_to_find, file_to_check_list, _check_only_file_mode = get_path_to_find(target_path, _check_only_file_mode)
-    if path_to_find != "":
-        os.chdir(path_to_find)
 
     now = datetime.now().strftime('%Y%m%d_%H-%M-%S')
-    output_dir = os.getcwd()
-    logger, _result_log = init_log(os.path.join(output_dir, f"fosslight_reuse_add_log_{now}.txt"),
+    logger, _result_log = init_log(os.path.join(path_to_find, f"fosslight_reuse_add_log_{now}.txt"),
                                    True, logging.INFO, logging.DEBUG, PKG_NAME, path_to_find)
 
     if not os.path.isdir(path_to_find):
@@ -372,10 +369,11 @@ def add_content(target_path="", input_license="", input_copyright=""):
         main_parser = reuse_arg_parser()
         missing_license_list, missing_copyright_list, project = reuse_for_files(path_to_find, file_to_check_list)
 
-        if missing_license_list is not None and len(missing_license_list) > 0:
-            if input_license == "" and input_copyright == "":
-                input_license = input_license_while_running()
+        if input_license == "" and input_copyright == "":
+            input_copyright = input_copyright_while_running()
+            input_license = input_license_while_running()
 
+        if missing_license_list is not None and len(missing_license_list) > 0:
             if input_license != "":
                 converted_license = check_input_license_format(input_license)
                 logger.warning(f"  * Your input license : {converted_license}")
@@ -388,9 +386,6 @@ def add_content(target_path="", input_license="", input_copyright=""):
             logger.info("# There is no missing license file")
 
         if missing_copyright_list is not None and len(missing_copyright_list) > 0:
-            if input_license == "" and input_copyright == "":
-                input_copyright = input_copyright_while_running()
-
             if input_copyright != "":
                 input_copyright = f"Copyright {input_copyright}"
 
@@ -417,7 +412,7 @@ def add_content(target_path="", input_license="", input_copyright=""):
         all_files_list = get_allfiles_list(path_to_find)
 
         # Get missing license / copyright file list
-        missing_license, missing_copyright, _, project, _, _ = reuse_for_project(path_to_find)
+        missing_license, missing_copyright, _, project, _, _, _, _ = reuse_for_project(path_to_find)
 
         # Print Skipped Files
         missing_license_filtered, missing_copyright_filtered = \
