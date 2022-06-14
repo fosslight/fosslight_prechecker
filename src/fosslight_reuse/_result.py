@@ -9,6 +9,7 @@ import yaml
 import xml.etree.ElementTree as ET
 import logging
 import fosslight_util.constant as constant
+from fosslight_reuse._constant import OSS_PKG_INFO_FILES
 from fosslight_util.output_format import check_output_format
 from pathlib import Path
 
@@ -222,8 +223,14 @@ def result_for_summary(oss_pkg_info_files, license_missing_files, copyright_miss
             detected_lic.append(lic)
 
     # Subtract license or copyright presenting file and excluded file
-    license_missing_files = list(set(license_missing_files) - set(lic_present_files_in_yaml) - set(excluded_files))
-    copyright_missing_files = list(set(copyright_missing_files) - set(cop_present_files_in_yaml) - set(excluded_files))
+    license_missing_files = list(set(license_missing_files) -
+                                 set(lic_present_files_in_yaml) -
+                                 set(excluded_files) -
+                                 set(oss_pkg_info_files))
+    copyright_missing_files = list(set(copyright_missing_files) -
+                                   set(cop_present_files_in_yaml) -
+                                   set(excluded_files) -
+                                   set(oss_pkg_info_files))
 
     if len(license_missing_files) == 0 and len(copyright_missing_files) == 0:
         reuse_compliant = True
