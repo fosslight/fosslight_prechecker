@@ -318,6 +318,7 @@ def run_lint(target_path, disable, output_file_name, format=''):
     if os.path.isdir(path_to_find):
         lic_present_files_in_yaml = []
         cop_present_files_in_yaml = []
+        excluded_files = []
         _turn_on_default_reuse_config = not disable
 
         if _check_only_file_mode:
