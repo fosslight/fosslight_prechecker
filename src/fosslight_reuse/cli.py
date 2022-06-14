@@ -32,7 +32,7 @@ def main():
     elif args.mode == "convert":
         convert_report(args.path, args.output)
     elif args.mode == "add":
-        add_content(args.path, args.license, args.copyright)
+        add_content(args.path, args.license, args.copyright, args.output)
     else:
         print_help_msg()
 
