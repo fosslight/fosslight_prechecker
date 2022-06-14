@@ -9,7 +9,6 @@ import yaml
 import xml.etree.ElementTree as ET
 import logging
 import fosslight_util.constant as constant
-from fosslight_reuse._constant import OSS_PKG_INFO_FILES
 from fosslight_util.output_format import check_output_format
 from pathlib import Path
 
