@@ -13,6 +13,7 @@ from yaml import safe_dump
 from fosslight_util.set_log import init_log
 from fosslight_util.spdx_licenses import get_spdx_licenses_json
 from fosslight_util.parsing_yaml import find_all_oss_pkg_files, parsing_yml
+from fosslight_util.output_format import check_output_format
 from datetime import datetime
 from fosslight_reuse._fosslight_reuse import reuse_for_project, reuse_for_files, dump_error_msg, get_path_to_find
 from reuse.header import run as reuse_header
@@ -331,15 +332,21 @@ def download_oss_info_license(base_path, input_license=""):
         logger.info(" # There is no license in the path \n")
 
 
-def add_content(target_path="", input_license="", input_copyright=""):
+def add_content(target_path="", input_license="", input_copyright="", output_path=""):
     global _result_log
     _check_only_file_mode = False
     file_to_check_list = []
 
     path_to_find, file_to_check_list, _check_only_file_mode = get_path_to_find(target_path, _check_only_file_mode)
 
+    _, _, output_path, _, _ = check_output_format(output_path)
+    if output_path == "":
+        output_path = os.getcwd()
+    else:
+        output_path = os.path.abspath(output_path)
+
     now = datetime.now().strftime('%Y%m%d_%H-%M-%S')
-    logger, _result_log = init_log(os.path.join(path_to_find, f"fosslight_reuse_add_log_{now}.txt"),
+    logger, _result_log = init_log(os.path.join(output_path, f"fosslight_reuse_add_log_{now}.txt"),
                                    True, logging.INFO, logging.DEBUG, PKG_NAME, path_to_find)
 
     if not os.path.isdir(path_to_find):
