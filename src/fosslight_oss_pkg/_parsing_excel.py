@@ -12,7 +12,7 @@ from fosslight_util.constant import LOGGER_NAME
 from fosslight_util.oss_item import OssItem
 from fosslight_util.parsing_yaml import find_all_oss_pkg_files, parsing_yml, set_value_switch
 from fosslight_util.write_excel import write_result_to_excel, write_result_to_csv
-from fosslight_util.write_yaml import write_yaml, create_yaml_with_ossitem
+from fosslight_util.write_yaml import create_yaml_with_ossitem
 
 logger = logging.getLogger(LOGGER_NAME)
 IDX_CANNOT_FOUND = -1
@@ -34,7 +34,7 @@ def convert_yml_to_excel(oss_pkg_files, output_file, file_option_on, base_path, 
 
                 if file_option_on:
                     base_path = os.path.dirname(oss_pkg_file)
-                oss_items, _= parsing_yml(oss_pkg_file, base_path)
+                oss_items, _ = parsing_yml(oss_pkg_file, base_path)
                 for item in oss_items:
                     items_to_print.extend(item.get_print_array())
         except Exception as ex:
@@ -56,14 +56,13 @@ def convert_yml_to_excel(oss_pkg_files, output_file, file_option_on, base_path, 
             logger.error(f"Write .csv file : {ex}")
 
 
-def convert_excel_to_yaml(oss_report_to_read, output_file):
+def convert_excel_to_yaml(oss_report_to_read, output_file, sheet_names=""):
     _file_extension = ".yaml"
     yaml_dict = {}
 
     if os.path.isfile(oss_report_to_read):
         try:
-            logger.warning(f"Read data from : {oss_report_to_read}")
-            items = read_oss_report(oss_report_to_read)
+            items = read_oss_report(oss_report_to_read, sheet_names)
             for item in items:
                 yaml_dict = create_yaml_with_ossitem(item, yaml_dict)
             if yaml_dict:
@@ -81,17 +80,25 @@ def write_yaml_file(output_file, json_output):
         yaml.dump(json_output, f, sort_keys=False)
 
 
-def read_oss_report(excel_file):
+def read_oss_report(excel_file, sheet_names=""):
     _oss_report_items = []
     _xl_sheets = []
     SHEET_PREFIX_TO_READ = ["BIN", "BOM", "SRC"]
+    if sheet_names:
+        sheet_name_prefix_math = False
+        sheet_name_to_read = sheet_names.split(",")
+    else:
+        sheet_name_prefix_math = True
+        sheet_name_to_read = SHEET_PREFIX_TO_READ
 
     try:
-        # Open the workbook
+        logger.info(f"Read data from : {excel_file}")
         xl_workbook = xlrd.open_workbook(excel_file)
         for sheet_name in xl_workbook.sheet_names():
             try:
-                if any(sheet_name.startswith(sheet_prefix) for sheet_prefix in SHEET_PREFIX_TO_READ):
+                if any(((sheet_name_prefix_math and sheet_name.startswith(sheet_to_read))
+                       or sheet_name == sheet_to_read)
+                       for sheet_to_read in sheet_name_to_read):
                     sheet = xl_workbook.sheet_by_name(sheet_name)
                     if sheet:
                         logger.info(f"Load a sheet: {sheet_name}")

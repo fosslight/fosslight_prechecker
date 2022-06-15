@@ -27,7 +27,10 @@ _HELP_MESSAGE_REUSE = """
 
         Options for only 'add' mode
             -l <license>\t    License name(SPDX format) to add
-            -c <copyright>\t    Copyright to add(ex, 2015-2021 LG Electronics Inc.)"""
+            -c <copyright>\t    Copyright to add(ex, 2015-2021 LG Electronics Inc.)
+
+        Options for only 'convert' mode
+            -s <sheet_names>\t    Sheet name in excel to change to yaml(ex. SRC,BIN)"""
 
 
 def print_help_msg(exitOpt=True):
