@@ -23,6 +23,8 @@ _HELP_MESSAGE_REUSE = """
             -f <format>\t\t    Result format(yaml, xml, html)
             -o <file_name>\t    Output file name
             -n\t\t\t    Don't exclude venv*, node_modules, and .*/ from the analysis
+            -i\t\t\t    Don't write log to file
+
         Options for only 'add' mode
             -l <license>\t    License name(SPDX format) to add
             -c <copyright>\t    Copyright to add(ex, 2015-2021 LG Electronics Inc.)"""

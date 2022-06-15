@@ -332,7 +332,7 @@ def download_oss_info_license(base_path, input_license=""):
         logger.info(" # There is no license in the path \n")
 
 
-def add_content(target_path="", input_license="", input_copyright="", output_path=""):
+def add_content(target_path="", input_license="", input_copyright="", output_path="", need_log_file=True):
     global _result_log
     _check_only_file_mode = False
     file_to_check_list = []
@@ -347,7 +347,7 @@ def add_content(target_path="", input_license="", input_copyright="", output_pat
 
     now = datetime.now().strftime('%Y%m%d_%H-%M-%S')
     logger, _result_log = init_log(os.path.join(output_path, f"fosslight_reuse_add_log_{now}.txt"),
-                                   True, logging.INFO, logging.DEBUG, PKG_NAME, path_to_find)
+                                   need_log_file, logging.INFO, logging.DEBUG, PKG_NAME, path_to_find)
 
     if not os.path.isdir(path_to_find):
         logger.error(f"Check the path to find : {path_to_find}")
