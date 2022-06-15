@@ -19,6 +19,7 @@ def main():
     parser.add_argument('--license', '-l', help='License name to add', type=str, dest='license', default="")
     parser.add_argument('--copyright', '-c', help='Copyright to add', type=str, dest='copyright', default="")
     parser.add_argument('--help', '-h', help='Print help message', action='store_true', dest='help')
+    parser.add_argument('--ignore', '-i', help='Do not write log to file', action='store_false', dest='log')
     try:
         args = parser.parse_args()
     except SystemExit:
@@ -28,11 +29,11 @@ def main():
         print_help_msg()
 
     if args.mode == "lint":
-        run_lint(args.path, args.disable, args.output, args.format)
+        run_lint(args.path, args.disable, args.output, args.format, args.log)
     elif args.mode == "convert":
-        convert_report(args.path, args.output)
+        convert_report(args.path, args.output, args.log)
     elif args.mode == "add":
-        add_content(args.path, args.license, args.copyright, args.output)
+        add_content(args.path, args.license, args.copyright, args.output, args.log)
     else:
         print_help_msg()
 

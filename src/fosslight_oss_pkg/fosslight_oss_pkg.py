@@ -39,7 +39,7 @@ def find_report_file(path_to_find):
     return ""
 
 
-def convert_report(base_path, output_name):
+def convert_report(base_path, output_name, need_log_file=True):
     oss_pkg_files = ["oss-pkg-info.yml", "oss-pkg-info.yaml"]
     file_option_on = False
     convert_yml_mode = False
@@ -53,7 +53,7 @@ def convert_report(base_path, output_name):
     success, msg, output_path, output_name, output_extension = check_output_format(output_name, '', CUSTOMIZED_FORMAT_FOR_REUSE)
 
     logger, _result_log = init_log(os.path.join(output_path, f"fosslight_reuse_log_{now}.txt"),
-                                   True, logging.INFO, logging.DEBUG, _PKG_NAME, base_path)
+                                   need_log_file, logging.INFO, logging.DEBUG, _PKG_NAME, base_path)
     if success:
         if output_path == "":
             output_path = os.getcwd()
