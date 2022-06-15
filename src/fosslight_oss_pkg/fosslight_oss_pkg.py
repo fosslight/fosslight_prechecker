@@ -39,7 +39,7 @@ def find_report_file(path_to_find):
     return ""
 
 
-def convert_report(base_path, output_name, need_log_file=True):
+def convert_report(base_path, output_name, need_log_file=True, sheet_names=""):
     oss_pkg_files = ["oss-pkg-info.yml", "oss-pkg-info.yaml"]
     file_option_on = False
     convert_yml_mode = False
@@ -74,7 +74,7 @@ def convert_report(base_path, output_name, need_log_file=True):
 
     if os.path.isdir(base_path):
         if output_extension == ".yaml":
-            logger.error(f"Format error - can make only .xlsx file")
+            logger.error("Format error - can make only .xlsx file")
             sys.exit(1)
         convert_yml_mode = True
     else:
@@ -101,7 +101,7 @@ def convert_report(base_path, output_name, need_log_file=True):
         convert_yml_to_excel(oss_pkg_files, output_report, file_option_on, base_path, is_window)
 
     if convert_excel_mode:
-        convert_excel_to_yaml(report_to_read, output_yaml)
+        convert_excel_to_yaml(report_to_read, output_yaml, sheet_names)
 
     try:
         _str_final_result_log = safe_dump(_result_log, allow_unicode=True, sort_keys=True)

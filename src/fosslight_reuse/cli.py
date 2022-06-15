@@ -18,6 +18,7 @@ def main():
     parser.add_argument('--no', '-n', help='Disable automatic exclude mode', action='store_true', dest='disable')
     parser.add_argument('--license', '-l', help='License name to add', type=str, dest='license', default="")
     parser.add_argument('--copyright', '-c', help='Copyright to add', type=str, dest='copyright', default="")
+    parser.add_argument('--sheet', '-s', help='Sheet name to change to yaml', type=str, dest='sheet', default="")
     parser.add_argument('--help', '-h', help='Print help message', action='store_true', dest='help')
     parser.add_argument('--ignore', '-i', help='Do not write log to file', action='store_false', dest='log')
     try:
@@ -31,7 +32,7 @@ def main():
     if args.mode == "lint":
         run_lint(args.path, args.disable, args.output, args.format, args.log)
     elif args.mode == "convert":
-        convert_report(args.path, args.output, args.log)
+        convert_report(args.path, args.output, args.log, args.sheet)
     elif args.mode == "add":
         add_content(args.path, args.license, args.copyright, args.output, args.log)
     else:
