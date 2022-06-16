@@ -83,7 +83,7 @@ def write_yaml_file(output_file, json_output):
 def read_oss_report(excel_file, sheet_names=""):
     _oss_report_items = []
     _xl_sheets = []
-    SHEET_PREFIX_TO_READ = ["BIN", "BOM", "SRC"]
+    SHEET_PREFIX_TO_READ = ["bin", "bom", "src"]
     if sheet_names:
         sheet_name_prefix_math = False
         sheet_name_to_read = sheet_names.split(",")
@@ -96,8 +96,9 @@ def read_oss_report(excel_file, sheet_names=""):
         xl_workbook = xlrd.open_workbook(excel_file)
         for sheet_name in xl_workbook.sheet_names():
             try:
-                if any(((sheet_name_prefix_math and sheet_name.startswith(sheet_to_read))
-                       or sheet_name == sheet_to_read)
+                sheet_name_lower = sheet_name.lower()
+                if any(((sheet_name_prefix_math and sheet_name_lower.startswith(sheet_to_read.lower()))
+                       or sheet_name_lower == sheet_to_read.lower())
                        for sheet_to_read in sheet_name_to_read):
                     sheet = xl_workbook.sheet_by_name(sheet_name)
                     if sheet:
