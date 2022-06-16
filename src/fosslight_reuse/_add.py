@@ -188,7 +188,7 @@ def set_missing_license_copyright(missing_license_filtered, missing_copyright_fi
         logger.info("\n# Missing Copyright File(s) ")
         for cop_file in sorted(missing_copyright_filtered):
             logger.info(f"  * {cop_file}")
-            missing_copyright_list.append(cop_file)
+            missing_copyright_list.append(os.path.join(path_to_find, cop_file))
 
         if license == "" and copyright == "":
             input_copyright = input_copyright_while_running()

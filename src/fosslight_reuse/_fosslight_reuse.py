@@ -7,6 +7,7 @@ import sys
 import shutil
 import logging
 import locale
+import re
 from datetime import datetime
 from binaryornot.check import is_binary
 import fosslight_util.constant as constant
@@ -42,7 +43,8 @@ def find_oss_pkg_info(path):
                 file_abs_path = os.path.join(root, file)
                 file_rel_path = os.path.relpath(file_abs_path, path)
 
-                if file_lower_case in OSS_PKG_INFO_FILES or file_lower_case.startswith("module_license_"):
+                if any(re.search(re_oss_pkg_pattern, file_lower_case) for re_oss_pkg_pattern in OSS_PKG_INFO_FILES) \
+                   or file_lower_case.startswith("module_license_"):
                     oss_pkg_info.append(file_rel_path)
                 elif is_binary(file_abs_path):
                     DEFAULT_EXCLUDE_EXTENSION_FILES.append(file_rel_path)
@@ -319,15 +321,14 @@ def run_lint(target_path, disable, output_file_name, format='', need_log_file=Tr
         lic_present_files_in_yaml = []
         cop_present_files_in_yaml = []
         excluded_files = []
+        oss_pkg_info = []
         _turn_on_default_reuse_config = not disable
 
         if _check_only_file_mode:
             license_missing_files, copyright_missing_files, project = reuse_for_files(path_to_find, file_to_check_list)
-            oss_pkg_info = []
         else:
-            license_missing_files, copyright_missing_files, oss_pkg_info, project,
-            report, excluded_files, lic_present_files_in_yaml, cop_present_files_in_yaml \
-                = reuse_for_project(path_to_find)
+            license_missing_files, copyright_missing_files, oss_pkg_info, project, \
+                report, excluded_files, lic_present_files_in_yaml, cop_present_files_in_yaml = reuse_for_project(path_to_find)
 
         result_item = result_for_summary(oss_pkg_info,
                                          license_missing_files,
