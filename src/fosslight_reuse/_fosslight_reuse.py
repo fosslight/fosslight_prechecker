@@ -321,17 +321,14 @@ def run_lint(target_path, disable, output_file_name, format='', need_log_file=Tr
         lic_present_files_in_yaml = []
         cop_present_files_in_yaml = []
         excluded_files = []
-        license_missing_files = []
-        copyright_missing_files = []
+        oss_pkg_info = []
         _turn_on_default_reuse_config = not disable
 
         if _check_only_file_mode:
             license_missing_files, copyright_missing_files, project = reuse_for_files(path_to_find, file_to_check_list)
-            oss_pkg_info = []
         else:
-            license_missing_files, copyright_missing_files, oss_pkg_info, project,
-            report, excluded_files, lic_present_files_in_yaml, cop_present_files_in_yaml \
-                = reuse_for_project(path_to_find)
+            license_missing_files, copyright_missing_files, oss_pkg_info, project, \
+                report, excluded_files, lic_present_files_in_yaml, cop_present_files_in_yaml = reuse_for_project(path_to_find)
 
         result_item = result_for_summary(oss_pkg_info,
                                          license_missing_files,
