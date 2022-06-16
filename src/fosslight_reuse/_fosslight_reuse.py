@@ -246,7 +246,7 @@ def reuse_for_project(path_to_find):
     if _turn_on_default_reuse_config:
         remove_reuse_dep5_file(need_rollback, temp_file_name, temp_dir_name)
     return missing_license, missing_copyright, oss_pkg_info_files, project, \
-           report, excluded_files, lic_present_files_in_yaml, cop_present_files_in_yaml
+        report, excluded_files, lic_present_files_in_yaml, cop_present_files_in_yaml
 
 
 def dump_error_msg(error_msg: str, exit=False):
@@ -325,21 +325,21 @@ def run_lint(target_path, disable, output_file_name, format='', need_log_file=Tr
             license_missing_files, copyright_missing_files, project = reuse_for_files(path_to_find, file_to_check_list)
             oss_pkg_info = []
         else:
-            license_missing_files, copyright_missing_files, oss_pkg_info, project,\
+            license_missing_files, copyright_missing_files, oss_pkg_info, project,
             report, excluded_files, lic_present_files_in_yaml, cop_present_files_in_yaml \
                 = reuse_for_project(path_to_find)
 
         result_item = result_for_summary(oss_pkg_info,
-                                        license_missing_files,
-                                        copyright_missing_files,
-                                        report,
-                                        _result_log,
-                                        _check_only_file_mode,
-                                        file_to_check_list,
-                                        error_items,
-                                        excluded_files,
-                                        lic_present_files_in_yaml,
-                                        cop_present_files_in_yaml)
+                                         license_missing_files,
+                                         copyright_missing_files,
+                                         report,
+                                         _result_log,
+                                         _check_only_file_mode,
+                                         file_to_check_list,
+                                         error_items,
+                                         excluded_files,
+                                         lic_present_files_in_yaml,
+                                         cop_present_files_in_yaml)
 
         success, exit_code = write_result_file(result_file, output_extension, _exit_code, result_item, _result_log)
         if success:
