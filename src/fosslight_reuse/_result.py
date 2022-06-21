@@ -61,8 +61,8 @@ class ResultItem:
         result_summary_item = {}
         result_summary_item["Open Source Package File"] = self._oss_pkg_files
         result_summary_item["Detected Licenses"] = is_list_empty(self._detected_licenses)
-        result_summary_item["Count without license / Total"] = f"{self._count_without_lic} / {self._count_total_files}"
-        result_summary_item["Count without copyright / Total"] = f"{self._count_without_cop} / {self._count_total_files}"
+        result_summary_item["Files without license / total"] = f"{self._count_without_lic} / {self._count_total_files}"
+        result_summary_item["Files without copyright / total"] = f"{self._count_without_cop} / {self._count_total_files}"
 
         result_item["Summary"] = result_summary_item
         result_item["Files without license and copyright"] = is_list_empty(self._files_without_both)
@@ -70,10 +70,10 @@ class ResultItem:
         result_item["Files without copyright"] = is_list_empty(self._files_without_cop)
 
         result_tool_item = {}
-        result_tool_item["OS Info"] = self._os_info
-        result_tool_item["Path to analyze"] = self._path_to_analyze
-        result_tool_item["Python Version"] = self._python_ver
-        result_tool_item["FL Reuse Version"] = self._fl_reuse_ver
+        result_tool_item["OS"] = self._os_info
+        result_tool_item["Analyze path"] = self._path_to_analyze
+        result_tool_item["Python version"] = self._python_ver
+        result_tool_item["fosslight_reuse version"] = self._fl_reuse_ver
         result_item["Tool Info"] = result_tool_item
         if self.execution_error:
             result_item["Execution Error"] = self.execution_error
