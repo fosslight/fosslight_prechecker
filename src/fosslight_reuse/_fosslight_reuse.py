@@ -342,7 +342,8 @@ def run_lint(target_path, disable, output_file_name, format='', need_log_file=Tr
                                          lic_present_files_in_yaml,
                                          cop_present_files_in_yaml)
 
-        success, exit_code = write_result_file(result_file, output_extension, _exit_code, result_item, _result_log)
+        success, exit_code = write_result_file(result_file, output_extension, _exit_code,
+                                               result_item, _result_log, project, path_to_find)
         if success:
             logger.warning(f"Created file name: {result_file}\n")
         else:
