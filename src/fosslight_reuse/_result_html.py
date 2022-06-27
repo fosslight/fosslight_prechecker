@@ -84,9 +84,15 @@ def result_for_html(result_item, project: Project, path_to_find):
         cell_contents_str = get_html_cell(result_item, project, path_to_find)
         html_in_str = f"{HTML_FORMAT_PREFIX}{compliance_str}{summary_str}{HTML_CELL_PREFIX}{cell_contents_str}{HTML_FORMAT_SUFFIX}"
     else:
-        cell_contents_str = "<b> &#9888; There are so many incompliant files, so result can't be printed in html. </b>"
-        html_in_str = f"{HTML_FORMAT_PREFIX}{compliance_str}{summary_str}{cell_contents_str}{HTML_FORMAT_SUFFIX}"
+        err_str = "There are so many incompliant files, so result can't be printed in html."
+        result_item.execution_error.append(err_str)
 
-    # if result_item.execution_error:
-    # TODO: How do handle for execution_error in html format?
+    if result_item.execution_error:
+        err_str = ""
+        execution_err_str = "<b> &#9888; Execution Error </b>"
+        for error in result_item.execution_error:
+            err_str = f"<br>&nbsp;&nbsp;&nbsp; - {error}"
+            execution_err_str += err_str
+        html_in_str = f"{HTML_FORMAT_PREFIX}{compliance_str}{summary_str}{execution_err_str}{HTML_FORMAT_SUFFIX}"
+
     return html_in_str
