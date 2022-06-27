@@ -9,8 +9,11 @@ import yaml
 import xml.etree.ElementTree as ET
 import logging
 import fosslight_util.constant as constant
-from fosslight_util.output_format import check_output_format
 from pathlib import Path
+from reuse.project import Project
+from fosslight_reuse._result_html import result_for_html
+from fosslight_util.output_format import check_output_format
+
 
 CUSTOMIZED_FORMAT_FOR_REUSE = {'html': '.html', 'xml': '.xml', 'yaml': '.yaml'}
 RULE_LINK = "https://oss.lge.com/guide/process/osc_process/1-identification/copyright_license_rule.html"
@@ -27,6 +30,7 @@ class ResultItem:
         self._oss_pkg_files = []
         self._detected_licenses = []
         self._count_total_files = ""
+        self._count_without_both = ""
         self._count_without_lic = ""
         self._count_without_cop = ""
         self._files_without_both = []
@@ -49,7 +53,7 @@ class ResultItem:
         if value:
             self._compliant_result = "OK"
         else:
-            self._compliant_result = "Not OK"
+            self._compliant_result = "Not-OK"
 
     @property
     def oss_pkg_files(self):
@@ -59,7 +63,7 @@ class ResultItem:
         result_item = {}
         result_item["Compliant"] = self._compliant_result
         result_summary_item = {}
-        result_summary_item["Open Source Package File"] = self._oss_pkg_files
+        result_summary_item["Open Source Package File"] = is_list_empty(self._oss_pkg_files)
         result_summary_item["Detected Licenses"] = is_list_empty(self._detected_licenses)
         result_summary_item["Files without license / total"] = f"{self._count_without_lic} / {self._count_total_files}"
         result_summary_item["Files without copyright / total"] = f"{self._count_without_cop} / {self._count_total_files}"
@@ -133,7 +137,7 @@ def result_for_xml(result_item: ResultItem):
     return _root_xml_item
 
 
-def write_result_xml(result_file: str, exit_code: int, result_item: ResultItem, _result_log: str) -> None:
+def write_result_xml(result_file: str, exit_code: int, result_item: ResultItem, _result_log: str):
     success = False
     # Create a new XML file with the results
     try:
@@ -148,11 +152,14 @@ def write_result_xml(result_file: str, exit_code: int, result_item: ResultItem, 
     return success, exit_code
 
 
-def write_result_html(result_file: str, exit_code: int, _result_log: str) -> None:
+def write_result_html(result_file: str, exit_code: int, result_item: ResultItem, project: Project, path_to_find):
     success = False
     try:
         output_dir = os.path.dirname(result_file)
         Path(output_dir).mkdir(parents=True, exist_ok=True)
+        html_result = result_for_html(result_item, project, path_to_find)
+        with open(result_file, 'w') as f:
+            f.write(html_result)
         success = True
     except Exception as ex:
         logger.error(f"Error_to_write_html: {ex}")
@@ -160,7 +167,7 @@ def write_result_html(result_file: str, exit_code: int, _result_log: str) -> Non
     return success, exit_code
 
 
-def write_result_yaml(result_file: str, exit_code: int, result_item: ResultItem) -> None:
+def write_result_yaml(result_file: str, exit_code: int, result_item: ResultItem):
     success = False
     try:
         output_dir = os.path.dirname(result_file)
@@ -206,7 +213,7 @@ def create_result_file(output_file_name, format='', _start_time=""):
 
 
 def result_for_summary(oss_pkg_info_files, license_missing_files, copyright_missing_files,
-                       report, _result_log, _check_only_file_mode, file_to_check_list, error_items,
+                       prj_report, _result_log, _check_only_file_mode, file_to_check_list, error_items,
                        excluded_files, lic_present_files_in_yaml, cop_present_files_in_yaml):
     reuse_compliant = False
     detected_lic = []
@@ -216,9 +223,9 @@ def result_for_summary(oss_pkg_info_files, license_missing_files, copyright_miss
     if _check_only_file_mode:
         file_total = len(file_to_check_list)
     else:
-        file_total = len(report.file_reports)
+        file_total = len(prj_report.file_reports)
         # Get detected License
-        for i, lic in enumerate(sorted(report.used_licenses)):
+        for i, lic in enumerate(sorted(prj_report.used_licenses)):
             detected_lic.append(lic)
 
     # Subtract license or copyright presenting file and excluded file
@@ -245,6 +252,7 @@ def result_for_summary(oss_pkg_info_files, license_missing_files, copyright_miss
     result_item._oss_pkg_files = oss_pkg_info_files
     result_item._detected_licenses = detected_lic
     result_item._count_total_files = file_total
+    result_item._count_without_both = str(len(missing_both_files))
     result_item._count_without_lic = str(len(license_missing_files) + len(missing_both_files))
     result_item._count_without_cop = str(len(copyright_missing_files) + len(missing_both_files))
     result_item._files_without_both = sorted(missing_both_files)
@@ -259,12 +267,12 @@ def result_for_summary(oss_pkg_info_files, license_missing_files, copyright_miss
     return result_item
 
 
-def write_result_file(result_file, output_extension, exit_code, result_item, _result_log):
+def write_result_file(result_file, output_extension, exit_code, result_item, _result_log, project, path_to_find):
     success = False
     if output_extension == ".yaml" or output_extension == "":
         success, exit_code = write_result_yaml(result_file, exit_code, result_item)
     elif output_extension == ".html":
-        success, exit_code = write_result_html(result_file, exit_code, _result_log)
+        success, exit_code = write_result_html(result_file, exit_code, result_item, project, path_to_find)
     elif output_extension == ".xml":
         success, exit_code = write_result_xml(result_file, exit_code, result_item, _result_log)
     else:
@@ -273,6 +281,6 @@ def write_result_file(result_file, output_extension, exit_code, result_item, _re
     if success:
         # Print yaml result
         yaml_result = result_item.get_print_yaml()
-        str_yaml_result = yaml.safe_dump(yaml_result, allow_unicode=True, sort_keys=True)
+        str_yaml_result = yaml.safe_dump(yaml_result, allow_unicode=True, sort_keys=False)
         logger.info(str_yaml_result)
     return success, exit_code

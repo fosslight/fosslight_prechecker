@@ -8,3 +8,67 @@ DEFAULT_EXCLUDE_EXTENSION = ["jar", "png", "exe", "so", "a", "dll", "jpeg", "jpg
 OSS_PKG_INFO_FILES = ["oss-pkg-info.yaml", "oss-pkg-info.yml", r"oss-package*.info", "requirement.txt",
                       "requirements.txt", "package.json", "pom.xml", "build.gradle", "podfile.lock", "cartfile.resolved",
                       "pubspec.yaml", "package.resolved", "go.mod", r"fosslight-sbom-info*.yaml"]
+
+HTML_FORMAT_PREFIX = """
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/1999/REC-html401-19991224/strict.dtd">
+<html lang="ko">
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+        <style>
+            .marker{background-color: Yellow;}
+        </style>
+        <title>FOSSLight Reuse</title>
+    </head>
+    <body>
+        <table cellspacing="0" cellpadding="0" border="0" style="font-family:'arial,sans-serif'">
+            <tr>
+                <td colspan="3" height="28" style="background:#f9f9f9"></td>
+            </tr>
+            <tr>
+                <td width="60" style="background:#f9f9f9"></td>
+                <td>
+                    <table cellspacing="0" cellpadding="0" border="0">
+                        <tr>
+                            <td colspan="3" height="25" style="background:#c00c3f">
+                                <h1 style="margin:0;padding-left:5px;font-size:14px;color:white">FOSSLight Reuse Lint</h1>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="1" style="background:#ddd"></td>
+                            <td style="padding:40px;">
+                                <div style="padding-bottom:10px;font-size:16px;font-weight:bold;">"""
+
+HTML_COMPLIANCE_SUFFIX = """
+                            </div>
+                            <p style="font-size:12px;">
+                            """
+
+HTML_CELL_PREFIX = """
+                                <h2 style="margin:20px 0 0;padding:10px;font-size:16px;">« Files without License or Copyright »</h2>
+                                <table cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
+                                    <tr>
+                                        <th style="padding:5px;background:#f0f0f0;">File</th>
+                                        <th style="padding:5px;background:#f0f0f0;">License</th>
+                                        <th style="padding:5px;background:#f0f0f0;">Copyright</th>
+                                    </tr>"""
+
+HTML_FORMAT_SUFFIX = """
+                                </table>
+                                <br/>
+                             </td>
+                            <td width="1" style="background:#ddd"></td>
+                        </tr>
+                        <tr>
+                            <td colspan="3" height="1" style="background:#ddd"></td>
+                        </tr>
+                    </table>
+                </td>
+                <td width="60" style="background:#f9f9f9"></td>
+            </tr>
+            <tr>
+                <td colspan="3" height="28" style="background:#f9f9f9"></td>
+            </tr>
+        </table>
+    </body>
+</html>
+"""
