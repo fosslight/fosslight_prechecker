@@ -8,6 +8,8 @@ DEFAULT_EXCLUDE_EXTENSION = ["jar", "png", "exe", "so", "a", "dll", "jpeg", "jpg
 OSS_PKG_INFO_FILES = ["oss-pkg-info.yaml", "oss-pkg-info.yml", r"oss-package*.info", "requirement.txt",
                       "requirements.txt", "package.json", "pom.xml", "build.gradle", "podfile.lock", "cartfile.resolved",
                       "pubspec.yaml", "package.resolved", "go.mod", r"fosslight-sbom-info*.yaml"]
+HTML_RESULT_EXPAND_LIMIT = 10
+HTML_RESULT_PRINT_LIMIT = 100
 
 HTML_FORMAT_PREFIX = """
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/1999/REC-html401-19991224/strict.dtd">
@@ -16,6 +18,7 @@ HTML_FORMAT_PREFIX = """
         <meta http-equiv="content-type" content="text/html; charset=UTF-8">
         <style>
             .marker{background-color: Yellow;}
+            .underline{text-decoration-line: underline;}
         </style>
         <title>FOSSLight Reuse</title>
     </head>
@@ -38,11 +41,7 @@ HTML_FORMAT_PREFIX = """
                             <td style="padding:40px;">
                                 <div style="padding-bottom:10px;font-size:16px;font-weight:bold;">"""
 
-HTML_COMPLIANCE_SUFFIX = """
-                            </div>
-                            <p style="font-size:12px;">
-                            """
-
+HTML_COMPLIANCE_SUFFIX = "</div>"
 HTML_CELL_PREFIX = """
                                 <h2 style="margin:20px 0 0;padding:10px;font-size:16px;">« Files without License or Copyright »</h2>
                                 <table cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
@@ -72,3 +71,6 @@ HTML_FORMAT_SUFFIX = """
     </body>
 </html>
 """
+
+HTML_EXPAND_PREFIX = """<details style="font-size:12px;">
+                            <summary style="font-size:12px;color:blue;"  class='underline'>Click to expand...</summary>"""

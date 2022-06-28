@@ -5,29 +5,41 @@
 import os
 from reuse import report
 from reuse.project import Project
-from fosslight_reuse._constant import HTML_FORMAT_PREFIX, HTML_CELL_PREFIX, HTML_FORMAT_SUFFIX, HTML_COMPLIANCE_SUFFIX
+from fosslight_reuse._constant import HTML_FORMAT_PREFIX, HTML_CELL_PREFIX, HTML_FORMAT_SUFFIX, HTML_EXPAND_PREFIX,\
+                                      HTML_COMPLIANCE_SUFFIX, HTML_RESULT_PRINT_LIMIT, HTML_RESULT_EXPAND_LIMIT
+
+
+def check_length_of_print_list(input_list: list, list_len: int):
+    print_cnt = 0
+    print_str = ""
+    if not input_list:
+        print_str = 'N/A'
+    else:
+        if list_len <= HTML_RESULT_EXPAND_LIMIT:
+            for file in input_list:
+                print_str += f"<br>&nbsp;&nbsp;&nbsp; &#183;	{file}"
+        elif HTML_RESULT_EXPAND_LIMIT < list_len:
+            print_str = HTML_EXPAND_PREFIX
+            for file in input_list:
+                print_str += f"<br>&nbsp;&nbsp;&nbsp; &#183;	{file}"
+                print_cnt += 1
+                if print_cnt >= HTML_RESULT_PRINT_LIMIT:
+                    print_str += "<br><b>&nbsp;&nbsp;&nbsp; See the log file for more listings...</b>"
+                    break
+            print_str += "</details>"
+    return print_str
 
 
 def get_html_summary(result_item):
-    pkg_file_str = ""
-    detected_lic_str = ""
-    if result_item._oss_pkg_files:
-        for pkg_file in result_item._oss_pkg_files:
-            pkg_file_str += f"<br>&nbsp;&nbsp;&nbsp; - {pkg_file}"
-    else:
-        pkg_file_str = 'N/A'
-
-    if result_item._detected_licenses:
-        for detected_lic in result_item._detected_licenses:
-            detected_lic_str += f"<br>&nbsp;&nbsp;&nbsp; - {detected_lic}"
-    else:
-        detected_lic_str = 'N/A'
+    pkg_file_str = check_length_of_print_list(result_item._oss_pkg_files, len(result_item._oss_pkg_files))
+    detected_lic_str = check_length_of_print_list(result_item._detected_licenses, len(result_item._detected_licenses))
 
     html_lint_str = f"""
-    - Open Source Package file: {pkg_file_str}</br>
-    - Detected licenses: {detected_lic_str}</br>
-    - Files without copyright / total: {result_item._count_without_cop} / {result_item._count_total_files}</br>
-    - Files without license / total: {result_item._count_without_lic} / {result_item._count_total_files}</br></p>
+    <p style="font-size:14px;line-height:1.2;">
+    - Open Source Package file: {pkg_file_str}<br>
+    - Detected licenses: {detected_lic_str}<br>
+    - Files without copyright / total: {result_item._count_without_cop} / {result_item._count_total_files}<br>
+    - Files without license / total: {result_item._count_without_lic} / {result_item._count_total_files}<br></p>
     """
     return html_lint_str
 
@@ -80,7 +92,7 @@ def result_for_html(result_item, project: Project, path_to_find):
     summary_str = get_html_summary(result_item)
     cell_contents_str = ""
 
-    if get_num_of_not_compliant(result_item) <= 100:
+    if get_num_of_not_compliant(result_item) <= HTML_RESULT_PRINT_LIMIT:
         cell_contents_str = get_html_cell(result_item, project, path_to_find)
         html_in_str = f"{HTML_FORMAT_PREFIX}{compliance_str}{summary_str}{HTML_CELL_PREFIX}{cell_contents_str}{HTML_FORMAT_SUFFIX}"
     else:
