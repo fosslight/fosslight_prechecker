@@ -1,5 +1,19 @@
 # Changelog
 
+## v2.2.1 (28/06/2022)
+## Changes
+## 🚀 Features
+
+- Add generating html format file @bjk7119 (#73)
+
+## 🔧 Maintenance
+
+- Add expand button in html @bjk7119 (#75)
+- Add execution error handling for html @bjk7119 (#74)
+- Change field's name in yaml file @bjk7119 (#72)
+
+---
+
 ## v2.2.0 (16/06/2022)
 ## Changes
 ## 🚀 Features
