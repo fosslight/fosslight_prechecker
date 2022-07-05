@@ -6,7 +6,7 @@ import os
 from reuse import report
 from reuse.project import Project
 from fosslight_reuse._constant import HTML_FORMAT_PREFIX, HTML_CELL_PREFIX, HTML_FORMAT_SUFFIX, HTML_EXPAND_PREFIX,\
-                                      HTML_COMPLIANCE_SUFFIX, HTML_RESULT_PRINT_LIMIT, HTML_RESULT_EXPAND_LIMIT
+                                      HTML_COMPLIANCE_SUFFIX, HTML_RESULT_PRINT_LIMIT, HTML_RESULT_EXPAND_LIMIT, HTML_CELL_HEAD_ROW
 
 
 def check_length_of_print_list(input_list: list, list_len: int):
@@ -94,10 +94,14 @@ def result_for_html(result_item, project: Project, path_to_find):
 
     if get_num_of_not_compliant(result_item) <= HTML_RESULT_PRINT_LIMIT:
         cell_contents_str = get_html_cell(result_item, project, path_to_find)
-        html_in_str = f"{HTML_FORMAT_PREFIX}{compliance_str}{summary_str}{HTML_CELL_PREFIX}{cell_contents_str}{HTML_FORMAT_SUFFIX}"
+        if result_item._compliant_result == 'OK':
+            html_in_str = f"{HTML_FORMAT_PREFIX}{compliance_str}{summary_str}{cell_contents_str}{HTML_FORMAT_SUFFIX}"
+        else:
+            html_in_str = f"{HTML_FORMAT_PREFIX}{compliance_str}{summary_str}{HTML_CELL_HEAD_ROW}{HTML_CELL_PREFIX}\
+                            {cell_contents_str}{HTML_FORMAT_SUFFIX}"
     else:
-        err_str = "There are so many incompliant files, so result can't be printed in html."
-        result_item.execution_error.append(err_str)
+        cell_contents_str = "There are so many incompliant files. See the log file for more listings...</br>"
+        html_in_str = f"{HTML_FORMAT_PREFIX}{compliance_str}{summary_str}{HTML_CELL_HEAD_ROW}{cell_contents_str}{HTML_FORMAT_SUFFIX}"
 
     if result_item.execution_error:
         err_str = ""
