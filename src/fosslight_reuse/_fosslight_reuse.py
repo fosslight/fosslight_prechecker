@@ -200,7 +200,7 @@ def get_only_pkg_info_yaml_file(pkg_info_files):
             yield yaml
 
 
-def reuse_for_project(path_to_find):
+def reuse_for_project(path_to_find, need_log_file):
     missing_license = []
     missing_copyright = []
     pkg_info_yaml_files = []
@@ -214,15 +214,17 @@ def reuse_for_project(path_to_find):
         need_rollback, temp_file_name, temp_dir_name = create_reuse_dep5_file(path_to_find)
 
     try:
-        # Use ProgressBar
-        timer = TimerThread()
-        timer.setDaemon(True)
-        timer.start()
+        if need_log_file:
+            # Use ProgressBar
+            timer = TimerThread()
+            timer.setDaemon(True)
+            timer.start()
 
         project = Project(path_to_find)
         report = ProjectReport.generate(project)
 
-        timer.stop = True
+        if need_log_file:
+            timer.stop = True
 
         if oss_pkg_info_files:
             pkg_info_yaml_files = find_all_oss_pkg_files(path_to_find, oss_pkg_info_files)
@@ -328,7 +330,7 @@ def run_lint(target_path, disable, output_file_name, format='', need_log_file=Tr
             license_missing_files, copyright_missing_files, project = reuse_for_files(path_to_find, file_to_check_list)
         else:
             license_missing_files, copyright_missing_files, oss_pkg_info, project, \
-                report, excluded_files, lic_present_files_in_yaml, cop_present_files_in_yaml = reuse_for_project(path_to_find)
+                report, excluded_files, lic_present_files_in_yaml, cop_present_files_in_yaml = reuse_for_project(path_to_find, need_log_file)
 
         result_item = result_for_summary(oss_pkg_info,
                                          license_missing_files,
