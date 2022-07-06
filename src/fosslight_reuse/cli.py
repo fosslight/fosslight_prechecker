@@ -32,7 +32,7 @@ def main():
     if args.mode == "lint":
         run_lint(args.path, args.disable, args.output, args.format, args.log)
     elif args.mode == "convert":
-        convert_report(args.path, args.output, args.log, args.sheet)
+        convert_report(args.path, args.output, args.format, args.log, args.sheet)
     elif args.mode == "add":
         add_content(args.path, args.license, args.copyright, args.output, args.log)
     else:
