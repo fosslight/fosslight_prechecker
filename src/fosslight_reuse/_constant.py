@@ -25,10 +25,6 @@ HTML_FORMAT_PREFIX = """
     <body>
         <table cellspacing="0" cellpadding="0" border="0" style="font-family:'arial,sans-serif'">
             <tr>
-                <td colspan="3" height="28" style="background:#f9f9f9"></td>
-            </tr>
-            <tr>
-                <td width="60" style="background:#f9f9f9"></td>
                 <td>
                     <table cellspacing="0" cellpadding="0" border="0">
                         <tr>
@@ -42,8 +38,8 @@ HTML_FORMAT_PREFIX = """
                                 <div style="padding-bottom:10px;font-size:16px;font-weight:bold;">"""
 
 HTML_COMPLIANCE_SUFFIX = "</div>"
+HTML_CELL_HEAD_ROW = """<h2 style="margin:20px 0 0;padding:10px;font-size:16px;">« Files without License or Copyright »</h2>"""
 HTML_CELL_PREFIX = """
-                                <h2 style="margin:20px 0 0;padding:10px;font-size:16px;">« Files without License or Copyright »</h2>
                                 <table cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
                                     <tr>
                                         <th style="padding:5px;background:#f0f0f0;">File</th>
