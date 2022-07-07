@@ -58,10 +58,6 @@ HTML_FORMAT_SUFFIX = """
                         </tr>
                     </table>
                 </td>
-                <td width="60" style="background:#f9f9f9"></td>
-            </tr>
-            <tr>
-                <td colspan="3" height="28" style="background:#f9f9f9"></td>
             </tr>
         </table>
     </body>
