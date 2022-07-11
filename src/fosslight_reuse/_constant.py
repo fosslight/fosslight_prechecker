@@ -24,7 +24,6 @@ HTML_FORMAT_PREFIX = """
         <title>FOSSLight Reuse</title>
     </head>
     <body>
-        <div style='overflow-x:scroll;overflow-y:scroll;width:100%;'>
             <table cellspacing="0" cellpadding="0" border="0" style="font-family:'arial,sans-serif'">
                 <tr>
                     <td>
@@ -62,7 +61,6 @@ HTML_FORMAT_SUFFIX = """
                     </td>
                 </tr>
             </table>
-        </div>
     </body>
 </html>
 """
