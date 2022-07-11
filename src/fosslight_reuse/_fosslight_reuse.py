@@ -8,6 +8,7 @@ import shutil
 import logging
 import locale
 import re
+import fnmatch
 from datetime import datetime
 from binaryornot.check import is_binary
 import fosslight_util.constant as constant
@@ -149,19 +150,17 @@ def reuse_for_files(path, files):
     return missing_license_list, missing_copyright_list, prj
 
 
-def extract_files_in_path(repository, filepath):
+def extract_files_in_path(path_to_find, filepath, all_files):
     extract_files = []
+    if not path_to_find.endswith("/"):
+        path_to_find += "/"
     for path in filepath:
-        if not repository.endswith("/"):
-            repository += "/"
-        if os.path.isdir(path):
-            files = os.listdir(path)
-            files = [os.path.join(path, file) for file in files]
-            files = [sub.replace(repository, '') for sub in files]
-            extract_files.extend(files)
-        elif os.path.isfile(path):
-            path = path.replace(repository, '')
-            extract_files.append(path)
+        if path.find('*') != -1:
+            for file in all_files:
+                if fnmatch.fnmatch(str(file), path):
+                    extract_files.append(str(file).replace(path_to_find, ''))
+        else:
+            extract_files.append(path.replace(path_to_find, ''))
     return extract_files
 
 
@@ -170,8 +169,7 @@ def get_rel_path_in_yaml(oss_item):
         yield os.path.join(oss_item.relative_path, source_name_or_path)
 
 
-# TODO : Get all file list in 'exclude_filepath' by using Regular expression
-def get_excluded_file_in_yaml(repository, yaml_files):
+def get_excluded_file_in_yaml(repository, yaml_files, project):
     excluded_path = []
     excluded_list = []
     lic_present_path = []
@@ -179,18 +177,19 @@ def get_excluded_file_in_yaml(repository, yaml_files):
     cop_present_path = []
     cop_present_list = []
 
+    all_files = project.all_files()
     for file in yaml_files:
         oss_items, _ = parsing_yml(file, repository)
         for oss_item in oss_items:
             if oss_item.exclude:
                 excluded_path = get_rel_path_in_yaml(oss_item)
-                excluded_list.extend(extract_files_in_path(repository, excluded_path))
+                excluded_list.extend(extract_files_in_path(repository, excluded_path, all_files))
             if oss_item.license:
                 lic_present_path = get_rel_path_in_yaml(oss_item)
-                lic_present_list.extend(extract_files_in_path(repository, lic_present_path))
+                lic_present_list.extend(extract_files_in_path(repository, lic_present_path, all_files))
             if oss_item.copyright:
                 cop_present_path = get_rel_path_in_yaml(oss_item)
-                cop_present_list.extend(extract_files_in_path(repository, cop_present_path))
+                cop_present_list.extend(extract_files_in_path(repository, cop_present_path, all_files))
     return excluded_list, lic_present_list, cop_present_list
 
 
@@ -229,9 +228,8 @@ def reuse_for_project(path_to_find, need_log_file):
         if oss_pkg_info_files:
             pkg_info_yaml_files = find_all_oss_pkg_files(path_to_find, oss_pkg_info_files)
             yaml_file = get_only_pkg_info_yaml_file(pkg_info_yaml_files)
-
             # Get path to be excluded in yaml file
-            excluded_files, lic_present_files_in_yaml, cop_present_files_in_yaml = get_excluded_file_in_yaml(path_to_find, yaml_file)
+            excluded_files, lic_present_files_in_yaml, cop_present_files_in_yaml = get_excluded_file_in_yaml(path_to_find, yaml_file, project)
 
         # File list that missing license text
         missing_license = [str(sub) for sub in set(report.files_without_licenses)]
