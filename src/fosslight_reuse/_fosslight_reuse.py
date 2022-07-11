@@ -8,13 +8,11 @@ import shutil
 import logging
 import locale
 import re
-import fnmatch
 from datetime import datetime
 from binaryornot.check import is_binary
 import fosslight_util.constant as constant
 from fosslight_util.set_log import init_log
 from fosslight_util.timer_thread import TimerThread
-from fosslight_util.parsing_yaml import parsing_yml, find_all_oss_pkg_files
 from reuse import report
 from reuse.project import Project
 from reuse.report import ProjectReport
@@ -150,63 +148,9 @@ def reuse_for_files(path, files):
     return missing_license_list, missing_copyright_list, prj
 
 
-def extract_files_in_path(path_to_find, filepath, all_files):
-    extract_files = []
-    if not path_to_find.endswith("/"):
-        path_to_find += "/"
-    for path in filepath:
-        if path.find('*') != -1:
-            for file in all_files:
-                if fnmatch.fnmatch(str(file), path):
-                    extract_files.append(str(file).replace(path_to_find, ''))
-        else:
-            extract_files.append(path.replace(path_to_find, ''))
-    return extract_files
-
-
-def get_rel_path_in_yaml(oss_item):
-    for source_name_or_path in oss_item.source_name_or_path:
-        yield os.path.join(oss_item.relative_path, source_name_or_path)
-
-
-def get_excluded_file_in_yaml(repository, yaml_files, project):
-    excluded_path = []
-    excluded_list = []
-    lic_present_path = []
-    lic_present_list = []
-    cop_present_path = []
-    cop_present_list = []
-
-    all_files = project.all_files()
-    for file in yaml_files:
-        oss_items, _ = parsing_yml(file, repository)
-        for oss_item in oss_items:
-            if oss_item.exclude:
-                excluded_path = get_rel_path_in_yaml(oss_item)
-                excluded_list.extend(extract_files_in_path(repository, excluded_path, all_files))
-            if oss_item.license:
-                lic_present_path = get_rel_path_in_yaml(oss_item)
-                lic_present_list.extend(extract_files_in_path(repository, lic_present_path, all_files))
-            if oss_item.copyright:
-                cop_present_path = get_rel_path_in_yaml(oss_item)
-                cop_present_list.extend(extract_files_in_path(repository, cop_present_path, all_files))
-    return excluded_list, lic_present_list, cop_present_list
-
-
-def get_only_pkg_info_yaml_file(pkg_info_files):
-    for yaml in pkg_info_files:
-        if yaml.split('/')[-1].startswith("oss-pkg-info"):
-            yield yaml
-
-
 def reuse_for_project(path_to_find, need_log_file):
     missing_license = []
     missing_copyright = []
-    pkg_info_yaml_files = []
-    excluded_files = []
-    lic_present_files_in_yaml = []
-    cop_present_files_in_yaml = []
-    yaml_file = []
 
     oss_pkg_info_files = find_oss_pkg_info(path_to_find)
     if _turn_on_default_reuse_config:
@@ -225,12 +169,6 @@ def reuse_for_project(path_to_find, need_log_file):
         if need_log_file:
             timer.stop = True
 
-        if oss_pkg_info_files:
-            pkg_info_yaml_files = find_all_oss_pkg_files(path_to_find, oss_pkg_info_files)
-            yaml_file = get_only_pkg_info_yaml_file(pkg_info_yaml_files)
-            # Get path to be excluded in yaml file
-            excluded_files, lic_present_files_in_yaml, cop_present_files_in_yaml = get_excluded_file_in_yaml(path_to_find, yaml_file, project)
-
         # File list that missing license text
         missing_license = [str(sub) for sub in set(report.files_without_licenses)]
         if not path_to_find.endswith("/"):
@@ -247,8 +185,7 @@ def reuse_for_project(path_to_find, need_log_file):
 
     if _turn_on_default_reuse_config:
         remove_reuse_dep5_file(need_rollback, temp_file_name, temp_dir_name)
-    return missing_license, missing_copyright, oss_pkg_info_files, project, \
-        report, excluded_files, lic_present_files_in_yaml, cop_present_files_in_yaml
+    return missing_license, missing_copyright, oss_pkg_info_files, project, report
 
 
 def dump_error_msg(error_msg: str, exit=False):
@@ -318,29 +255,23 @@ def run_lint(target_path, disable, output_file_name, format='', need_log_file=Tr
     init(path_to_find, output_path, file_to_check_list, need_log_file)
 
     if os.path.isdir(path_to_find):
-        lic_present_files_in_yaml = []
-        cop_present_files_in_yaml = []
-        excluded_files = []
         oss_pkg_info = []
         _turn_on_default_reuse_config = not disable
 
         if _check_only_file_mode:
             license_missing_files, copyright_missing_files, project = reuse_for_files(path_to_find, file_to_check_list)
         else:
-            license_missing_files, copyright_missing_files, oss_pkg_info, project, \
-                report, excluded_files, lic_present_files_in_yaml, cop_present_files_in_yaml = reuse_for_project(path_to_find, need_log_file)
+            license_missing_files, copyright_missing_files, oss_pkg_info, project, report = reuse_for_project(path_to_find, need_log_file)
 
-        result_item = result_for_summary(oss_pkg_info,
+        result_item = result_for_summary(path_to_find,
+                                         oss_pkg_info,
                                          license_missing_files,
                                          copyright_missing_files,
                                          report,
                                          _result_log,
                                          _check_only_file_mode,
                                          file_to_check_list,
-                                         error_items,
-                                         excluded_files,
-                                         lic_present_files_in_yaml,
-                                         cop_present_files_in_yaml)
+                                         error_items)
 
         success, exit_code = write_result_file(result_file, output_extension, _exit_code,
                                                result_item, _result_log, project, path_to_find)

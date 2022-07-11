@@ -19,23 +19,24 @@ HTML_FORMAT_PREFIX = """
         <style>
             .marker{background-color: Yellow;}
             .underline{text-decoration-line: underline;}
+            table{width: 100%;}
         </style>
         <title>FOSSLight Reuse</title>
     </head>
     <body>
-        <table cellspacing="0" cellpadding="0" border="0" style="font-family:'arial,sans-serif'">
-            <tr>
-                <td>
-                    <table cellspacing="0" cellpadding="0" border="0">
-                        <tr>
-                            <td colspan="3" height="25" style="background:#c00c3f">
-                                <h1 style="margin:0;padding-left:5px;font-size:14px;color:white">FOSSLight Reuse Lint</h1>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td width="1" style="background:#ddd"></td>
-                            <td style="padding:40px;">
-                                <div style="padding-bottom:10px;font-size:16px;font-weight:bold;">"""
+            <table cellspacing="0" cellpadding="0" border="0" style="font-family:'arial,sans-serif'">
+                <tr>
+                    <td>
+                        <table cellspacing="0" cellpadding="0" border="0">
+                            <tr>
+                                <td colspan="3" height="25" style="background:#c00c3f">
+                                    <h1 style="margin:0;padding-left:5px;font-size:14px;color:white">FOSSLight Reuse Lint</h1>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td width="1" style="background:#ddd"></td>
+                                <td style="padding:40px;">
+                                    <div style="padding-bottom:10px;font-size:16px;font-weight:bold;">"""
 
 HTML_COMPLIANCE_SUFFIX = "</div>"
 HTML_CELL_HEAD_ROW = """<h2 style="margin:20px 0 0;padding:10px;font-size:16px;">« Files without License or Copyright »</h2>"""
@@ -48,22 +49,18 @@ HTML_CELL_PREFIX = """
                                     </tr>"""
 
 HTML_FORMAT_SUFFIX = """
-                                </table>
-                                <br/>
-                             </td>
-                            <td width="1" style="background:#ddd"></td>
-                        </tr>
-                        <tr>
-                            <td colspan="3" height="1" style="background:#ddd"></td>
-                        </tr>
-                    </table>
-                </td>
-                <td width="60" style="background:#f9f9f9"></td>
-            </tr>
-            <tr>
-                <td colspan="3" height="28" style="background:#f9f9f9"></td>
-            </tr>
-        </table>
+                                    </table>
+                                    <br/>
+                                </td>
+                                <td width="1" style="background:#ddd"></td>
+                            </tr>
+                            <tr>
+                                <td colspan="3" height="1" style="background:#ddd"></td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
     </body>
 </html>
 """
