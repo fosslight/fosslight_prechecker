@@ -216,7 +216,8 @@ def create_result_file(output_file_name, format='', _start_time=""):
 
 def get_only_pkg_info_yaml_file(pkg_info_files):
     for yaml_file in pkg_info_files:
-        if yaml_file.split('/')[-1].startswith("oss-pkg-info"):
+        abs_path = os.path.join(os.getcwd(), yaml_file)
+        if os.path.basename(abs_path) == "oss-pkg-info.yaml":
             yield yaml_file
 
 
@@ -225,24 +226,32 @@ def get_path_in_yaml(oss_item):
         yield os.path.join(oss_item.relative_path, source_name_or_path)
 
 
-def extract_files_in_path(filepath, input_list=None):
+def extract_files_in_path(path_to_find, filepath, input_list=None):
     extract_files = []
     remained_files = []
+    remained_path = []
+    intersection_files = []
+
+    if not path_to_find.endswith("/"):
+        path_to_find += "/"
+    filepath_rel = [file.replace(path_to_find, '') for file in filepath]
 
     if input_list is None:
-        extract_files.extend(filepath)
+        extract_files.extend(filepath_rel)
     else:
-        extract_files.extend(list(set(input_list) & set(filepath)))
-        remained_files = list(set(input_list) - set(filepath))
+        intersection_files = list(set(input_list) & set(filepath_rel))
+        extract_files.extend(intersection_files)
+        remained_files = list(set(input_list) - set(intersection_files))
+        remained_path = list(set(filepath_rel) - set(intersection_files))
 
     for file in remained_files:
-        for path in filepath:
+        for path in remained_path:
             if fnmatch.fnmatch(file, path):
                 extract_files.append(file)
     return extract_files
 
 
-def get_excluded_file_in_yaml(repository, yaml_files, license_missing_files, copyright_missing_files):
+def get_excluded_file_in_yaml(path_to_find, yaml_files, license_missing_files, copyright_missing_files):
     excluded_path = []
     excluded_list = []
     lic_present_path = []
@@ -251,17 +260,17 @@ def get_excluded_file_in_yaml(repository, yaml_files, license_missing_files, cop
     cop_present_list = []
 
     for file in yaml_files:
-        oss_items, _ = parsing_yml(file, repository)
+        oss_items, _ = parsing_yml(file, path_to_find)
         for oss_item in oss_items:
             if oss_item.exclude:
                 excluded_path = list(get_path_in_yaml(oss_item))
-                excluded_list.extend(extract_files_in_path(excluded_path))
+                excluded_list.extend(extract_files_in_path(path_to_find, excluded_path))
             if oss_item.license:
                 lic_present_path = list(get_path_in_yaml(oss_item))
-                lic_present_list.extend(extract_files_in_path(lic_present_path, license_missing_files))
+                lic_present_list.extend(extract_files_in_path(path_to_find, lic_present_path, license_missing_files))
             if oss_item.copyright:
                 cop_present_path = list(get_path_in_yaml(oss_item))
-                cop_present_list.extend(extract_files_in_path(cop_present_path, copyright_missing_files))
+                cop_present_list.extend(extract_files_in_path(path_to_find, cop_present_path, copyright_missing_files))
     return excluded_list, lic_present_list, cop_present_list
 
 
@@ -270,6 +279,9 @@ def result_for_summary(path_to_find, oss_pkg_info_files, license_missing_files, 
     reuse_compliant = False
     detected_lic = []
     missing_both_files = []
+    excluded_files = []
+    lic_present_files_in_yaml = []
+    cop_present_files_in_yaml = []
     file_total = ""
 
     if _check_only_file_mode:
