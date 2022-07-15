@@ -216,8 +216,7 @@ def create_result_file(output_file_name, format='', _start_time=""):
 
 def get_only_pkg_info_yaml_file(pkg_info_files):
     for yaml_file in pkg_info_files:
-        abs_path = os.path.join(os.getcwd(), yaml_file)
-        if os.path.basename(abs_path) == "oss-pkg-info.yaml":
+        if os.path.basename(yaml_file) == "oss-pkg-info.yaml":
             yield yaml_file
 
 
@@ -225,11 +224,10 @@ def get_path_in_yaml(oss_item):
     return [os.path.join(oss_item.relative_path, file) for file in oss_item.source_name_or_path]
 
 
-def extract_files_in_path(remove_file_list, base_file_list=None):
+def extract_files_in_path(remove_file_list, base_file_list, return_found=False):
     extract_files = []
-    remained_files = []
-    remained_path = []
-    intersection_files = []
+    remained_file_to_remove = []
+    remained_base_files = []
 
     if base_file_list:
         intersection_files = list(set(base_file_list) & set(remove_file_list))
@@ -238,20 +236,18 @@ def extract_files_in_path(remove_file_list, base_file_list=None):
         remained_file_to_remove = list(set(remove_file_list) - set(intersection_files))
 
     for remove_pattern in remained_file_to_remove:
-        for file in remained_base_files:
+        for file in remained_base_files[:]:
             if fnmatch.fnmatch(file, remove_pattern):
                 extract_files.append(file)
-    return extract_files
+                remained_base_files.remove(file)
+    return extract_files if return_found else remained_base_files
 
 
-def get_excluded_file_in_yaml(path_to_find, yaml_files, license_missing_files, copyright_missing_files):
+def exclude_file_in_yaml(path_to_find, yaml_files, license_missing_files, copyright_missing_files):
+    
     excluded_path = []
-    excluded_list = []
     lic_present_path = []
-    lic_present_list = []
     cop_present_path = []
-    cop_present_list = []
-
     for file in yaml_files:
         oss_items, _ = parsing_yml(file, path_to_find)
         for oss_item in oss_items:
@@ -264,11 +260,11 @@ def get_excluded_file_in_yaml(path_to_find, yaml_files, license_missing_files, c
                     cop_present_path.extend(get_path_in_yaml(oss_item))
 
     total_missing_files = list(set(license_missing_files + copyright_missing_files))
-    excluded_list.extend(extract_files_in_path(excluded_path, total_missing_files))
-    lic_present_list.extend(extract_files_in_path(lic_present_path, license_missing_files))
-    cop_present_list.extend(extract_files_in_path(cop_present_path, copyright_missing_files))
+    files_with_exclude_removed = extract_files_in_path(excluded_path, total_missing_files, True)
+    license_missing_files = extract_files_in_path(lic_present_path, list(set(license_missing_files) - set(files_with_exclude_removed)))
+    copyright_missing_files = extract_files_in_path(cop_present_path, list(set(copyright_missing_files) - set(files_with_exclude_removed)))
 
-    return excluded_list, lic_present_list, cop_present_list
+    return license_missing_files, copyright_missing_files
 
 
 def result_for_summary(path_to_find, oss_pkg_info_files, license_missing_files, copyright_missing_files,
@@ -276,9 +272,6 @@ def result_for_summary(path_to_find, oss_pkg_info_files, license_missing_files, 
     reuse_compliant = False
     detected_lic = []
     missing_both_files = []
-    excluded_files = []
-    lic_present_files_in_yaml = []
-    cop_present_files_in_yaml = []
     file_total = ""
 
     if _check_only_file_mode:
@@ -292,20 +285,10 @@ def result_for_summary(path_to_find, oss_pkg_info_files, license_missing_files, 
     if oss_pkg_info_files:
         pkg_info_yaml_files = find_all_oss_pkg_files(path_to_find, oss_pkg_info_files)
         yaml_file = get_only_pkg_info_yaml_file(pkg_info_yaml_files)
-        # Get path to be excluded in yaml file
-        excluded_files, lic_present_files_in_yaml, cop_present_files_in_yaml = get_excluded_file_in_yaml(path_to_find, yaml_file,
-                                                                                                         license_missing_files,
-                                                                                                         copyright_missing_files)
-
-    # Subtract license or copyright presenting file and excluded file
-    license_missing_files = list(set(license_missing_files) -
-                                 set(lic_present_files_in_yaml) -
-                                 set(excluded_files) -
-                                 set(oss_pkg_info_files))
-    copyright_missing_files = list(set(copyright_missing_files) -
-                                   set(cop_present_files_in_yaml) -
-                                   set(excluded_files) -
-                                   set(oss_pkg_info_files))
+        # Exclude files in yaml
+        license_missing_files, copyright_missing_files = exclude_file_in_yaml(path_to_find, yaml_file,
+                                                                              license_missing_files,
+                                                                              copyright_missing_files)
 
     if len(license_missing_files) == 0 and len(copyright_missing_files) == 0:
         reuse_compliant = True
