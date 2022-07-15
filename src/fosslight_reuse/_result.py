@@ -288,12 +288,10 @@ def result_for_summary(path_to_find, oss_pkg_info_files, license_missing_files, 
     if oss_pkg_info_files:
         pkg_info_yaml_files = find_all_oss_pkg_files(path_to_find, oss_pkg_info_files)
         yaml_file = get_only_pkg_info_yaml_file(pkg_info_yaml_files)
-        # Remove OSS Package files from missing files
-        pkg_info_yaml_files = [os.path.relpath(pkg_file, path_to_find) for pkg_file in pkg_info_yaml_files]
         # Exclude files in yaml
         license_missing_files, copyright_missing_files = exclude_file_in_yaml(path_to_find, yaml_file,
-                                                                              set(license_missing_files) - set(pkg_info_yaml_files),
-                                                                              set(copyright_missing_files) - set(pkg_info_yaml_files))
+                                                                              set(license_missing_files) - set(oss_pkg_info_files),
+                                                                              set(copyright_missing_files) - set(oss_pkg_info_files))
 
     if len(license_missing_files) == 0 and len(copyright_missing_files) == 0:
         reuse_compliant = True
