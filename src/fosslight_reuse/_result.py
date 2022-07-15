@@ -244,7 +244,6 @@ def extract_files_in_path(remove_file_list, base_file_list, return_found=False):
 
 
 def exclude_file_in_yaml(path_to_find, yaml_files, license_missing_files, copyright_missing_files):
-    
     excluded_path = []
     lic_present_path = []
     cop_present_path = []
@@ -259,10 +258,10 @@ def exclude_file_in_yaml(path_to_find, yaml_files, license_missing_files, copyri
                 if oss_item.copyright:
                     cop_present_path.extend(get_path_in_yaml(oss_item))
 
-    total_missing_files = list(set(license_missing_files + copyright_missing_files))
+    total_missing_files = list(license_missing_files.union(copyright_missing_files))
     files_with_exclude_removed = extract_files_in_path(excluded_path, total_missing_files, True)
-    license_missing_files = extract_files_in_path(lic_present_path, list(set(license_missing_files) - set(files_with_exclude_removed)))
-    copyright_missing_files = extract_files_in_path(cop_present_path, list(set(copyright_missing_files) - set(files_with_exclude_removed)))
+    license_missing_files = extract_files_in_path(lic_present_path, list(license_missing_files - set(files_with_exclude_removed)))
+    copyright_missing_files = extract_files_in_path(cop_present_path, list(copyright_missing_files - set(files_with_exclude_removed)))
 
     return license_missing_files, copyright_missing_files
 
@@ -285,10 +284,12 @@ def result_for_summary(path_to_find, oss_pkg_info_files, license_missing_files, 
     if oss_pkg_info_files:
         pkg_info_yaml_files = find_all_oss_pkg_files(path_to_find, oss_pkg_info_files)
         yaml_file = get_only_pkg_info_yaml_file(pkg_info_yaml_files)
+        # Remove OSS Package files from missing files
+        pkg_info_yaml_files = [os.path.relpath(pkg_file, path_to_find) for pkg_file in pkg_info_yaml_files]
         # Exclude files in yaml
         license_missing_files, copyright_missing_files = exclude_file_in_yaml(path_to_find, yaml_file,
-                                                                              license_missing_files,
-                                                                              copyright_missing_files)
+                                                                              set(license_missing_files) - set(pkg_info_yaml_files),
+                                                                              set(copyright_missing_files) - set(pkg_info_yaml_files))
 
     if len(license_missing_files) == 0 and len(copyright_missing_files) == 0:
         reuse_compliant = True
