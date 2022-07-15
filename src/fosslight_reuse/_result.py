@@ -222,31 +222,24 @@ def get_only_pkg_info_yaml_file(pkg_info_files):
 
 
 def get_path_in_yaml(oss_item):
-    for source_name_or_path in oss_item.source_name_or_path:
-        yield os.path.join(oss_item.relative_path, source_name_or_path)
+    return [os.path.join(oss_item.relative_path, file) for file in oss_item.source_name_or_path]
 
 
-def extract_files_in_path(path_to_find, filepath, input_list=None):
+def extract_files_in_path(remove_file_list, base_file_list=None):
     extract_files = []
     remained_files = []
     remained_path = []
     intersection_files = []
 
-    if not path_to_find.endswith("/"):
-        path_to_find += "/"
-    filepath_rel = [file.replace(path_to_find, '') for file in filepath]
-
-    if input_list is None:
-        extract_files.extend(filepath_rel)
-    else:
-        intersection_files = list(set(input_list) & set(filepath_rel))
+    if base_file_list:
+        intersection_files = list(set(base_file_list) & set(remove_file_list))
         extract_files.extend(intersection_files)
-        remained_files = list(set(input_list) - set(intersection_files))
-        remained_path = list(set(filepath_rel) - set(intersection_files))
+        remained_base_files = list(set(base_file_list) - set(intersection_files))
+        remained_file_to_remove = list(set(remove_file_list) - set(intersection_files))
 
-    for file in remained_files:
-        for path in remained_path:
-            if fnmatch.fnmatch(file, path):
+    for remove_pattern in remained_file_to_remove:
+        for file in remained_base_files:
+            if fnmatch.fnmatch(file, remove_pattern):
                 extract_files.append(file)
     return extract_files
 
@@ -263,14 +256,18 @@ def get_excluded_file_in_yaml(path_to_find, yaml_files, license_missing_files, c
         oss_items, _ = parsing_yml(file, path_to_find)
         for oss_item in oss_items:
             if oss_item.exclude:
-                excluded_path = list(get_path_in_yaml(oss_item))
-                excluded_list.extend(extract_files_in_path(path_to_find, excluded_path))
-            if oss_item.license:
-                lic_present_path = list(get_path_in_yaml(oss_item))
-                lic_present_list.extend(extract_files_in_path(path_to_find, lic_present_path, license_missing_files))
-            if oss_item.copyright:
-                cop_present_path = list(get_path_in_yaml(oss_item))
-                cop_present_list.extend(extract_files_in_path(path_to_find, cop_present_path, copyright_missing_files))
+                excluded_path.extend(get_path_in_yaml(oss_item))
+            else:
+                if oss_item.license:
+                    lic_present_path.extend(get_path_in_yaml(oss_item))
+                if oss_item.copyright:
+                    cop_present_path.extend(get_path_in_yaml(oss_item))
+
+    total_missing_files = list(set(license_missing_files + copyright_missing_files))
+    excluded_list.extend(extract_files_in_path(excluded_path, total_missing_files))
+    lic_present_list.extend(extract_files_in_path(lic_present_path, license_missing_files))
+    cop_present_list.extend(extract_files_in_path(cop_present_path, copyright_missing_files))
+
     return excluded_list, lic_present_list, cop_present_list
 
 
