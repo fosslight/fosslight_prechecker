@@ -217,8 +217,11 @@ def create_result_file(output_file_name, format='', _start_time=""):
 
 def get_only_pkg_info_yaml_file(pkg_info_files):
     for yaml_file in pkg_info_files:
-        if os.path.basename(yaml_file) == "oss-pkg-info.yaml":
-            yield yaml_file
+        try:
+            if re.search(r"oss-pkg-info[\s\S]*.yaml", os.path.basename(yaml_file).lower()):
+                yield yaml_file
+        except Exception as ex:
+            logger.debug(f"Error to find oss-pkg-info*.yaml: {ex}")
 
 
 def get_path_in_yaml(oss_item):
