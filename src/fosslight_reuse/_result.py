@@ -15,6 +15,7 @@ from reuse.project import Project
 from fosslight_reuse._result_html import result_for_html
 from fosslight_util.parsing_yaml import find_all_oss_pkg_files, parsing_yml
 from fosslight_util.output_format import check_output_format
+import re
 
 
 CUSTOMIZED_FORMAT_FOR_REUSE = {'html': '.html', 'xml': '.xml', 'yaml': '.yaml'}
@@ -237,7 +238,7 @@ def extract_files_in_path(remove_file_list, base_file_list, return_found=False):
 
     for remove_pattern in remained_file_to_remove:
         for file in remained_base_files[:]:
-            if fnmatch.fnmatch(file, remove_pattern):
+            if fnmatch.fnmatch(file, remove_pattern) or re.search(remove_pattern, file):
                 extract_files.append(file)
                 remained_base_files.remove(file)
     return extract_files if return_found else remained_base_files
