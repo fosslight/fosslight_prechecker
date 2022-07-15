@@ -5,9 +5,9 @@
 
 DEFAULT_EXCLUDE_EXTENSION = ["jar", "png", "exe", "so", "a", "dll", "jpeg", "jpg", "ttf", "lib", "ttc", "pfb",
                              "pfm", "otf", "afm", "dfont", "json"]
-OSS_PKG_INFO_FILES = ["oss-pkg-info.yaml", "oss-pkg-info.yml", r"oss-package*.info", "requirement.txt",
+OSS_PKG_INFO_FILES = [r"oss-pkg-info[\s\S]*.yaml", "oss-pkg-info.yml", r"oss-package[\s\S]*.info", "requirement.txt",
                       "requirements.txt", "package.json", "pom.xml", "build.gradle", "podfile.lock", "cartfile.resolved",
-                      "pubspec.yaml", "package.resolved", "go.mod", r"fosslight-sbom-info*.yaml"]
+                      "pubspec.yaml", "package.resolved", "go.mod", r"fosslight-sbom-info[\s\S]*.yaml"]
 HTML_RESULT_EXPAND_LIMIT = 10
 HTML_RESULT_PRINT_LIMIT = 100
 
