@@ -4,10 +4,11 @@
 # SPDX-License-Identifier: GPL-3.0-only
 import logging
 import os
+import sys
 import yaml
 from fosslight_util.constant import LOGGER_NAME
 from fosslight_util.parsing_yaml import find_all_oss_pkg_files, parsing_yml
-from fosslight_util.write_excel import write_result_to_excel, write_result_to_csv
+from fosslight_util.write_excel import write_result_to_excel
 from fosslight_util.write_yaml import create_yaml_with_ossitem
 from fosslight_util.read_excel import read_oss_report
 
@@ -21,8 +22,6 @@ def convert_yml_to_excel(oss_pkg_files, output_file, file_option_on, base_path, 
 
     if not file_option_on:
         oss_pkg_files = find_all_oss_pkg_files(base_path, oss_pkg_files)
-    else:
-        oss_pkg_files = [pkg_file for pkg_file in oss_pkg_files if pkg_file.endswith(('.yaml', '.yml'))]
 
     for oss_pkg_file in oss_pkg_files:
         try:
@@ -37,20 +36,19 @@ def convert_yml_to_excel(oss_pkg_files, output_file, file_option_on, base_path, 
         except Exception as ex:
             logger.error(f"Read yaml file: {ex}")
 
-    if not window:
-        try:
-            sheet_list["SRC_FL_Reuse"] = items_to_print
-            write_result_to_csv(f"{output_file}.csv", sheet_list, True)
-            logger.warning(f"Output: {output_file}_SRC_FL_Reuse.csv")
-        except Exception as ex:
-            logger.error(f"Write .xlsx file : {ex}")
     if items_to_print and len(items_to_print) > 0:
         try:
             sheet_list["SRC_FL_Reuse"] = items_to_print
-            write_result_to_excel(f"{output_file}.xlsx", sheet_list)
-            logger.warning(f"Output: {output_file}.xlsx")
+            success = write_result_to_excel(f"{output_file}.xlsx", sheet_list)
+            if success:
+                logger.warning(f"Output: {output_file}.xlsx")
+            else:
+                logger.error(f"Can't write excel file : {output_file}")
+                sys.exit(1)
         except Exception as ex:
-            logger.error(f"Write .csv file : {ex}")
+            logger.error(f"Error to write excel file : {ex}")
+    else:
+        logger.warning("There is no item to convert to Excel")
 
 
 def convert_excel_to_yaml(oss_report_to_read, output_file, sheet_names=""):
@@ -64,8 +62,12 @@ def convert_excel_to_yaml(oss_report_to_read, output_file, sheet_names=""):
                 yaml_dict = create_yaml_with_ossitem(item, yaml_dict)
             if yaml_dict:
                 output_file = output_file if output_file.endswith(_file_extension) else output_file + _file_extension
-                write_yaml_file(output_file, yaml_dict)
-                logger.warning(f"Output: {output_file}")
+                success = write_yaml_file(output_file, yaml_dict)
+                if success:
+                    logger.warning(f"Output: {output_file}")
+                else:
+                    logger.error(f"Can't write yaml file : {output_file}")
+                    sys.exit(1)
         except Exception as error:
             logger.error(f"Convert yaml: {error}")
     else:
@@ -73,5 +75,13 @@ def convert_excel_to_yaml(oss_report_to_read, output_file, sheet_names=""):
 
 
 def write_yaml_file(output_file, json_output):
-    with open(output_file, 'w') as f:
-        yaml.dump(json_output, f, sort_keys=False)
+    success = True
+    error_msg = ""
+
+    try:
+        with open(output_file, 'w') as f:
+            yaml.dump(json_output, f, sort_keys=False)
+    except Exception as ex:
+        error_msg = str(ex)
+        success = False
+    return success, error_msg

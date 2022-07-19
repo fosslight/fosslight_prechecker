@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 import os
 import sys
+import re
 import logging
 import platform
 from datetime import datetime
@@ -31,8 +32,8 @@ def find_report_file(path_to_find):
         for root, dirs, files in os.walk(path_to_find):
             for file in files:
                 file_name = file.lower()
-                if (file_name.startswith("oss-report") or file_name.startswith("fosslight-report")) \
-                   and file_name.endswith(".xlsx"):
+                p = re.compile(r"[\s\S]*OSS[\s\S]*-Report[\s\S]*.xlsx", re.I)
+                if p.search(file_name):
                     return os.path.join(root, file)
     except Exception as error:
         logger.debug("Find report:"+str(error))
@@ -83,15 +84,22 @@ def convert_report(base_path, output_name, format, need_log_file=True, sheet_nam
                 if output_extension == '.xlsx':
                     logger.error("Format error - can make only .yaml file")
                     sys.exit(1)
-                convert_excel_mode = True
-                report_to_read = base_path
-            else:
+                p = re.compile(r"[\s\S]*OSS[\s\S]*-Report[\s\S]*.xlsx", re.I)
+                if p.search(base_path):
+                    convert_excel_mode = True
+                    report_to_read = base_path
+            elif base_path.endswith((".yaml", ".yml")):
                 if output_extension == '.yaml':
                     logger.error("Format error - can make only .xlsx file")
                     sys.exit(1)
-                oss_pkg_files = base_path.split(',')
-                convert_yml_mode = True
-                file_option_on = True
+                p = re.compile(r"oss-pkg-info[\s\S]*.ya?ml", re.I)
+                if p.search(base_path):
+                    oss_pkg_files = base_path.split(',')
+                    convert_yml_mode = True
+                    file_option_on = True
+            else:
+                logger.error("Not support file name or extension - only support for FOSSLight-Report*.xlsx or oss-pkg-info*.yaml file")
+                sys.exit(1)
 
     if not convert_yml_mode and not convert_excel_mode:
         if is_window:
