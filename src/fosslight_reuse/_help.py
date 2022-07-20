@@ -19,6 +19,7 @@ _HELP_MESSAGE_REUSE = """
 
         Options:
             -h\t\t\t    Print help message
+            -v\t\t\t    Print FOSSLight Prechecker version
             -p <path>\t\t    Path to check
             -f <format>\t\t    Result format(yaml, xml, html)
             -o <file_name>\t    Output file name

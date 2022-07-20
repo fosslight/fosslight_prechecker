@@ -3,10 +3,12 @@
 # Copyright (c) 2021 LG Electronics Inc.
 # SPDX-License-Identifier: GPL-3.0-only
 import argparse
-from ._help import print_help_msg
-from ._fosslight_reuse import run_lint
+import sys
+from fosslight_util.help import print_package_version
+from fosslight_reuse._help import print_help_msg
+from fosslight_reuse._fosslight_reuse import run_lint, PKG_NAME
 from fosslight_oss_pkg.fosslight_oss_pkg import convert_report
-from ._add import add_content
+from fosslight_reuse._add import add_content
 
 
 def main():
@@ -21,6 +23,7 @@ def main():
     parser.add_argument('--sheet', '-s', help='Sheet name to change to yaml', type=str, dest='sheet', default="")
     parser.add_argument('--help', '-h', help='Print help message', action='store_true', dest='help')
     parser.add_argument('--ignore', '-i', help='Do not write log to file', action='store_false', dest='log')
+    parser.add_argument('--version', '-v', help='Print FOSSLight Prechecker version', action='store_true', dest='version')
     try:
         args = parser.parse_args()
     except SystemExit:
@@ -28,6 +31,10 @@ def main():
 
     if args.help:
         print_help_msg()
+
+    if args.version:
+        print_package_version(PKG_NAME, "FOSSLight Prechecker Version")
+        sys.exit(0)
 
     if args.mode == "lint":
         run_lint(args.path, args.disable, args.output, args.format, args.log)
