@@ -1,5 +1,19 @@
 # Changelog
 
+## v2.2.2 (20/07/2022)
+## Changes
+## 🔧 Maintenance
+
+- Add -v option and error handling in convert mode @bjk7119 (#85)
+- Move read excel code to FL Util @bjk7119 (#84)
+- Apply fnmatch / re match to match file name @bjk7119 (#83)
+- Remove scroll from html @soimkim (#79)
+- Change it to a responsive table @soimkim (#78)
+- Remove gray background from html @soimkim (#77)
+- Modify html format when files exceeds 100 @bjk7119 (#76)
+
+---
+
 ## v2.2.1 (28/06/2022)
 ## Changes
 ## 🚀 Features
