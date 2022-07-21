@@ -15,7 +15,7 @@ from fosslight_util.spdx_licenses import get_spdx_licenses_json
 from fosslight_util.parsing_yaml import find_all_oss_pkg_files, parsing_yml
 from fosslight_util.output_format import check_output_format
 from datetime import datetime
-from fosslight_reuse._fosslight_reuse import reuse_for_project, reuse_for_files, dump_error_msg, get_path_to_find
+from fosslight_prechecker._precheck import precheck_for_project, precheck_for_files, dump_error_msg, get_path_to_find
 from reuse.header import run as reuse_header
 from reuse.download import run as reuse_download
 from reuse._comment import EXTENSION_COMMENT_STYLE_MAP_LOWERCASE
@@ -23,7 +23,7 @@ from reuse._main import parser as reuse_arg_parser
 from reuse.project import Project
 
 
-PKG_NAME = "fosslight_reuse"
+PKG_NAME = "fosslight_prechecker"
 LICENSE_INCLUDE_FILES = ["license", "license.md", "license.txt", "notice"]
 EXCLUDE_DIR = ["test", "tests", "doc", "docs"]
 EXCLUDE_PREFIX = ("test", ".", "doc", "__")
@@ -76,7 +76,7 @@ def check_license_and_copyright(path_to_find, all_files, missing_license, missin
     skip_files = sorted(set(all_files_filtered) - set(missing_license_filtered) - set(missing_copyright_filtered))
     logger.info(f"\n# File list that have both license and copyright : {len(skip_files)} / {len(all_files_filtered)}")
 
-    reuse_for_files(path_to_find, skip_files)
+    precheck_for_files(path_to_find, skip_files)
 
     return missing_license_filtered, missing_copyright_filtered
 
@@ -346,7 +346,7 @@ def add_content(target_path="", input_license="", input_copyright="", output_pat
         output_path = os.path.abspath(output_path)
 
     now = datetime.now().strftime('%Y%m%d_%H-%M-%S')
-    logger, _result_log = init_log(os.path.join(output_path, f"fosslight_reuse_add_log_{now}.txt"),
+    logger, _result_log = init_log(os.path.join(output_path, f"fosslight_prechecker_add_log_{now}.txt"),
                                    need_log_file, logging.INFO, logging.DEBUG, PKG_NAME, path_to_find)
 
     if not os.path.isdir(path_to_find):
@@ -374,7 +374,7 @@ def add_content(target_path="", input_license="", input_copyright="", output_pat
     # File Only mode (-f option)
     if _check_only_file_mode:
         main_parser = reuse_arg_parser()
-        missing_license_list, missing_copyright_list, project = reuse_for_files(path_to_find, file_to_check_list)
+        missing_license_list, missing_copyright_list, project = precheck_for_files(path_to_find, file_to_check_list)
 
         if input_license == "" and input_copyright == "":
             input_copyright = input_copyright_while_running()
@@ -419,7 +419,7 @@ def add_content(target_path="", input_license="", input_copyright="", output_pat
         all_files_list = get_allfiles_list(path_to_find)
 
         # Get missing license / copyright file list
-        missing_license, missing_copyright, _, project, _ = reuse_for_project(path_to_find, need_log_file)
+        missing_license, missing_copyright, _, project, _ = precheck_for_project(path_to_find, need_log_file)
 
         # Print Skipped Files
         missing_license_filtered, missing_copyright_filtered = \

@@ -10,14 +10,14 @@ import platform
 from datetime import datetime
 from pathlib import Path
 from yaml import safe_dump
-from fosslight_reuse._help import print_help_msg
+from fosslight_prechecker._help import print_help_msg
 from fosslight_util.constant import LOGGER_NAME
 from fosslight_util.set_log import init_log
 from fosslight_util.output_format import check_output_format
 from ._parsing_excel import convert_excel_to_yaml, convert_yml_to_excel
 
-CUSTOMIZED_FORMAT_FOR_REUSE = {'yaml': '.yaml', 'excel': '.xlsx'}
-_PKG_NAME = "fosslight_reuse"
+CUSTOMIZED_FORMAT_FOR_PRECHECKER = {'yaml': '.yaml', 'excel': '.xlsx'}
+_PKG_NAME = "fosslight_prechecker"
 logger = logging.getLogger(LOGGER_NAME)
 
 
@@ -51,9 +51,9 @@ def convert_report(base_path, output_name, format, need_log_file=True, sheet_nam
     now = datetime.now().strftime('%Y%m%d_%H-%M-%S')
     is_window = platform.system() == "Windows"
 
-    success, msg, output_path, output_name, output_extension = check_output_format(output_name, format, CUSTOMIZED_FORMAT_FOR_REUSE)
+    success, msg, output_path, output_name, output_extension = check_output_format(output_name, format, CUSTOMIZED_FORMAT_FOR_PRECHECKER)
 
-    logger, _result_log = init_log(os.path.join(output_path, f"fosslight_reuse_log_{now}.txt"),
+    logger, _result_log = init_log(os.path.join(output_path, f"fosslight_prechecker_log_{now}.txt"),
                                    need_log_file, logging.INFO, logging.DEBUG, _PKG_NAME, base_path)
     if success:
         if output_path == "":

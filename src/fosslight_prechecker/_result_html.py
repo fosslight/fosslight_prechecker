@@ -5,8 +5,8 @@
 import os
 from reuse import report
 from reuse.project import Project
-from fosslight_reuse._constant import HTML_FORMAT_PREFIX, HTML_CELL_PREFIX, HTML_FORMAT_SUFFIX, HTML_EXPAND_PREFIX,\
-                                      HTML_COMPLIANCE_SUFFIX, HTML_RESULT_PRINT_LIMIT, HTML_RESULT_EXPAND_LIMIT, HTML_CELL_HEAD_ROW
+from fosslight_prechecker._constant import HTML_FORMAT_PREFIX, HTML_CELL_PREFIX, HTML_FORMAT_SUFFIX, HTML_EXPAND_PREFIX,\
+                                           HTML_COMPLIANCE_SUFFIX, HTML_RESULT_PRINT_LIMIT, HTML_RESULT_EXPAND_LIMIT, HTML_CELL_HEAD_ROW
 
 
 def check_length_of_print_list(input_list: list, list_len: int):

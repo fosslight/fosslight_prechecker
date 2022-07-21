@@ -16,10 +16,10 @@ from fosslight_util.timer_thread import TimerThread
 from reuse import report
 from reuse.project import Project
 from reuse.report import ProjectReport
-from fosslight_reuse._result import write_result_file, create_result_file, result_for_summary, ResultItem
-from fosslight_reuse._constant import DEFAULT_EXCLUDE_EXTENSION, OSS_PKG_INFO_FILES
+from fosslight_prechecker._result import write_result_file, create_result_file, result_for_summary, ResultItem
+from fosslight_prechecker._constant import DEFAULT_EXCLUDE_EXTENSION, OSS_PKG_INFO_FILES
 
-PKG_NAME = "fosslight_reuse"
+PKG_NAME = "fosslight_prechecker"
 REUSE_CONFIG_FILE = ".reuse/dep5"
 DEFAULT_EXCLUDE_EXTENSION_FILES = []  # Exclude files from reuse
 _turn_on_default_reuse_config = True
@@ -109,7 +109,7 @@ def remove_reuse_dep5_file(rollback, file_to_remove, temp_dir_name):
         dump_error_msg(f"Error_Remove_Dep5 : {ex}")
 
 
-def reuse_for_files(path, files):
+def precheck_for_files(path, files):
     global DEFAULT_EXCLUDE_EXTENSION_FILES
 
     missing_license_list = []
@@ -140,15 +140,15 @@ def reuse_for_files(path, files):
                             missing_copyright_list.append(file)
 
             except Exception as ex:
-                dump_error_msg(f"Error_Reuse_for_file_to_read : {ex}", True)
+                dump_error_msg(f"Error - precheck_for_files to read : {ex}", True)
 
     except Exception as ex:
-        dump_error_msg(f"Error_Reuse_for_file : {ex}", True)
+        dump_error_msg(f"Error - precheck_for_files: {ex}", True)
 
     return missing_license_list, missing_copyright_list, prj
 
 
-def reuse_for_project(path_to_find, need_log_file):
+def precheck_for_project(path_to_find, need_log_file):
     missing_license = []
     missing_copyright = []
 
@@ -181,7 +181,7 @@ def reuse_for_project(path_to_find, need_log_file):
             path_to_find += "/"
         missing_copyright = [sub.replace(path_to_find, '') for sub in missing_copyright]
     except Exception as ex:
-        dump_error_msg(f"Error_Reuse_lint: {ex}", True)
+        dump_error_msg(f"Error prechecker lint: {ex}", True)
 
     if _turn_on_default_reuse_config:
         remove_reuse_dep5_file(need_rollback, temp_file_name, temp_dir_name)
@@ -198,7 +198,7 @@ def dump_error_msg(error_msg: str, exit=False):
 
 def init(path_to_find, output_path, file_list, need_log_file=True):
     global logger, _result_log
-    logger, _result_log = init_log(os.path.join(output_path, f"fosslight_reuse_log_{_start_time}.txt"),
+    logger, _result_log = init_log(os.path.join(output_path, f"fosslight_prechecker_log_{_start_time}.txt"),
                                    need_log_file, logging.INFO, logging.DEBUG, PKG_NAME, path_to_find)
     if file_list:
         _result_log["File list to check"] = file_list
@@ -259,9 +259,9 @@ def run_lint(target_path, disable, output_file_name, format='', need_log_file=Tr
         _turn_on_default_reuse_config = not disable
 
         if _check_only_file_mode:
-            license_missing_files, copyright_missing_files, project = reuse_for_files(path_to_find, file_to_check_list)
+            license_missing_files, copyright_missing_files, project = precheck_for_files(path_to_find, file_to_check_list)
         else:
-            license_missing_files, copyright_missing_files, oss_pkg_info, project, report = reuse_for_project(path_to_find, need_log_file)
+            license_missing_files, copyright_missing_files, oss_pkg_info, project, report = precheck_for_project(path_to_find, need_log_file)
 
         result_item = result_for_summary(path_to_find,
                                          oss_pkg_info,
