@@ -13,17 +13,17 @@ with open('requirements.txt', 'r', 'utf-8') as f:
 
 if __name__ == "__main__":
     setup(
-        name='fosslight_reuse',
-        version='2.2.1',
+        name='fosslight_prechecker',
+        version='3.0.0',
         package_dir={"": "src"},
         packages=find_packages(where='src'),
-        description='FOSSLight Reuse',
+        description='FOSSLight Prechecker',
         long_description=readme,
         long_description_content_type='text/markdown',
         license='GPL-3.0-only',
         author='LG Electronics',
-        url='https://github.com/fosslight/fosslight_reuse',
-        download_url='https://github.com/fosslight/fosslight_reuse',
+        url='https://github.com/fosslight/fosslight_prechecker',
+        download_url='https://github.com/fosslight/fosslight_prechecker',
         classifiers=[
             "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
             "Programming Language :: Python :: 3",
@@ -32,11 +32,11 @@ if __name__ == "__main__":
             "Programming Language :: Python :: 3.8",
             "Programming Language :: Python :: 3.9"],
         install_requires=required,
-        package_data={'fosslight_reuse': ['resources/convert_license.json']},
+        package_data={'fosslight_prechecker': ['resources/convert_license.json']},
         include_package_data=True,
         entry_points={
             "console_scripts": [
-                "fosslight_reuse = fosslight_reuse.cli:main"
+                "fosslight_prechecker = fosslight_prechecker.cli:main"
             ]
         }
     )

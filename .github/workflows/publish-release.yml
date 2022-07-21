@@ -1,7 +1,7 @@
 # 1. Update changelog
 # 2. Upload a Python Package using Twine
 
-name: Release fosslight_reuse
+name: Release fosslight_prechecker
 
 on:
   release:
@@ -61,8 +61,8 @@ jobs:
             TARGET: windows
             CMD_BUILD: >
                 pyinstaller --onefile cli.py -n cli --additional-hooks-dir=hooks &&
-                move dist/cli.exe fosslight_reuse_windows.exe
-            OUT_FILE_NAME: fosslight_reuse_windows.exe
+                move dist/cli.exe fosslight_prechecker_windows.exe
+            OUT_FILE_NAME: fosslight_prechecker_windows.exe
             ASSET_MIME: application/vnd.microsoft.portable-executable
     steps:
     - uses: actions/checkout@v2

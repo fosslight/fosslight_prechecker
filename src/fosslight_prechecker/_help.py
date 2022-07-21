@@ -4,12 +4,12 @@
 # SPDX-License-Identifier: GPL-3.0-only
 from fosslight_util.help import PrintHelpMsg
 
-_HELP_MESSAGE_REUSE = """
-    FOSSLight Reuse is a Tool to check REUSE compliance in source code.
+_HELP_MESSAGE_PRECHECKER = """
+    FOSSLight Prechecker is a Tool to check REUSE compliance in source code.
 
-    Usage: fosslight_reuse [Mode] [option1] <arg1> [option2] <arg2>...
-     ex) fosslight_reuse lint -p /home/test/src/
-         fosslight_reuse add -p /home/test/test.py -c "2019-2021 LG Electronics Inc." -l "GPL-3.0-only"
+    Usage: fosslight_precheck [Mode] [option1] <arg1> [option2] <arg2>...
+     ex) fosslight_precheck lint -p /home/test/src/
+         fosslight_precheck add -p /home/test/test.py -c "2019-2021 LG Electronics Inc." -l "GPL-3.0-only"
 
     Parameters:
         Mode
@@ -35,5 +35,5 @@ _HELP_MESSAGE_REUSE = """
 
 
 def print_help_msg(exitOpt=True):
-    helpMsg = PrintHelpMsg(_HELP_MESSAGE_REUSE)
+    helpMsg = PrintHelpMsg(_HELP_MESSAGE_PRECHECKER)
     helpMsg.print_help_msg(exitOpt)

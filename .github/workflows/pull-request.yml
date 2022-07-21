@@ -1,6 +1,6 @@
 # Running tests with tox for releasing new version
 
-name: Pull requests fosslight_reuse
+name: Pull requests fosslight_prechecker
 
 on:
   pull_request:
@@ -47,9 +47,9 @@ jobs:
             TARGET: windows
             CMD_BUILD: >
                 pyinstaller --onefile cli.py -n cli --additional-hooks-dir=hooks &&
-                move dist/cli.exe fosslight_reuse_windows.exe &&
-                ./fosslight_reuse_windows.exe
-            OUT_FILE_NAME: fosslight_reuse_windows.exe
+                move dist/cli.exe fosslight_prechecker_windows.exe &&
+                ./fosslight_prechecker_windows.exe
+            OUT_FILE_NAME: fosslight_prechecker_windows.exe
             ASSET_MIME: application/vnd.microsoft.portable-executable
     steps:
     - uses: actions/checkout@v2

@@ -12,13 +12,13 @@ import logging
 import fosslight_util.constant as constant
 from pathlib import Path
 from reuse.project import Project
-from fosslight_reuse._result_html import result_for_html
+from fosslight_prechecker._result_html import result_for_html
 from fosslight_util.parsing_yaml import find_all_oss_pkg_files, parsing_yml
 from fosslight_util.output_format import check_output_format
 import re
 
 
-CUSTOMIZED_FORMAT_FOR_REUSE = {'html': '.html', 'xml': '.xml', 'yaml': '.yaml'}
+CUSTOMIZED_FORMAT_FOR_PRECHECKER = {'html': '.html', 'xml': '.xml', 'yaml': '.yaml'}
 RULE_LINK = "https://oss.lge.com/guide/process/osc_process/1-identification/copyright_license_rule.html"
 MSG_REFERENCE = "Ref. Copyright and License Writing Rules in Source Code. : " + RULE_LINK
 MSG_FOLLOW_LIC_TXT = "Follow the Copyright and License Writing Rules in Source Code. : " + RULE_LINK
@@ -42,7 +42,7 @@ class ResultItem:
         self._os_info = ""
         self._path_to_analyze = ""
         self._python_ver = ""
-        self._fl_reuse_ver = ""
+        self._fl_prechecker_ver = ""
         self._log_msg = ""
         self._check_only_file_mode = False
         self.execution_error = []
@@ -80,7 +80,7 @@ class ResultItem:
         result_tool_item["OS"] = self._os_info
         result_tool_item["Analyze path"] = self._path_to_analyze
         result_tool_item["Python version"] = self._python_ver
-        result_tool_item["fosslight_reuse version"] = self._fl_reuse_ver
+        result_tool_item["fosslight_prechecker version"] = self._fl_prechecker_ver
         result_item["Tool Info"] = result_tool_item
         if self.execution_error:
             result_item["Execution Error"] = self.execution_error
@@ -187,7 +187,7 @@ def write_result_yaml(result_file: str, exit_code: int, result_item: ResultItem)
 
 
 def create_result_file(output_file_name, format='', _start_time=""):
-    success, msg, output_path, output_file, output_extension = check_output_format(output_file_name, format, CUSTOMIZED_FORMAT_FOR_REUSE)
+    success, msg, output_path, output_file, output_extension = check_output_format(output_file_name, format, CUSTOMIZED_FORMAT_FOR_PRECHECKER)
     if success:
         result_file = ""
         if output_path == "":
@@ -199,11 +199,11 @@ def create_result_file(output_file_name, format='', _start_time=""):
             result_file = f"{output_file}{output_extension}"
         else:
             if output_extension == '.yaml' or output_extension == "":
-                result_file = f"FOSSLight_Reuse_{_start_time}.yaml"
+                result_file = f"FOSSLight_Prechecker_{_start_time}.yaml"
             elif output_extension == '.html':
-                result_file = f"FOSSLight_Reuse_{_start_time}.html"
+                result_file = f"FOSSLight_Prechecker_{_start_time}.html"
             elif output_extension == '.xml':
-                result_file = f"FOSSLight_Reuse_{_start_time}.xml"
+                result_file = f"FOSSLight_Prechecker_{_start_time}.xml"
             else:
                 logger.error("Not supported file extension")
 
@@ -272,7 +272,7 @@ def exclude_file_in_yaml(path_to_find, yaml_files, license_missing_files, copyri
 
 def result_for_summary(path_to_find, oss_pkg_info_files, license_missing_files, copyright_missing_files,
                        prj_report, _result_log, _check_only_file_mode, file_to_check_list, error_items):
-    reuse_compliant = False
+    prechecker_compliant = False
     detected_lic = []
     missing_both_files = []
     file_total = ""
@@ -294,7 +294,7 @@ def result_for_summary(path_to_find, oss_pkg_info_files, license_missing_files, 
                                                                               set(copyright_missing_files) - set(oss_pkg_info_files))
 
     if len(license_missing_files) == 0 and len(copyright_missing_files) == 0:
-        reuse_compliant = True
+        prechecker_compliant = True
 
     # Remove duplicated file
     missing_both_files = list(set(license_missing_files) & set(copyright_missing_files))
@@ -303,7 +303,7 @@ def result_for_summary(path_to_find, oss_pkg_info_files, license_missing_files, 
 
     # Save result items
     result_item = ResultItem()
-    result_item.compliant_result = reuse_compliant
+    result_item.compliant_result = prechecker_compliant
     result_item._oss_pkg_files = oss_pkg_info_files
     result_item._detected_licenses = detected_lic
     result_item._count_total_files = file_total
@@ -313,7 +313,7 @@ def result_for_summary(path_to_find, oss_pkg_info_files, license_missing_files, 
     result_item._files_without_both = sorted(missing_both_files)
     result_item._files_without_lic = sorted(license_missing_files)
     result_item._files_without_cop = sorted(copyright_missing_files)
-    result_item._fl_reuse_ver = _result_log["Tool Info"]
+    result_item._fl_prechecker_ver = _result_log["Tool Info"]
     result_item._path_to_analyze = _result_log["Path to analyze"]
     result_item._os_info = _result_log["OS"]
     result_item._python_ver = _result_log["Python version"]
