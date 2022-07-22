@@ -1,8 +1,2 @@
-python-debian==0.1.40
-binaryornot
-requests
-reuse
-PyYAML
-xlrd==1.2.0
-XlsxWriter==1.2.9
-fosslight_util>=1.4.3
+fosslight_prechecker
+
