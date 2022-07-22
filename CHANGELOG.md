@@ -1,5 +1,13 @@
 # Changelog
 
+## v3.0.0 (22/07/2022)
+## Changes
+## 🔧 Maintenance
+
+- Rename FOSSLight Reuse to FOSSLight Prechecker @bjk7119 (#87)
+
+---
+
 ## v2.2.2 (20/07/2022)
 ## Changes
 ## 🔧 Maintenance
