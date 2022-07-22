@@ -1,5 +1,13 @@
 # Changelog
 
+## v3.0.1 (22/07/2022)
+## Changes
+## 🐛 Hotfixes
+
+- Remove unused packages @bjk7119 (#89)
+
+---
+
 ## v3.0.0 (22/07/2022)
 ## Changes
 ## 🔧 Maintenance
