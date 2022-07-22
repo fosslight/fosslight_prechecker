@@ -1,4 +1,2 @@
 include README.md
-include requirements.txt
 include LICENSE
-recursive-include src/fosslight_prechecker/resources *.json

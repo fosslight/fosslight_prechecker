@@ -14,10 +14,17 @@ def get_long_description():
 
 setup(
     name="fosslight_reuse",
+    license='GPL-3.0-only',
     description="fosslight_reuse is now fosslight_prechecker",
     long_description=get_long_description(),
     long_description_content_type="text/markdown",
     version=VERSION,
     install_requires=["fosslight_prechecker"],
-    classifiers=["Development Status :: 7 - Inactive"],
+    classifiers=[
+        "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9"],
 )
