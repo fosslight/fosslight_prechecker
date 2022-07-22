@@ -37,7 +37,7 @@ if __name__ == "__main__":
         entry_points={
             "console_scripts": [
                 "fosslight_prechecker = fosslight_prechecker.cli:main",
-                "fosslight_reuse = fosslight_reuse.cli:main"
+                "fosslight_reuse = fosslight_prechecker.cli:main"
             ]
         }
     )

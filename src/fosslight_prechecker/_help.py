@@ -5,7 +5,7 @@
 from fosslight_util.help import PrintHelpMsg
 
 _HELP_MESSAGE_PRECHECKER = """
-    FOSSLight Prechecker is a Tool to check REUSE compliance in source code.
+    FOSSLight Prechecker is a tool that checks whether source code complies with copyright and license writing rules.
 
     Usage: fosslight_prechecker [Mode] [option1] <arg1> [option2] <arg2>...
      ex) fosslight_prechecker lint -p /home/test/src/
@@ -13,7 +13,7 @@ _HELP_MESSAGE_PRECHECKER = """
 
     Parameters:
         Mode
-            lint\t\t    Check REUSE compliance
+            lint\t\t    Check whether the copyright and license writing rules are complied with
             convert\t\t    Convert oss_pkg_info.yaml <-> FOSSLight-Report.xlsx
             add\t\t\t    Add missing license and copyright
 
