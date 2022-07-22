@@ -21,7 +21,7 @@ HTML_FORMAT_PREFIX = """
             .underline{text-decoration-line: underline;}
             table{width: 100%;}
         </style>
-        <title>FOSSLight Reuse</title>
+        <title>FOSSLight Prechecker</title>
     </head>
     <body>
             <table cellspacing="0" cellpadding="0" border="0" style="font-family:'arial,sans-serif'">
@@ -30,7 +30,7 @@ HTML_FORMAT_PREFIX = """
                         <table cellspacing="0" cellpadding="0" border="0">
                             <tr>
                                 <td colspan="3" height="25" style="background:#c00c3f">
-                                    <h1 style="margin:0;padding-left:5px;font-size:14px;color:white">FOSSLight Reuse Lint</h1>
+                                    <h1 style="margin:0;padding-left:5px;font-size:14px;color:white">FOSSLight Prechecker Lint</h1>
                                 </td>
                             </tr>
                             <tr>

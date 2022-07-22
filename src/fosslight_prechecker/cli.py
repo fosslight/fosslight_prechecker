@@ -5,14 +5,14 @@
 import argparse
 import sys
 from fosslight_util.help import print_package_version
-from fosslight_reuse._help import print_help_msg
-from fosslight_reuse._fosslight_reuse import run_lint, PKG_NAME
-from fosslight_oss_pkg.fosslight_oss_pkg import convert_report
-from fosslight_reuse._add import add_content
+from fosslight_prechecker._help import print_help_msg
+from fosslight_prechecker._precheck import run_lint, PKG_NAME
+from fosslight_oss_pkg._convert import convert_report
+from fosslight_prechecker._add import add_content
 
 
 def main():
-    parser = argparse.ArgumentParser(description='FOSSLight Reuse', prog='fosslight_reuse', add_help=False)
+    parser = argparse.ArgumentParser(description='FOSSLight Prechecker', prog='fosslight_prechecker', add_help=False)
     parser.add_argument('mode', nargs='?', help='lint | convert | add', default="")
     parser.add_argument('--path', '-p', help='Path to check', type=str, dest='path', default="")
     parser.add_argument('--format', '-f', help='Format of ouput', type=str, dest='format', default="")

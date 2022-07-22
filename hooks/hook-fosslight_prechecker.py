@@ -4,4 +4,4 @@
 # SPDX-License-Identifier: GPL-3.0-only
 from PyInstaller.utils.hooks import collect_all
 
-datas, binaries, hiddenimports = collect_all('fosslight_reuse')
+datas, binaries, hiddenimports = collect_all('fosslight_prechecker')
