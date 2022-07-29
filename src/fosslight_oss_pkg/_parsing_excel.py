@@ -8,7 +8,7 @@ import sys
 import yaml
 from fosslight_util.constant import LOGGER_NAME
 from fosslight_util.parsing_yaml import find_all_oss_pkg_files, parsing_yml
-from fosslight_util.write_excel import write_result_to_excel
+from fosslight_util.output_format import write_output_file
 from fosslight_util.write_yaml import create_yaml_with_ossitem
 from fosslight_util.read_excel import read_oss_report
 
@@ -36,19 +36,19 @@ def convert_yml_to_excel(oss_pkg_files, output_file, file_option_on, base_path, 
         except Exception as ex:
             logger.error(f"Read yaml file: {ex}")
 
-    if items_to_print and len(items_to_print) > 0:
-        try:
-            sheet_list["SRC_FL_Reuse"] = items_to_print
-            success = write_result_to_excel(f"{output_file}.xlsx", sheet_list)
-            if success:
-                logger.warning(f"Output: {output_file}.xlsx")
+    try:
+        sheet_list["SRC_FL_Reuse"] = items_to_print
+        success, msg, result_file = write_output_file(output_file, '.xlsx',
+                                                      sheet_list)
+        if success:
+            if result_file:
+                logger.info(f"Output: {result_file}")
             else:
-                logger.error(f"Can't write excel file : {output_file}")
-                sys.exit(1)
-        except Exception as ex:
-            logger.error(f"Error to write excel file : {ex}")
-    else:
-        logger.warning("There is no item to convert to Excel")
+                logger.warning("Nothing is detected to convert so output file is not generated.")
+        else:
+            logger.error(f"Error to write excel file : {msg}")
+    except Exception as ex:
+        logger.error(f"Error to write excel file : {ex}")
 
 
 def convert_excel_to_yaml(oss_report_to_read, output_file, sheet_names=""):
