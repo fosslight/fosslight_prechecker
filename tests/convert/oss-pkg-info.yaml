@@ -1,27 +1,34 @@
-Open Source Software Package:
-- name: glibc
-  version: 2.3
-  source: https://github.com/fsfe/glibc
-  license:
-  - GPL-3.0
-  - LGPL-2.1
-  file : 
+libidn:
+- version: "1.5"
+  source name or path:
   - a.c
   - b.c
-- name : dbus
-  version : 1.3
-  source : https://github.com/fsfe/dbus
-  license : GPL-2.0
-  file : src/*
-  copyright : |
-   Copyright (c) 2020 Test
-   Copyright (c) 2020 Sample
-- name : reuse-tool
-  source : https://github.com/fsfe/reuse
-  homepage : http://google.com
-  license : MIT
-  copyright: Copyright (c) 2020 Test
-- name : build-tool
-  source : http://gihub.com/bazel
-  license : Apache-2.0
-  exclude : True
+  license:
+  - "GPL-3.0"
+  - "LGPL-2.1"
+  download location: "http://ftp.gnu.org/gnu/libidn"
+  homepage: "https://www.gnu.org/software/libidn"
+  copyright text: "Copyright (c) 2002-2007, Simon Josefsson"
+node-backoff:
+- version: "2.5.0"
+  source name or path: "src/*"
+  license: "MIT"
+  download location: "https://github.com/MathieuTurcotte/node-backoff"
+  homepage: "https://www.npmjs.com/package/backoff"
+  copyright text: "Copyright (c) 2012 Mathieu Turcotte"
+  exclude: True
+rsync:
+- version: "2.6.9"
+  source name or path: "test/tool"
+  license: "GPL-2.0"
+  download location: "https://download.samba.org/pub/rsync/src"
+  homepage: "http://rsync.samba.org"
+- version: "3.1.2"
+  source name or path: "test/tool"
+  license: "GPL-3.0"
+  download location: "https://download.samba.org/pub/rsync/src"
+  homepage: "http://rsync.samba.org"
+  copyright text:
+  - "Copyright (c) 1996 Andrew Tridgell"
+  - "Copyright (c) 1996 Paul Mackerras"
+  - "Copyright (c) 2003-2015 Wayne Davison"
