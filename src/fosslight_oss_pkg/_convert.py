@@ -67,7 +67,7 @@ def convert_report(base_path, output_name, format, need_log_file=True, sheet_nam
             output_yaml = os.path.join(output_path, output_name)
         else:
             output_report = os.path.join(os.path.abspath(output_path), f"FOSSLight-Report_{now}")
-            output_yaml = os.path.join(os.path.abspath(output_path), f"oss-pkg-info_{now}")
+            output_yaml = os.path.join(os.path.abspath(output_path), f"fosslight-sbom-info_{now}")
     else:
         logger.error(f"Format error - {msg}")
         sys.exit(1)
@@ -93,7 +93,7 @@ def convert_report(base_path, output_name, format, need_log_file=True, sheet_nam
                 convert_yml_mode = True
                 file_option_on = True
             else:
-                logger.error("Not support file name or extension - only support for FOSSLight-Report*.xlsx or oss-pkg-info*.yaml file")
+                logger.error("Not support file name or extension")
                 sys.exit(1)
 
     if not convert_yml_mode and not convert_excel_mode:
