@@ -10,7 +10,6 @@ import platform
 from datetime import datetime
 from pathlib import Path
 from yaml import safe_dump
-from fosslight_prechecker._help import print_help_msg
 from fosslight_util.constant import LOGGER_NAME
 from fosslight_util.set_log import init_log
 from fosslight_util.output_format import check_output_format
@@ -84,19 +83,15 @@ def convert_report(base_path, output_name, format, need_log_file=True, sheet_nam
                 if output_extension == '.xlsx':
                     logger.error("Format error - can make only .yaml file")
                     sys.exit(1)
-                p = re.compile(r"[\s\S]*OSS[\s\S]*-Report[\s\S]*.xlsx", re.I)
-                if p.search(base_path):
-                    convert_excel_mode = True
-                    report_to_read = base_path
+                convert_excel_mode = True
+                report_to_read = base_path
             elif base_path.endswith((".yaml", ".yml")):
                 if output_extension == '.yaml':
                     logger.error("Format error - can make only .xlsx file")
                     sys.exit(1)
-                p = re.compile(r"oss-pkg-info[\s\S]*.ya?ml", re.I)
-                if p.search(base_path):
-                    oss_pkg_files = base_path.split(',')
-                    convert_yml_mode = True
-                    file_option_on = True
+                oss_pkg_files = base_path.split(',')
+                convert_yml_mode = True
+                file_option_on = True
             else:
                 logger.error("Not support file name or extension - only support for FOSSLight-Report*.xlsx or oss-pkg-info*.yaml file")
                 sys.exit(1)
