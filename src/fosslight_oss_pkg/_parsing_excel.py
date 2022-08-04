@@ -37,7 +37,7 @@ def convert_yml_to_excel(oss_pkg_files, output_file, file_option_on, base_path, 
             logger.error(f"Read yaml file: {ex}")
 
     try:
-        sheet_list["SRC_FL_Reuse"] = items_to_print
+        sheet_list["SRC_FL_Prechecker"] = items_to_print
         success, msg, result_file = write_output_file(output_file, '.xlsx',
                                                       sheet_list)
         if success:

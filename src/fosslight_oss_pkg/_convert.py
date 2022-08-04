@@ -109,7 +109,8 @@ def convert_report(base_path, output_name, format, need_log_file=True, sheet_nam
             if report_to_read != "":
                 convert_excel_mode = True
         else:
-            print_help_msg()
+            logger.info("fosslight_prechecker: can't convert anything")
+            logger.info("Try 'fosslight_prechecker -h for more information")
 
     if convert_yml_mode:
         convert_yml_to_excel(oss_pkg_files, output_report, file_option_on, base_path, is_window)
