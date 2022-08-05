@@ -13,6 +13,7 @@ from yaml import safe_dump
 from fosslight_util.constant import LOGGER_NAME
 from fosslight_util.set_log import init_log
 from fosslight_util.output_format import check_output_format
+from fosslight_util.parsing_yaml import find_sbom_yaml_files
 from ._parsing_excel import convert_excel_to_yaml, convert_yml_to_excel
 
 CUSTOMIZED_FORMAT_FOR_PRECHECKER = {'yaml': '.yaml', 'excel': '.xlsx'}
@@ -39,12 +40,19 @@ def find_report_file(path_to_find):
     return ""
 
 
+def check_extension_and_format(file, format):
+    if (file.endswith((".yaml", ".yml")) and format == "yaml") or \
+       (file.endswith(".xlsx") and format == "excel"):
+        logger.error(f"File extension is not matched with input format({format})")
+        sys.exit(1)
+
+
 def convert_report(base_path, output_name, format, need_log_file=True, sheet_names=""):
-    oss_pkg_files = ["oss-pkg-info.yml", "oss-pkg-info.yaml"]
+    oss_yaml_files = []
+    oss_report_files = ""  # TODO: Change to list type for multiple Report files
     file_option_on = False
     convert_yml_mode = False
     convert_excel_mode = False
-    report_to_read = ""
     output_report = ""
     output_yaml = ""
     now = datetime.now().strftime('%Y%m%d_%H-%M-%S')
@@ -72,46 +80,45 @@ def convert_report(base_path, output_name, format, need_log_file=True, sheet_nam
         logger.error(f"Format error - {msg}")
         sys.exit(1)
 
+    if base_path == "":
+        base_path = output_path
+
     if os.path.isdir(base_path):
-        if output_extension == ".yaml":
-            logger.error("Format error - can make only .xlsx file")
-            sys.exit(1)
-        convert_yml_mode = True
+        oss_yaml_files = find_sbom_yaml_files(base_path)
+        if oss_yaml_files:
+            convert_yml_mode = True
     else:
         if base_path != "":
-            if base_path.endswith(".xlsx"):
-                if output_extension == '.xlsx':
-                    logger.error("Format error - can make only .yaml file")
+            files_to_convert = base_path.split(",")
+            for file in files_to_convert:
+                check_extension_and_format(file, format)
+                if base_path.endswith(".xlsx"):
+                    convert_excel_mode = True
+                    oss_report_files = base_path
+                elif base_path.endswith((".yaml", ".yml")):
+                    convert_yml_mode = True
+                    file_option_on = True
+                    oss_yaml_files.append(file)
+                else:
+                    logger.error("Not support file name or extension")
                     sys.exit(1)
-                convert_excel_mode = True
-                report_to_read = base_path
-            elif base_path.endswith((".yaml", ".yml")):
-                if output_extension == '.yaml':
-                    logger.error("Format error - can make only .xlsx file")
-                    sys.exit(1)
-                oss_pkg_files = base_path.split(',')
-                convert_yml_mode = True
-                file_option_on = True
-            else:
-                logger.error("Not support file name or extension")
-                sys.exit(1)
 
     if not convert_yml_mode and not convert_excel_mode:
         if is_window:
             convert_yml_mode = True
             base_path = os.getcwd()
-            report_to_read = find_report_file(base_path)
-            if report_to_read != "":
+            oss_report_files = find_report_file(base_path)
+            if oss_report_files != "":
                 convert_excel_mode = True
         else:
             logger.info("fosslight_prechecker: can't convert anything")
             logger.info("Try 'fosslight_prechecker -h for more information")
 
     if convert_yml_mode:
-        convert_yml_to_excel(oss_pkg_files, output_report, file_option_on, base_path, is_window)
+        convert_yml_to_excel(oss_yaml_files, output_report, file_option_on, base_path)
 
     if convert_excel_mode:
-        convert_excel_to_yaml(report_to_read, output_yaml, sheet_names)
+        convert_excel_to_yaml(oss_report_files, output_yaml, sheet_names)
 
     try:
         _str_final_result_log = safe_dump(_result_log, allow_unicode=True, sort_keys=True)
