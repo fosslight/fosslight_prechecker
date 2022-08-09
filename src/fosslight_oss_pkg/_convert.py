@@ -92,10 +92,10 @@ def convert_report(base_path, output_name, format, need_log_file=True, sheet_nam
             files_to_convert = base_path.split(",")
             for file in files_to_convert:
                 check_extension_and_format(file, format)
-                if base_path.endswith(".xlsx"):
+                if file.endswith(".xlsx"):
                     convert_excel_mode = True
-                    oss_report_files = base_path
-                elif base_path.endswith((".yaml", ".yml")):
+                    oss_report_files = file
+                elif file.endswith((".yaml", ".yml")):
                     convert_yml_mode = True
                     file_option_on = True
                     oss_yaml_files.append(file)

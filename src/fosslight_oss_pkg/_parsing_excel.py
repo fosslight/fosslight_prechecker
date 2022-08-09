@@ -23,7 +23,7 @@ def convert_yml_to_excel(oss_yaml_files, output_file, file_option_on, base_path)
     for yaml_file in oss_yaml_files:
         try:
             if os.path.isfile(yaml_file):
-                logger.warning(f"Read data from : {yaml_file}")
+                logger.info(f"Read data from : {yaml_file}")
 
                 if file_option_on:
                     base_path = os.path.dirname(yaml_file)
@@ -39,7 +39,7 @@ def convert_yml_to_excel(oss_yaml_files, output_file, file_option_on, base_path)
                                                       sheet_list)
         if success:
             if result_file:
-                logger.info(f"Output: {result_file}")
+                logger.warning(f"Output: {result_file}")
             else:
                 logger.warning("Nothing is detected to convert so output file is not generated.")
         else:
