@@ -80,9 +80,6 @@ def convert_report(base_path, output_name, format, need_log_file=True, sheet_nam
         logger.error(f"Format error - {msg}")
         sys.exit(1)
 
-    if base_path == "":
-        base_path = output_path
-
     if os.path.isdir(base_path):
         oss_yaml_files = find_sbom_yaml_files(base_path)
         if oss_yaml_files:

@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 import argparse
 import sys
+import os
 from fosslight_util.help import print_package_version
 from fosslight_prechecker._help import print_help_msg
 from fosslight_prechecker._precheck import run_lint, PKG_NAME
@@ -35,6 +36,9 @@ def main():
     if args.version:
         print_package_version(PKG_NAME, "FOSSLight Prechecker Version")
         sys.exit(0)
+
+    if not args.path:
+        args.path = os.getcwd()
 
     if args.mode == "lint":
         run_lint(args.path, args.disable, args.output, args.format, args.log)
