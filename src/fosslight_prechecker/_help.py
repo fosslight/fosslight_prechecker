@@ -20,7 +20,7 @@ _HELP_MESSAGE_PRECHECKER = """
         Options:
             -h\t\t\t    Print help message
             -v\t\t\t    Print FOSSLight Prechecker version
-            -p <path>\t\t    Path to check
+            -p <path>\t\t    Path to check(Default: current directory)
             -f <format>\t\t    Result format(yaml, xml, html)
             -o <file_name>\t    Output file name
             -n\t\t\t    Don't exclude venv*, node_modules, and .*/ from the analysis
