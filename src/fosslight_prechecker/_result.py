@@ -13,7 +13,7 @@ import fosslight_util.constant as constant
 from pathlib import Path
 from reuse.project import Project
 from fosslight_prechecker._result_html import result_for_html
-from fosslight_util.parsing_yaml import find_all_oss_pkg_files, parsing_yml
+from fosslight_util.parsing_yaml import find_sbom_yaml_files, parsing_yml
 from fosslight_util.output_format import check_output_format
 import re
 
@@ -286,8 +286,8 @@ def result_for_summary(path_to_find, oss_pkg_info_files, license_missing_files, 
             detected_lic.append(lic)
 
     if oss_pkg_info_files:
-        pkg_info_yaml_files = find_all_oss_pkg_files(path_to_find, oss_pkg_info_files)
-        yaml_file = get_only_pkg_info_yaml_file(pkg_info_yaml_files)
+        oss_yaml_files = find_sbom_yaml_files(path_to_find)
+        yaml_file = get_only_pkg_info_yaml_file(oss_yaml_files)
         # Exclude files in yaml
         license_missing_files, copyright_missing_files = exclude_file_in_yaml(path_to_find, yaml_file,
                                                                               set(license_missing_files) - set(oss_pkg_info_files),

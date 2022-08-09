@@ -1,0 +1,34 @@
+libidn:
+- version: "1.5"
+  source name or path:
+  - a.c
+  - b.c
+  license:
+  - "GPL-3.0"
+  - "LGPL-2.1"
+  download location: "http://ftp.gnu.org/gnu/libidn"
+  homepage: "https://www.gnu.org/software/libidn"
+  copyright text: "Copyright (c) 2002-2007, Simon Josefsson"
+node-backoff:
+- version: "2.5.0"
+  source name or path: "src/*"
+  license: "MIT"
+  download location: "https://github.com/MathieuTurcotte/node-backoff"
+  homepage: "https://www.npmjs.com/package/backoff"
+  copyright text: "Copyright (c) 2012 Mathieu Turcotte"
+  exclude: True
+rsync:
+- version: "2.6.9"
+  source name or path: "test/tool"
+  license: "GPL-2.0"
+  download location: "https://download.samba.org/pub/rsync/src"
+  homepage: "http://rsync.samba.org"
+- version: "3.1.2"
+  source name or path: "test/tool"
+  license: "GPL-3.0"
+  download location: "https://download.samba.org/pub/rsync/src"
+  homepage: "http://rsync.samba.org"
+  copyright text:
+  - "Copyright (c) 1996 Andrew Tridgell"
+  - "Copyright (c) 1996 Paul Mackerras"
+  - "Copyright (c) 2003-2015 Wayne Davison"

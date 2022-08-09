@@ -12,7 +12,7 @@ import fosslight_util.constant as constant
 from yaml import safe_dump
 from fosslight_util.set_log import init_log
 from fosslight_util.spdx_licenses import get_spdx_licenses_json
-from fosslight_util.parsing_yaml import find_all_oss_pkg_files, parsing_yml
+from fosslight_util.parsing_yaml import find_sbom_yaml_files, parsing_yml
 from fosslight_util.output_format import check_output_format
 from datetime import datetime
 from fosslight_prechecker._precheck import precheck_for_project, precheck_for_files, dump_error_msg, get_path_to_find
@@ -298,24 +298,24 @@ def is_exclude_dir(dir_path):
 
 
 def download_oss_info_license(base_path, input_license=""):
-    oss_pkg_files = ["oss-pkg-info.yml", "oss-pkg-info.yaml"]
     license_list = []
     converted_lic_list = []
+    oss_yaml_files = []
     main_parser = reuse_arg_parser()
     prj = Project(base_path)
 
-    found_oss_pkg_files = find_all_oss_pkg_files(base_path, oss_pkg_files)
+    oss_yaml_files = find_sbom_yaml_files(base_path)
 
     if input_license != "":
         license_list.append(input_license)
 
-    if found_oss_pkg_files is None or len(found_oss_pkg_files) == 0:
+    if oss_yaml_files is None or len(oss_yaml_files) == 0:
         logger.info("\n # There is no OSS package Info file in this path\n")
         return
     else:
-        logger.info(f"\n # There is OSS Package Info file(s) : {found_oss_pkg_files}\n")
+        logger.info(f"\n # There is OSS Package Info file(s) : {oss_yaml_files}\n")
 
-    for oss_pkg_file in found_oss_pkg_files:
+    for oss_pkg_file in oss_yaml_files:
         _, license_list = parsing_yml(oss_pkg_file, base_path)
 
     for lic in license_list:
