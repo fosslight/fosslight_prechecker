@@ -5,7 +5,6 @@
 import os
 import sys
 import logging
-import platform
 from datetime import datetime
 from pathlib import Path
 from yaml import safe_dump
@@ -20,19 +19,11 @@ _PKG_NAME = "fosslight_prechecker"
 logger = logging.getLogger(LOGGER_NAME)
 
 
-def check_extension_and_format(file, format):
-    if (file.endswith((".yaml", ".yml")) and format == "yaml"):
-        logger.error(f"File extension is not matched with input format({format})")
-        sys.exit(1)
-
-
 def convert_report(base_path, output_name, format, need_log_file=True):
     oss_yaml_files = []
     file_option_on = False
-    convert_yml_mode = False
     output_report = ""
     now = datetime.now().strftime('%Y%m%d_%H-%M-%S')
-    is_window = platform.system() == "Windows"
 
     success, msg, output_path, output_name, output_extension = check_output_format(output_name, format, CUSTOMIZED_FORMAT_FOR_PRECHECKER)
 
@@ -56,30 +47,22 @@ def convert_report(base_path, output_name, format, need_log_file=True):
 
     if os.path.isdir(base_path):
         oss_yaml_files = find_sbom_yaml_files(base_path)
-        if oss_yaml_files:
-            convert_yml_mode = True
     else:
         if base_path != "":
             files_to_convert = base_path.split(",")
+            file_option_on = True
             for file in files_to_convert:
-                check_extension_and_format(file, format)
                 if file.endswith((".yaml", ".yml")):
-                    convert_yml_mode = True
-                    file_option_on = True
                     oss_yaml_files.append(file)
                 else:
                     logger.error("Not support file name or extension")
                     sys.exit(1)
 
-    if not convert_yml_mode:
-        if is_window:
-            convert_yml_mode = True
-        else:
-            logger.info("fosslight_prechecker: can't convert anything")
-            logger.info("Try 'fosslight_prechecker -h for more information")
-
-    if convert_yml_mode:
+    if oss_yaml_files:
         convert_yml_to_excel(oss_yaml_files, output_report, file_option_on, base_path)
+    else:
+        logger.info("fosslight_prechecker: can't convert anything")
+        logger.info("Try 'fosslight_prechecker -h for more information")
 
     try:
         _str_final_result_log = safe_dump(_result_log, allow_unicode=True, sort_keys=True)
