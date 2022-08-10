@@ -103,7 +103,6 @@ def convert_report(base_path, output_name, format, need_log_file=True, sheet_nam
     if not convert_yml_mode and not convert_excel_mode:
         if is_window:
             convert_yml_mode = True
-            base_path = os.getcwd()
             oss_report_files = find_report_file(base_path)
             if oss_report_files != "":
                 convert_excel_mode = True
