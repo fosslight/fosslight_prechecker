@@ -1,5 +1,20 @@
 # Changelog
 
+## v3.0.2 (12/08/2022)
+## Changes
+## 🔧 Maintenance
+
+- Remove the function to convert excel to yaml @bjk7119 (#98)
+- Remove unnecessary code @bjk7119 (#97)
+- Run current path if no input path @bjk7119 (#96)
+- Remove the code of filtering fille name in convert mode @bjk7119 (#95)
+- Delete unnecessary returns @soimkim (#94)
+- Add new format of oss-pkg-info.yaml @bjk7119 (#93)
+- Change the message if there is nothing to convert @soimkim (#92)
+- Modify badge info in README.md @bjk7119 (#90)
+
+---
+
 ## v3.0.1 (22/07/2022)
 ## Changes
 ## 🐛 Hotfixes
