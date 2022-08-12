@@ -10,11 +10,12 @@ _HELP_MESSAGE_PRECHECKER = """
     Usage: fosslight_prechecker [Mode] [option1] <arg1> [option2] <arg2>...
      ex) fosslight_prechecker lint -p /home/test/src/
          fosslight_prechecker add -p /home/test/test.py -c "2019-2021 LG Electronics Inc." -l "GPL-3.0-only"
+         fosslight_prechecker convert -p /home/test/sbom_info.py
 
     Parameters:
         Mode
             lint\t\t    Check whether the copyright and license writing rules are complied with
-            convert\t\t    Convert oss_pkg_info.yaml <-> FOSSLight-Report.xlsx
+            convert\t\t    Convert sbom_info.yaml -> FOSSLight-Report.xlsx
             add\t\t\t    Add missing license and copyright
 
         Options:
@@ -28,10 +29,7 @@ _HELP_MESSAGE_PRECHECKER = """
 
         Options for only 'add' mode
             -l <license>\t    License name(SPDX format) to add
-            -c <copyright>\t    Copyright to add(ex, 2015-2021 LG Electronics Inc.)
-
-        Options for only 'convert' mode
-            -s <sheet_names>\t    Sheet name in excel to change to yaml(ex. SRC,BIN)"""
+            -c <copyright>\t    Copyright to add(ex, 2015-2021 LG Electronics Inc.)"""
 
 
 def print_help_msg(exitOpt=True):
