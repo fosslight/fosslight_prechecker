@@ -237,7 +237,7 @@ def run_lint(target_path, disable, output_file_name, format='', need_log_file=Tr
     global _turn_on_default_reuse_config, _check_only_file_mode, _start_time
 
     file_to_check_list = []
-    _exit_code = os.EX_OK
+    _exit_code = 0
     path_to_find = ""
     report = ProjectReport()
     result_item = ResultItem()

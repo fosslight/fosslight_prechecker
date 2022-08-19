@@ -22,7 +22,7 @@ CUSTOMIZED_FORMAT_FOR_PRECHECKER = {'html': '.html', 'xml': '.xml', 'yaml': '.ya
 RULE_LINK = "https://oss.lge.com/guide/process/osc_process/1-identification/copyright_license_rule.html"
 MSG_REFERENCE = "Ref. Copyright and License Writing Rules in Source Code. : " + RULE_LINK
 MSG_FOLLOW_LIC_TXT = "Follow the Copyright and License Writing Rules in Source Code. : " + RULE_LINK
-
+EX_IOERR = 74
 logger = logging.getLogger(constant.LOGGER_NAME)
 
 
@@ -151,7 +151,7 @@ def write_result_xml(result_file: str, exit_code: int, result_item: ResultItem, 
         success = True
     except Exception as ex:
         logger.error(f"Error_to_write_xml: {ex}")
-        exit_code = os.EX_IOERR
+        exit_code = EX_IOERR
     return success, exit_code
 
 
@@ -166,7 +166,7 @@ def write_result_html(result_file: str, exit_code: int, result_item: ResultItem,
         success = True
     except Exception as ex:
         logger.error(f"Error_to_write_html: {ex}")
-        exit_code = os.EX_IOERR
+        exit_code = EX_IOERR
     return success, exit_code
 
 
@@ -182,7 +182,7 @@ def write_result_yaml(result_file: str, exit_code: int, result_item: ResultItem)
         success = True
     except Exception as ex:
         logger.error(f"Error_to_write_yaml: {ex}")
-        exit_code = os.EX_IOERR
+        exit_code = EX_IOERR
     return success, exit_code
 
 
