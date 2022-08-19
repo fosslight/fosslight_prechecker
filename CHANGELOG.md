@@ -1,5 +1,13 @@
 # Changelog
 
+## v3.0.3 (19/08/2022)
+## Changes
+## 🐛 Hotfixes
+
+- Change the exit code to a constant for windows @soimkim (#99)
+
+---
+
 ## v3.0.2 (12/08/2022)
 ## Changes
 ## 🔧 Maintenance
