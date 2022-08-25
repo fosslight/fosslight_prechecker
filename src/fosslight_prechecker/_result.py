@@ -215,15 +215,6 @@ def create_result_file(output_file_name, format='', _start_time=""):
     return result_file, output_path, output_extension
 
 
-def get_only_pkg_info_yaml_file(pkg_info_files):
-    for yaml_file in pkg_info_files:
-        try:
-            if re.search(r"oss-pkg-info[\s\S]*.yaml", os.path.basename(yaml_file).lower()):
-                yield yaml_file
-        except Exception as ex:
-            logger.debug(f"Error to find oss-pkg-info*.yaml: {ex}")
-
-
 def get_path_in_yaml(oss_item):
     return [os.path.join(oss_item.relative_path, file) for file in oss_item.source_name_or_path]
 
@@ -287,9 +278,8 @@ def result_for_summary(path_to_find, oss_pkg_info_files, license_missing_files, 
 
     if oss_pkg_info_files:
         oss_yaml_files = find_sbom_yaml_files(path_to_find)
-        yaml_file = get_only_pkg_info_yaml_file(oss_yaml_files)
         # Exclude files in yaml
-        license_missing_files, copyright_missing_files = exclude_file_in_yaml(path_to_find, yaml_file,
+        license_missing_files, copyright_missing_files = exclude_file_in_yaml(path_to_find, oss_yaml_files,
                                                                               set(license_missing_files) - set(oss_pkg_info_files),
                                                                               set(copyright_missing_files) - set(oss_pkg_info_files))
 
