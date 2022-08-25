@@ -14,7 +14,7 @@ from fosslight_prechecker._add import add_content
 
 def main():
     parser = argparse.ArgumentParser(description='FOSSLight Prechecker', prog='fosslight_prechecker', add_help=False)
-    parser.add_argument('mode', nargs='?', help='lint | convert | add', default="")
+    parser.add_argument('mode', nargs='*', help='lint | convert | add', default="")
     parser.add_argument('--path', '-p', help='Path to check', type=str, dest='path', default="")
     parser.add_argument('--format', '-f', help='Format of ouput', type=str, dest='format', default="")
     parser.add_argument('--output', '-o', help='Output file name', type=str, dest='output', default="")
