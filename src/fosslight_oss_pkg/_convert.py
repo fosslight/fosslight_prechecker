@@ -52,17 +52,21 @@ def convert_report(base_path, output_name, format, need_log_file=True):
             files_to_convert = base_path.split(",")
             file_option_on = True
             for file in files_to_convert:
-                if file.endswith((".yaml", ".yml")):
-                    oss_yaml_files.append(file)
+                if os.path.isfile(file):
+                    if file.endswith((".yaml", ".yml")):
+                        oss_yaml_files.append(file)
+                    else:
+                        logger.error("Not support file name or extension")
+                        sys.exit(1)
                 else:
-                    logger.error("Not support file name or extension")
+                    logger.error(f"Check the path to find: {base_path}")
                     sys.exit(1)
 
     if oss_yaml_files:
         convert_yml_to_excel(oss_yaml_files, output_report, file_option_on, base_path)
     else:
         logger.info("fosslight_prechecker: can't convert anything")
-        logger.info("Try 'fosslight_prechecker -h for more information")
+        logger.info("Try 'fosslight_prechecker -h' for more information")
 
     try:
         _str_final_result_log = safe_dump(_result_log, allow_unicode=True, sort_keys=True)
