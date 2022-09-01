@@ -1,5 +1,18 @@
 # Changelog
 
+## v3.0.4 (01/09/2022)
+## Changes
+## 🐛 Hotfixes
+
+- Fix not to print argparse's help msg @bjk7119 (#102)
+- Fix bug where path in sbom-info.yaml is not excluded from lint result @bjk7119 (#101)
+
+## 🔧 Maintenance
+
+- Apply new help msg if invalid input @bjk7119 (#103)
+
+---
+
 ## v3.0.3 (19/08/2022)
 ## Changes
 ## 🐛 Hotfixes
