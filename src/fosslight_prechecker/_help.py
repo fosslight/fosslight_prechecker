@@ -2,11 +2,7 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2021 LG Electronics Inc.
 # SPDX-License-Identifier: GPL-3.0-only
-import logging
-import fosslight_util.constant as constant
 from fosslight_util.help import PrintHelpMsg
-
-logger = logging.getLogger(constant.LOGGER_NAME)
 
 
 _HELP_MESSAGE_PRECHECKER = """
@@ -40,9 +36,3 @@ _HELP_MESSAGE_PRECHECKER = """
 def print_help_msg(exitOpt=True):
     helpMsg = PrintHelpMsg(_HELP_MESSAGE_PRECHECKER)
     helpMsg.print_help_msg(exitOpt)
-
-
-def print_invalid_msg(reason: str):
-    logger.warning(f"fosslight_prechecker: {reason}")
-    logger.warning("fosslight_prechecker [Mode] [option1] <arg1> [option2] <arg2>...")
-    logger.warning("Try 'fosslight_prechecker -h' for more information")
