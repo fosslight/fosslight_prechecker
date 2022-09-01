@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 from fosslight_util.help import PrintHelpMsg
 
+
 _HELP_MESSAGE_PRECHECKER = """
     FOSSLight Prechecker is a tool that checks whether source code complies with copyright and license writing rules.
 

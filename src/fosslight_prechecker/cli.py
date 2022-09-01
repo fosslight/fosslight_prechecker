@@ -14,22 +14,22 @@ from fosslight_prechecker._add import add_content
 
 def main():
     parser = argparse.ArgumentParser(description='FOSSLight Prechecker', prog='fosslight_prechecker', add_help=False)
-    parser.add_argument('mode', nargs='?', help='lint | convert | add', choices=['lint', 'convert', 'add'])
-    parser.add_argument('--path', '-p', help='Path to check', type=str, dest='path', default="")
-    parser.add_argument('--format', '-f', help='Format of ouput', type=str, dest='format', default="")
-    parser.add_argument('--output', '-o', help='Output file name', type=str, dest='output', default="")
-    parser.add_argument('--no', '-n', help='Disable automatic exclude mode', action='store_true', dest='disable')
-    parser.add_argument('--license', '-l', help='License name to add', type=str, dest='license', default="")
-    parser.add_argument('--copyright', '-c', help='Copyright to add', type=str, dest='copyright', default="")
-    parser.add_argument('--help', '-h', help='Print help message', action='store_true', dest='help')
-    parser.add_argument('--ignore', '-i', help='Do not write log to file', action='store_false', dest='log')
-    parser.add_argument('--version', '-v', help='Print FOSSLight Prechecker version', action='store_true', dest='version')
+    parser.add_argument('mode', nargs='?', help='lint | convert | add', choices=['lint', 'add', 'convert'])
+    parser.add_argument('-h', '--help', help='Print help message', action='store_true', dest='help')
+    parser.add_argument('-i', '--ignore', help='Do not write log to file', action='store_false', dest='log')
+    parser.add_argument('-v', '--version', help='Print FOSSLight Prechecker version', action='store_true', dest='version')
+    parser.add_argument('-n', '--no', help='Disable automatic exclude mode', action='store_true', dest='disable')
+    parser.add_argument('-p', '--path', help='Path to check', type=str, dest='path', default="")
+    parser.add_argument('-f', '--format', help='Format of ouput', type=str, dest='format', default="")
+    parser.add_argument('-o', '--output', help='Output file name', type=str, dest='output', default="")
+    parser.add_argument('-l', '--license', help='License name to add', type=str, dest='license', default="")
+    parser.add_argument('-c', '--copyright', help='Copyright to add', type=str, dest='copyright', default="")
     try:
-        args, unknown = parser.parse_known_args()
+        args = parser.parse_args()
     except SystemExit:
-        print_help_msg()
+        sys.exit(0)
 
-    if args.help or unknown:
+    if args.help:
         print_help_msg()
 
     if args.version:
