@@ -14,7 +14,7 @@ from fosslight_prechecker._add import add_content
 
 def main():
     parser = argparse.ArgumentParser(description='FOSSLight Prechecker', prog='fosslight_prechecker', add_help=False)
-    parser.add_argument('mode', nargs='?', help='lint | convert | add', choices=['lint', 'add', 'convert'])
+    parser.add_argument('mode', help='lint | convert | add', choices=['lint', 'add', 'convert'])
     parser.add_argument('-h', '--help', help='Print help message', action='store_true', dest='help')
     parser.add_argument('-i', '--ignore', help='Do not write log to file', action='store_false', dest='log')
     parser.add_argument('-v', '--version', help='Print FOSSLight Prechecker version', action='store_true', dest='version')
