@@ -345,8 +345,8 @@ def add_content(target_path="", input_license="", input_copyright="", output_pat
     else:
         output_path = os.path.abspath(output_path)
 
-    now = datetime.now().strftime('%Y%m%d_%H-%M-%S')
-    logger, _result_log = init_log(os.path.join(output_path, f"fosslight_prechecker_add_log_{now}.txt"),
+    now = datetime.now().strftime('%y%m%d_%H%M')
+    logger, _result_log = init_log(os.path.join(output_path, f"fosslight_log_{now}.txt"),
                                    need_log_file, logging.INFO, logging.DEBUG, PKG_NAME, path_to_find)
 
     if not os.path.isdir(path_to_find):
