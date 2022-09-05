@@ -198,7 +198,7 @@ def dump_error_msg(error_msg: str, exit=False):
 
 def init(path_to_find, output_path, file_list, need_log_file=True):
     global logger, _result_log
-    logger, _result_log = init_log(os.path.join(output_path, f"fosslight_prechecker_log_{_start_time}.txt"),
+    logger, _result_log = init_log(os.path.join(output_path, f"fosslight_log_{_start_time}.txt"),
                                    need_log_file, logging.INFO, logging.DEBUG, PKG_NAME, path_to_find)
     if file_list:
         _result_log["File list to check"] = file_list
@@ -242,7 +242,7 @@ def run_lint(target_path, disable, output_file_name, format='', need_log_file=Tr
     report = ProjectReport()
     result_item = ResultItem()
     success = False
-    _start_time = datetime.now().strftime('%Y%m%d_%H-%M-%S')
+    _start_time = datetime.now().strftime('%y%m%d_%H%M')
 
     try:
         locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
