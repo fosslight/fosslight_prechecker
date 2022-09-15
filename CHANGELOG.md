@@ -1,5 +1,13 @@
 # Changelog
 
+## v3.0.6 (15/09/2022)
+## Changes
+## 🔧 Maintenance
+
+- Modify result file name format @bjk7119 (#106)
+
+---
+
 ## v3.0.5 (15/09/2022)
 ## Changes
 ## 🔧 Maintenance
