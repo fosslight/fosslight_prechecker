@@ -199,11 +199,11 @@ def create_result_file(output_file_name, format='', _start_time=""):
             result_file = f"{output_file}{output_extension}"
         else:
             if output_extension == '.yaml' or output_extension == "":
-                result_file = f"FOSSLight_Prechecker_{_start_time}.yaml"
+                result_file = f"fosslight_lint_{_start_time}.yaml"
             elif output_extension == '.html':
-                result_file = f"FOSSLight_Prechecker_{_start_time}.html"
+                result_file = f"fosslight_lint_{_start_time}.html"
             elif output_extension == '.xml':
-                result_file = f"FOSSLight_Prechecker_{_start_time}.xml"
+                result_file = f"fosslight_lint_{_start_time}.xml"
             else:
                 logger.error("Not supported file extension")
 
