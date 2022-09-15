@@ -1,5 +1,13 @@
 # Changelog
 
+## v3.0.5 (15/09/2022)
+## Changes
+## 🔧 Maintenance
+
+- Fix to print argparse help msg if input no mode @bjk7119 (#104)
+
+---
+
 ## v3.0.4 (01/09/2022)
 ## Changes
 ## 🐛 Hotfixes
