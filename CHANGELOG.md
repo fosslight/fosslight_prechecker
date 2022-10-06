@@ -1,5 +1,13 @@
 # Changelog
 
+## v3.0.7 (06/10/2022)
+## Changes
+## 🚀 Features
+
+- Convert multiple yaml files into one report @bjk7119 (#107)
+
+---
+
 ## v3.0.6 (15/09/2022)
 ## Changes
 ## 🔧 Maintenance
