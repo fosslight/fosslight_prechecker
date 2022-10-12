@@ -1,5 +1,17 @@
 # Changelog
 
+## v3.0.8 (12/10/2022)
+## Changes
+## 🐛 Hotfixes
+
+- Fix bug in lint and add error for Windows @bjk7119 (#109)
+
+## 🔧 Maintenance
+
+- Add OSS pkg file list for Nuget @bjk7119 (#108)
+
+---
+
 ## v3.0.7 (06/10/2022)
 ## Changes
 ## 🚀 Features
