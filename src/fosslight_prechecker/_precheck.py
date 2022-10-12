@@ -7,6 +7,7 @@ import sys
 import shutil
 import logging
 import locale
+import platform
 import re
 from datetime import datetime
 from binaryornot.check import is_binary
@@ -19,6 +20,7 @@ from reuse.report import ProjectReport
 from fosslight_prechecker._result import write_result_file, create_result_file, result_for_summary, ResultItem
 from fosslight_prechecker._constant import DEFAULT_EXCLUDE_EXTENSION, OSS_PKG_INFO_FILES
 
+is_windows = platform.system() == 'Windows'
 PKG_NAME = "fosslight_prechecker"
 REUSE_CONFIG_FILE = ".reuse/dep5"
 DEFAULT_EXCLUDE_EXTENSION_FILES = []  # Exclude files from reuse
@@ -46,10 +48,14 @@ def find_oss_pkg_info(path):
                    or file_lower_case.startswith("module_license_"):
                     oss_pkg_info.append(file_rel_path)
                 elif is_binary(file_abs_path):
+                    if is_windows:
+                        file_rel_path = file_rel_path.replace(os.sep, '/')
                     DEFAULT_EXCLUDE_EXTENSION_FILES.append(file_rel_path)
                 else:
                     extension = file_lower_case.split(".")[-1]
                     if extension in DEFAULT_EXCLUDE_EXTENSION:
+                        if is_windows:
+                            file_rel_path = file_rel_path.replace(os.sep, '/')
                         DEFAULT_EXCLUDE_EXTENSION_FILES.append(file_rel_path)
 
     except Exception as ex:
@@ -122,10 +128,14 @@ def precheck_for_files(path, files):
             try:
                 file_abs_path = os.path.join(path, file)
                 if not os.path.isfile(file_abs_path) or is_binary(file_abs_path):
+                    if is_windows:
+                        file = file.replace(os.sep, '/')
                     DEFAULT_EXCLUDE_EXTENSION_FILES.append(file)
                 else:
                     extension = file.split(".")[-1]
                     if extension in DEFAULT_EXCLUDE_EXTENSION:
+                        if is_windows:
+                            file = file.replace(os.sep, '/')
                         DEFAULT_EXCLUDE_EXTENSION_FILES.append(file)
                     else:
                         logger.info(f"# {file}")
