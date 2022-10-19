@@ -1,5 +1,13 @@
 # Changelog
 
+## v3.0.9 (19/10/2022)
+## Changes
+## 🐛 Hotfixes
+
+- Fix bug that doesn't work -v, -h option @bjk7119 (#110)
+
+---
+
 ## v3.0.8 (12/10/2022)
 ## Changes
 ## 🐛 Hotfixes
