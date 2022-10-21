@@ -3,6 +3,7 @@
 # Copyright (c) 2022 LG Electronics Inc.
 # SPDX-License-Identifier: GPL-3.0-only
 
+PKG_NAME = "fosslight_prechecker"
 DEFAULT_EXCLUDE_EXTENSION = ["jar", "png", "exe", "so", "a", "dll", "jpeg", "jpg", "ttf", "lib", "ttc", "pfb",
                              "pfm", "otf", "afm", "dfont", "json"]
 OSS_PKG_INFO_FILES = [r"oss-pkg-info[\s\S]*.ya?ml", r"oss-package[\s\S]*.info", r"sbom-info[\s\S]*.ya?ml",

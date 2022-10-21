@@ -18,10 +18,9 @@ from reuse import report
 from reuse.project import Project
 from reuse.report import ProjectReport
 from fosslight_prechecker._result import write_result_file, create_result_file, result_for_summary, ResultItem
-from fosslight_prechecker._constant import DEFAULT_EXCLUDE_EXTENSION, OSS_PKG_INFO_FILES
+from fosslight_prechecker._constant import DEFAULT_EXCLUDE_EXTENSION, OSS_PKG_INFO_FILES, PKG_NAME
 
 is_windows = platform.system() == 'Windows'
-PKG_NAME = "fosslight_prechecker"
 REUSE_CONFIG_FILE = ".reuse/dep5"
 DEFAULT_EXCLUDE_EXTENSION_FILES = []  # Exclude files from reuse
 _turn_on_default_reuse_config = True
