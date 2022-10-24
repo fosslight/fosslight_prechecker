@@ -157,7 +157,7 @@ def precheck_for_files(path, files):
     return missing_license_list, missing_copyright_list, prj
 
 
-def precheck_for_project(path_to_find, need_log_file):
+def precheck_for_project(path_to_find):
     missing_license = []
     missing_copyright = []
 
@@ -166,17 +166,8 @@ def precheck_for_project(path_to_find, need_log_file):
         need_rollback, temp_file_name, temp_dir_name = create_reuse_dep5_file(path_to_find)
 
     try:
-        if need_log_file:
-            # Use ProgressBar
-            timer = TimerThread()
-            timer.setDaemon(True)
-            timer.start()
-
         project = Project(path_to_find)
         report = ProjectReport.generate(project)
-
-        if need_log_file:
-            timer.stop = True
 
         # File list that missing license text
         missing_license = [str(sub) for sub in set(report.files_without_licenses)]
@@ -267,10 +258,18 @@ def run_lint(target_path, disable, output_file_name, format='', need_log_file=Tr
         oss_pkg_info = []
         _turn_on_default_reuse_config = not disable
 
+        if need_log_file:
+            # Use ProgressBar
+            timer = TimerThread()
+            timer.setDaemon(True)
+            timer.start()
+
         if _check_only_file_mode:
             license_missing_files, copyright_missing_files, project = precheck_for_files(path_to_find, file_to_check_list)
         else:
-            license_missing_files, copyright_missing_files, oss_pkg_info, project, report = precheck_for_project(path_to_find, need_log_file)
+            license_missing_files, copyright_missing_files, oss_pkg_info, project, report = precheck_for_project(path_to_find)
+        if need_log_file:
+            timer.stop = True
 
         result_item = result_for_summary(path_to_find,
                                          oss_pkg_info,
