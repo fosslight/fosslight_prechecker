@@ -124,7 +124,7 @@ def input_license_while_running():
     input_license = ""
 
     logger.info("# Select a license to write in the license missing files ")
-    select = input("   1.MIT,  2.Apache-2.0,  3.LGE-Proprietary,  4.Manaully Input,  5.Not select now : ")
+    select = input("\t1.MIT\n \t2.Apache-2.0\n \t3.LGE-Proprietary\n \t4.Manual Input\n \t5.Not select now\n- Choose one from the list: ")
     if select == '1' or select == 'MIT':
         input_license = 'MIT'
     elif select == '2' or select == 'Apache-2.0':
@@ -140,7 +140,7 @@ def input_license_while_running():
 
 def input_copyright_while_running():
     input_copyright = ""
-    input_copyright = input("# Input Copyright to write in the copyright missing files (ex, <year> <name>) : ")
+    input_copyright = input("# Input Copyright to write in the copyright missing files (ex, <year> <name>): ")
     if input_copyright == 'Quit' or input_copyright == 'quit' or input_copyright == 'Q':
         return
 
