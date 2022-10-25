@@ -16,7 +16,7 @@ It uses [reuse-tool][ret] to check whether the [source code's copyright and lice
 Please see the [**User Guide**](https://fosslight.org/fosslight-guide-en/scanner/1_prechecker.html) for more information on how to install and run it.    
 Here a short summary:    
 
-- `lint` --- Check whether the [source code's copyright and license writing rules][rule] are complied with.
+- `lint` --- (Default) Check whether the [source code's copyright and license writing rules][rule] are complied with.
 
 - `convert` --- Convert [sbom-info.yaml](https://github.com/fosslight/fosslight_prechecker/blob/main/tests/convert/sbom-info.yaml) or [oss-pkg-info.yaml](https://github.com/fosslight/fosslight_prechecker/blob/main/tests/convert/oss-pkg-info.yaml) to [fosslight_report.xlsx](https://fosslight.org/fosslight-guide-en/learn/2_fosslight_report.html).
 

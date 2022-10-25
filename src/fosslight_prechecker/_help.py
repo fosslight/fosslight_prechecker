@@ -15,7 +15,7 @@ _HELP_MESSAGE_PRECHECKER = """
 
     Parameters:
         Mode
-            lint\t\t    Check whether the copyright and license writing rules are complied with
+            lint\t\t    (Default) Check whether the copyright and license writing rules are complied with
             convert\t\t    Convert sbom_info.yaml -> FOSSLight-Report.xlsx
             add\t\t\t    Add missing license and copyright
 

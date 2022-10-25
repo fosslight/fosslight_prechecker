@@ -6,15 +6,27 @@ import argparse
 import sys
 import os
 from fosslight_util.help import print_package_version
-from fosslight_prechecker._help import print_help_msg
-from fosslight_prechecker._precheck import run_lint, PKG_NAME
 from fosslight_oss_pkg._convert import convert_report
+from fosslight_prechecker._help import print_help_msg
+from fosslight_prechecker._constant import PKG_NAME
 from fosslight_prechecker._add import add_content
+from fosslight_prechecker._precheck import run_lint
+
+
+def run_main(mode, path, output, format, no_log, disable, copyright, license):
+    if mode == "lint":
+        run_lint(path, disable, output, format, no_log)
+    elif mode == "add":
+        add_content(path, license, copyright, output, no_log)
+    elif mode == "convert":
+        convert_report(path, output, format, no_log)
+    else:
+        print("Not supported mode. Select one of 'lint', 'add', or 'convert'")
 
 
 def main():
     parser = argparse.ArgumentParser(description='FOSSLight Prechecker', prog='fosslight_prechecker', add_help=False)
-    parser.add_argument('mode', nargs='?', help='lint | convert | add', choices=['lint', 'add', 'convert'])
+    parser.add_argument('mode', nargs='?', help='lint(default) | convert | add', choices=['lint', 'add', 'convert'], default='lint')
     parser.add_argument('-h', '--help', help='Print help message', action='store_true', dest='help')
     parser.add_argument('-i', '--ignore', help='Do not write log to file', action='store_false', dest='log')
     parser.add_argument('-v', '--version', help='Print FOSSLight Prechecker version', action='store_true', dest='version')
@@ -29,24 +41,16 @@ def main():
     except SystemExit:
         sys.exit(0)
 
-    if args.help:
-        print_help_msg()
-
-    if args.version:
-        print_package_version(PKG_NAME, "FOSSLight Prechecker Version")
-        sys.exit(0)
-
     if not args.path:
         args.path = os.getcwd()
 
-    if args.mode == "lint":
-        run_lint(args.path, args.disable, args.output, args.format, args.log)
-    elif args.mode == "convert":
-        convert_report(args.path, args.output, args.format, args.log)
-    elif args.mode == "add":
-        add_content(args.path, args.license, args.copyright, args.output, args.log)
-    else:
+    if args.help:
         print_help_msg()
+    elif args.version:
+        print_package_version(PKG_NAME, "FOSSLight Prechecker Version")
+    else:
+        run_main(args.mode, args.path, args.output, args.format,
+                 args.log, args.disable, args.copyright, args.license)
 
 
 if __name__ == "__main__":

@@ -3,3 +3,4 @@ flake8==3.9.2
 pytest
 pytest-cov
 pytest-flake8
+importlib-metadata==4.2.0 
