@@ -3,6 +3,8 @@
 # Copyright (c) 2021 LG Electronics
 # SPDX-License-Identifier: GPL-3.0-only
 from codecs import open
+import os
+import shutil
 from setuptools import setup, find_packages
 
 with open('README.md', 'r', 'utf-8') as f:
@@ -11,7 +13,24 @@ with open('README.md', 'r', 'utf-8') as f:
 with open('requirements.txt', 'r', 'utf-8') as f:
     required = f.read().splitlines()
 
+_PACKAEG_NAME = 'fosslight_prechecker'
+_LICENSE_FILE = 'LICENSE'
+_LICENSE_DIR = 'LICENSES'
+
 if __name__ == "__main__":
+    dest_path = os.path.join('src', _PACKAEG_NAME, _LICENSE_DIR)
+    try:
+        if not os.path.exists(dest_path):
+            os.mkdir(dest_path)
+        if os.path.isfile(_LICENSE_FILE):
+            shutil.copy(_LICENSE_FILE, dest_path)
+        if os.path.isdir(_LICENSE_DIR):
+            license_f = [f_name for f_name in os.listdir(_LICENSE_DIR) if f_name.upper().startswith(_LICENSE_FILE)]
+            for lic_f in license_f:
+                shutil.copy(os.path.join(_LICENSE_DIR, lic_f), dest_path)
+    except Exception as e:
+        print(f'Warning: Fail to copy the license text: {e}')
+
     setup(
         name='fosslight_prechecker',
         version='3.0.7',
@@ -32,7 +51,7 @@ if __name__ == "__main__":
             "Programming Language :: Python :: 3.8",
             "Programming Language :: Python :: 3.9"],
         install_requires=required,
-        package_data={'fosslight_prechecker': ['resources/convert_license.json']},
+        package_data={_PACKAEG_NAME: ['resources/convert_license.json', os.path.join(_LICENSE_DIR, '*')]},
         include_package_data=True,
         entry_points={
             "console_scripts": [
@@ -41,3 +60,4 @@ if __name__ == "__main__":
             ]
         }
     )
+    shutil.rmtree(dest_path, ignore_errors=True)
