@@ -27,6 +27,7 @@ _HELP_MESSAGE_PRECHECKER = """
             -o <file_name>\t    Output file name
             -n\t\t\t    Don't exclude venv*, node_modules, and .*/ from the analysis
             -i\t\t\t    Don't both write log file and show progress bar
+            --notice\t\t    Print the open source license notice text.
 
         Options for only 'add' mode
             -l <license>\t    License name(SPDX format) to add

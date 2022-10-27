@@ -36,6 +36,7 @@ def main():
     parser.add_argument('-o', '--output', help='Output file name', type=str, dest='output', default="")
     parser.add_argument('-l', '--license', help='License name to add', type=str, dest='license', default="")
     parser.add_argument('-c', '--copyright', help='Copyright to add', type=str, dest='copyright', default="")
+    parser.add_argument('--notice', action='store_true', required=False)
     try:
         args = parser.parse_args()
     except SystemExit:
@@ -48,6 +49,17 @@ def main():
         print_help_msg()
     elif args.version:
         print_package_version(PKG_NAME, "FOSSLight Prechecker Version")
+    elif args.notice:
+        try:
+            base_path = sys._MEIPASS
+        except Exception:
+            base_path = os.path.dirname(__file__)
+
+        data_path = os.path.join(base_path, 'LICENSES')
+        print(f"*** {PKG_NAME} open source license notice ***")
+        for ff in os.listdir(data_path):
+            f = open(os.path.join(data_path, ff), 'r', encoding='utf8')
+            print(f.read())
     else:
         run_main(args.mode, args.path, args.output, args.format,
                  args.log, args.disable, args.copyright, args.license)
