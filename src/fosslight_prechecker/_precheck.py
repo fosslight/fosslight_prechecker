@@ -9,6 +9,7 @@ import logging
 import locale
 import platform
 import re
+import subprocess
 from datetime import datetime
 from binaryornot.check import is_binary
 import fosslight_util.constant as constant
@@ -17,13 +18,14 @@ from fosslight_util.timer_thread import TimerThread
 from reuse import report
 from reuse.project import Project
 from reuse.report import ProjectReport
+from reuse.vcs import VCSStrategyGit
 from fosslight_prechecker._result import write_result_file, create_result_file, result_for_summary, ResultItem
 from fosslight_prechecker._constant import DEFAULT_EXCLUDE_EXTENSION, OSS_PKG_INFO_FILES, PKG_NAME
 
 is_windows = platform.system() == 'Windows'
 REUSE_CONFIG_FILE = ".reuse/dep5"
 DEFAULT_EXCLUDE_EXTENSION_FILES = []  # Exclude files from reuse
-_turn_on_default_reuse_config = True
+_turn_on_exclude_config = True
 _check_only_file_mode = False
 error_items = []
 _start_time = ""
@@ -32,12 +34,61 @@ _result_log = {}
 logger = logging.getLogger(constant.LOGGER_NAME)
 
 
-def find_oss_pkg_info(path):
+def exclude_untracked_files(path):
+    global DEFAULT_EXCLUDE_EXTENSION_FILES
+    try:
+        cmd_result = subprocess.check_output(['git', 'ls-files', '-o', f'{path}'], universal_newlines=True)
+        cmd_result = cmd_result.split('\n')
+        cmd_result.remove('')
+        if not path.endswith("/"):
+            path += "/"
+        cmd_result = [file.replace(path, '', 1) for file in cmd_result]
+        DEFAULT_EXCLUDE_EXTENSION_FILES.extend(cmd_result)
+    except Exception as ex:
+        logger.error(f"Error to get git untracked files : {ex}")
+
+
+def exclude_gitignore_files(path):
+    global DEFAULT_EXCLUDE_EXTENSION_FILES
+    try:
+        cmd_result = subprocess.check_output(['git',
+                                              'ls-files',
+                                              '-i',
+                                              f"--exclude-from={os.path.join(path, '.gitignore')}"],
+                                             universal_newlines=True)
+        cmd_result = cmd_result.split('\n')
+        cmd_result.remove('')
+        if not path.endswith("/"):
+            path += "/"
+        cmd_result = [file.replace(path, '', 1) for file in cmd_result]
+        DEFAULT_EXCLUDE_EXTENSION_FILES.extend(cmd_result)
+    except Exception as ex:
+        logger.error(f"Error to get git ignored files : {ex}")
+
+
+def find_oss_pkg_info_and_exlcude_file(path):
     global DEFAULT_EXCLUDE_EXTENSION_FILES
     oss_pkg_info = []
+    git_present = shutil.which("git")
+
+    # Exlcude untracked files
+    if _turn_on_exclude_config and git_present and VCSStrategyGit.in_repo(path):
+        exclude_untracked_files(path)
+        # Exclude all files from .gitignore
+        if os.path.isfile(os.path.join(path, '.gitignore')):
+            exclude_gitignore_files(path)
 
     try:
         for root, dirs, files in os.walk(path):
+            for dir in dirs:
+                # For hidden folders
+                if dir.startswith("."):
+                    all_files_in_dir = [os.path.join(root, dir, file)
+                                        for file in os.listdir(os.path.join(root, dir))
+                                        if os.path.isfile(os.path.join(root, dir, file))]
+                    all_files_rel_path = [os.path.relpath(file, path) for file in all_files_in_dir]
+                    DEFAULT_EXCLUDE_EXTENSION_FILES.extend(all_files_rel_path)
+
             for file in files:
                 file_lower_case = file.lower()
                 file_abs_path = os.path.join(root, file)
@@ -46,6 +97,9 @@ def find_oss_pkg_info(path):
                 if any(re.search(re_oss_pkg_pattern, file_lower_case) for re_oss_pkg_pattern in OSS_PKG_INFO_FILES) \
                    or file_lower_case.startswith("module_license_"):
                     oss_pkg_info.append(file_rel_path)
+                # Exclude hidden files
+                elif _turn_on_exclude_config and file.startswith('.'):
+                    DEFAULT_EXCLUDE_EXTENSION_FILES.append(file_rel_path)
                 elif is_binary(file_abs_path):
                     if is_windows:
                         file_rel_path = file_rel_path.replace(os.sep, '/')
@@ -56,7 +110,6 @@ def find_oss_pkg_info(path):
                         if is_windows:
                             file_rel_path = file_rel_path.replace(os.sep, '/')
                         DEFAULT_EXCLUDE_EXTENSION_FILES.append(file_rel_path)
-
     except Exception as ex:
         dump_error_msg(f"Error_FIND_OSS_PKG : {ex}")
 
@@ -64,6 +117,7 @@ def find_oss_pkg_info(path):
 
 
 def create_reuse_dep5_file(path):
+    global DEFAULT_EXCLUDE_EXTENSION_FILES
     # Create .reuse/dep5 for excluding directories from reuse.
     _DEFAULT_CONFIG_PREFIX = "Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/\nUpstream-Name: \
                         reuse\nUpstream-Contact: Carmen Bianca Bakker <carmenbianca@fsfe.org>\nSource: https://github.com/fsfe/reuse-tool\n"
@@ -86,7 +140,8 @@ def create_reuse_dep5_file(path):
             need_rollback = True
 
         DEFAULT_EXCLUDE_EXTENSION_FILES.extend(_DEFAULT_EXCLUDE_FOLDERS)
-        for file_to_exclude in DEFAULT_EXCLUDE_EXTENSION_FILES:
+        exclude_file_list = list(set(DEFAULT_EXCLUDE_EXTENSION_FILES))
+        for file_to_exclude in exclude_file_list:
             str_contents += f"\nFiles: {file_to_exclude} \nCopyright: -\nLicense: -\n"
 
         with open(reuse_config_file, "a") as f:
@@ -161,8 +216,8 @@ def precheck_for_project(path_to_find):
     missing_license = []
     missing_copyright = []
 
-    oss_pkg_info_files = find_oss_pkg_info(path_to_find)
-    if _turn_on_default_reuse_config:
+    oss_pkg_info_files = find_oss_pkg_info_and_exlcude_file(path_to_find)
+    if _turn_on_exclude_config:
         need_rollback, temp_file_name, temp_dir_name = create_reuse_dep5_file(path_to_find)
 
     try:
@@ -183,7 +238,7 @@ def precheck_for_project(path_to_find):
     except Exception as ex:
         dump_error_msg(f"Error prechecker lint: {ex}", True)
 
-    if _turn_on_default_reuse_config:
+    if _turn_on_exclude_config:
         remove_reuse_dep5_file(need_rollback, temp_file_name, temp_dir_name)
     return missing_license, missing_copyright, oss_pkg_info_files, project, report
 
@@ -234,7 +289,7 @@ def get_path_to_find(target_path, _check_only_file_mode):
 
 
 def run_lint(target_path, disable, output_file_name, format='', need_log_file=True):
-    global _turn_on_default_reuse_config, _check_only_file_mode, _start_time
+    global _turn_on_exclude_config, _check_only_file_mode, _start_time
 
     file_to_check_list = []
     _exit_code = 0
@@ -256,7 +311,7 @@ def run_lint(target_path, disable, output_file_name, format='', need_log_file=Tr
 
     if os.path.isdir(path_to_find):
         oss_pkg_info = []
-        _turn_on_default_reuse_config = not disable
+        _turn_on_exclude_config = not disable
 
         if need_log_file:
             # Use ProgressBar
@@ -268,6 +323,7 @@ def run_lint(target_path, disable, output_file_name, format='', need_log_file=Tr
             license_missing_files, copyright_missing_files, project = precheck_for_files(path_to_find, file_to_check_list)
         else:
             license_missing_files, copyright_missing_files, oss_pkg_info, project, report = precheck_for_project(path_to_find)
+
         if need_log_file:
             timer.stop = True
 
@@ -279,7 +335,8 @@ def run_lint(target_path, disable, output_file_name, format='', need_log_file=Tr
                                          _result_log,
                                          _check_only_file_mode,
                                          file_to_check_list,
-                                         error_items)
+                                         error_items,
+                                         DEFAULT_EXCLUDE_EXTENSION_FILES)
 
         success, exit_code = write_result_file(result_file, output_extension, _exit_code,
                                                result_item, _result_log, project, path_to_find)
