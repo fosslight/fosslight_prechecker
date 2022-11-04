@@ -1,5 +1,17 @@
 # Changelog
 
+## v3.0.10 (04/11/2022)
+## Changes
+## 🐛 Hotfixes
+
+- Fix bug for not working options(-n, i) @bjk7119 (#111)
+
+## 🔧 Maintenance
+
+- Print license text through notice parameter @dd-jy (#112)
+
+---
+
 ## v3.0.9 (19/10/2022)
 ## Changes
 ## 🐛 Hotfixes
