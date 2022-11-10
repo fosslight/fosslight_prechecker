@@ -10,12 +10,12 @@ import fnmatch
 import xml.etree.ElementTree as ET
 import logging
 import fosslight_util.constant as constant
+import re
 from pathlib import Path
 from reuse.project import Project
 from fosslight_prechecker._result_html import result_for_html
 from fosslight_util.parsing_yaml import find_sbom_yaml_files, parsing_yml
 from fosslight_util.output_format import check_output_format
-import re
 
 
 CUSTOMIZED_FORMAT_FOR_PRECHECKER = {'html': '.html', 'xml': '.xml', 'yaml': '.yaml'}
@@ -262,16 +262,22 @@ def exclude_file_in_yaml(path_to_find, yaml_files, license_missing_files, copyri
 
 
 def result_for_summary(path_to_find, oss_pkg_info_files, license_missing_files, copyright_missing_files,
-                       prj_report, _result_log, _check_only_file_mode, file_to_check_list, error_items):
+                       prj_report, _result_log, _check_only_file_mode, file_to_check_list, error_items, exclude_files):
     prechecker_compliant = False
     detected_lic = []
     missing_both_files = []
-    file_total = ""
+    file_total_num = ""
+    total_files_exclude = ()
 
     if _check_only_file_mode:
-        file_total = len(file_to_check_list)
+        file_total_num = len(file_to_check_list)
     else:
-        file_total = len(prj_report.file_reports)
+        if not path_to_find.endswith('/'):
+            path_to_find += '/'
+        total_files = [str(file_report.path).replace(path_to_find, '', 1) for file_report in prj_report.file_reports]
+        total_files_exclude = set(total_files) - set(exclude_files)
+        file_total_num = len(total_files_exclude)
+
         # Get detected License
         for i, lic in enumerate(sorted(prj_report.used_licenses)):
             detected_lic.append(lic)
@@ -296,7 +302,7 @@ def result_for_summary(path_to_find, oss_pkg_info_files, license_missing_files, 
     result_item.compliant_result = prechecker_compliant
     result_item._oss_pkg_files = oss_pkg_info_files
     result_item._detected_licenses = detected_lic
-    result_item._count_total_files = file_total
+    result_item._count_total_files = file_total_num
     result_item._count_without_both = str(len(missing_both_files))
     result_item._count_without_lic = str(len(license_missing_files) + len(missing_both_files))
     result_item._count_without_cop = str(len(copyright_missing_files) + len(missing_both_files))
