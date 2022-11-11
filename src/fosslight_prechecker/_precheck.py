@@ -37,7 +37,7 @@ logger = logging.getLogger(constant.LOGGER_NAME)
 def exclude_untracked_files(path):
     global DEFAULT_EXCLUDE_EXTENSION_FILES
     try:
-        cmd_result = subprocess.check_output(['git', 'ls-files', '-o', f'{path}'], universal_newlines=True)
+        cmd_result = subprocess.check_output(['git', 'ls-files', '-o'], universal_newlines=True)
         cmd_result = cmd_result.split('\n')
         cmd_result.remove('')
         if not path.endswith("/"):
@@ -48,22 +48,45 @@ def exclude_untracked_files(path):
         logger.error(f"Error to get git untracked files : {ex}")
 
 
-def exclude_gitignore_files(path):
+def exclude_gitignore_files(root_path, path):
     global DEFAULT_EXCLUDE_EXTENSION_FILES
     try:
-        cmd_result = subprocess.check_output(['git',
-                                              'ls-files',
-                                              '-i',
-                                              f"--exclude-from={os.path.join(path, '.gitignore')}"],
-                                             universal_newlines=True)
-        cmd_result = cmd_result.split('\n')
-        cmd_result.remove('')
-        if not path.endswith("/"):
-            path += "/"
-        cmd_result = [file.replace(path, '', 1) for file in cmd_result]
-        DEFAULT_EXCLUDE_EXTENSION_FILES.extend(cmd_result)
+        if os.path.isfile(os.path.join(root_path, '.gitignore')):
+            cmd_result = subprocess.check_output(['git',
+                                                  'ls-files',
+                                                  '-i',
+                                                  '--exclude-from=.gitignore'],
+                                                 universal_newlines=True)
+            cmd_result = cmd_result.split('\n')
+            cmd_result.remove('')
+            if not path.endswith("/"):
+                path += "/"
+            cmd_result = [file.replace(path, '', 1) for file in cmd_result]
+            DEFAULT_EXCLUDE_EXTENSION_FILES.extend(cmd_result)
+        else:
+            return
+
     except Exception as ex:
         logger.error(f"Error to get git ignored files : {ex}")
+
+
+def exclude_git_related_files(path):
+    try:
+        root_path = VCSStrategyGit.find_root(path)
+
+        # Change currnt path for git command
+        current_path = os.getcwd()
+        os.chdir(path)
+
+        # Exclude untracked files
+        exclude_untracked_files(path)
+        # Exclude ignore files
+        exclude_gitignore_files(root_path, path)
+
+        # Restore path
+        os.chdir(current_path)
+    except Exception as ex:
+        logger.error(f"Error to get git related files : {ex}")
 
 
 def find_oss_pkg_info_and_exlcude_file(path):
@@ -71,12 +94,8 @@ def find_oss_pkg_info_and_exlcude_file(path):
     oss_pkg_info = []
     git_present = shutil.which("git")
 
-    # Exlcude untracked files
     if _turn_on_exclude_config and git_present and VCSStrategyGit.in_repo(path):
-        exclude_untracked_files(path)
-        # Exclude all files from .gitignore
-        if os.path.isfile(os.path.join(path, '.gitignore')):
-            exclude_gitignore_files(path)
+        exclude_git_related_files(path)
 
     try:
         for root, dirs, files in os.walk(path):
