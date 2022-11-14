@@ -288,6 +288,8 @@ def result_for_summary(path_to_find, oss_pkg_info_files, license_missing_files, 
         license_missing_files, copyright_missing_files = exclude_file_in_yaml(path_to_find, oss_yaml_files,
                                                                               set(license_missing_files) - set(oss_pkg_info_files),
                                                                               set(copyright_missing_files) - set(oss_pkg_info_files))
+        # Subtract excluded files(untracked or ignored file)
+        oss_pkg_info_files = list(set(oss_pkg_info_files) - set(exclude_files))
 
     if len(license_missing_files) == 0 and len(copyright_missing_files) == 0:
         prechecker_compliant = True
