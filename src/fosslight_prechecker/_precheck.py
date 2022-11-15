@@ -48,9 +48,10 @@ def exclude_untracked_files(path):
         logger.error(f"Error to get git untracked files : {ex}")
 
 
-def exclude_gitignore_files(root_path, path):
+def exclude_gitignore_files(path):
     global DEFAULT_EXCLUDE_EXTENSION_FILES
     try:
+        root_path = VCSStrategyGit.find_root(path)
         if os.path.isfile(os.path.join(root_path, '.gitignore')):
             cmd_result = subprocess.check_output(['git',
                                                   'ls-files',
@@ -72,8 +73,6 @@ def exclude_gitignore_files(root_path, path):
 
 def exclude_git_related_files(path):
     try:
-        root_path = VCSStrategyGit.find_root(path)
-
         # Change currnt path for git command
         current_path = os.getcwd()
         os.chdir(path)
@@ -81,7 +80,7 @@ def exclude_git_related_files(path):
         # Exclude untracked files
         exclude_untracked_files(path)
         # Exclude ignore files
-        exclude_gitignore_files(root_path, path)
+        exclude_gitignore_files(path)
 
         # Restore path
         os.chdir(current_path)
@@ -89,12 +88,12 @@ def exclude_git_related_files(path):
         logger.error(f"Error to get git related files : {ex}")
 
 
-def find_oss_pkg_info_and_exlcude_file(path):
+def find_oss_pkg_info_and_exlcude_file(path, mode='lint'):
     global DEFAULT_EXCLUDE_EXTENSION_FILES
     oss_pkg_info = []
     git_present = shutil.which("git")
 
-    if _turn_on_exclude_config and git_present and VCSStrategyGit.in_repo(path):
+    if mode == 'lint' and _turn_on_exclude_config and git_present and VCSStrategyGit.in_repo(path):
         exclude_git_related_files(path)
 
     try:
@@ -231,11 +230,11 @@ def precheck_for_files(path, files):
     return missing_license_list, missing_copyright_list, prj
 
 
-def precheck_for_project(path_to_find):
+def precheck_for_project(path_to_find, mode='lint'):
     missing_license = []
     missing_copyright = []
 
-    oss_pkg_info_files = find_oss_pkg_info_and_exlcude_file(path_to_find)
+    oss_pkg_info_files = find_oss_pkg_info_and_exlcude_file(path_to_find, mode)
     if _turn_on_exclude_config:
         need_rollback, temp_file_name, temp_dir_name = create_reuse_dep5_file(path_to_find)
 
@@ -341,7 +340,7 @@ def run_lint(target_path, disable, output_file_name, format='', need_log_file=Tr
         if _check_only_file_mode:
             license_missing_files, copyright_missing_files, project = precheck_for_files(path_to_find, file_to_check_list)
         else:
-            license_missing_files, copyright_missing_files, oss_pkg_info, project, report = precheck_for_project(path_to_find)
+            license_missing_files, copyright_missing_files, oss_pkg_info, project, report = precheck_for_project(path_to_find, 'lint')
 
         if need_log_file:
             timer.stop = True

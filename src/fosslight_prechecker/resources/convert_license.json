@@ -17,5 +17,17 @@
     "apache-2.0": "Apache-2.0",
     "apache2.0": "Apache-2.0",
     "apache 2.0": "Apache-2.0",
-    "mit": "MIT"
+    "bsd-3-clause": "BSD-3-clause",
+    "bsd 3 clause": "BSD-3-clause",
+    "bsd-3 clause": "BSD-3-clause",
+    "bsd 3-clause": "BSD-3-clause",
+    "agpl 3.0": "AGPL-3.0",
+    "apgl-3.0": "APGL-3.0",
+    "apgl3.0": "APGL-3.0",
+    "agplv3": "AGPL-3.0",
+    "mit": "MIT",
+    "lge": "LicenseRef-LGE_Proprietary_License",
+    "lge license": "LicenseRef-LGE_Proprietary_License",
+    "lge proprietary": "LicenseRef-LGE_Proprietary_License",
+    "lge-proprietary": "LicenseRef-LGE_Proprietary_License"
 }
