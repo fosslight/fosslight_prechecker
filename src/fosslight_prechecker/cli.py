@@ -13,7 +13,11 @@ from fosslight_prechecker._add import add_content
 from fosslight_prechecker._precheck import run_lint
 
 
-def run_main(mode, path, output, format, no_log, disable, copyright, license):
+def run_main(mode, path, output, format, no_log, disable, copyright, license, parser):
+    if mode != "add" and (copyright != "" or license != ""):
+        parser.print_help()
+        sys.exit(1)
+
     if mode == "lint":
         run_lint(path, disable, output, format, no_log)
     elif mode == "add":
@@ -34,8 +38,8 @@ def main():
     parser.add_argument('-p', '--path', help='Path to check', type=str, dest='path', default="")
     parser.add_argument('-f', '--format', help='Format of ouput', type=str, dest='format', default="")
     parser.add_argument('-o', '--output', help='Output file name', type=str, dest='output', default="")
-    parser.add_argument('-l', '--license', help='License name to add', type=str, dest='license', default="")
-    parser.add_argument('-c', '--copyright', help='Copyright to add', type=str, dest='copyright', default="")
+    parser.add_argument('-l', '--license', help="License name to add(used in only 'add' mode)", type=str, dest='license', default="")
+    parser.add_argument('-c', '--copyright', help="Copyright to add(used in only 'add' mode)", type=str, dest='copyright', default="")
     parser.add_argument('--notice', action='store_true', required=False)
     try:
         args = parser.parse_args()
@@ -62,7 +66,7 @@ def main():
             print(f.read())
     else:
         run_main(args.mode, args.path, args.output, args.format,
-                 args.log, args.disable, args.copyright, args.license)
+                 args.log, args.disable, args.copyright, args.license, parser)
 
 
 if __name__ == "__main__":

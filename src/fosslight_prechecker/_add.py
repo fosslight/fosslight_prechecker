@@ -92,6 +92,7 @@ def convert_to_spdx_style(input_string):
 
 
 def check_input_license_format(input_license):
+    global spdx_licenses
     if input_license in spdx_licenses:
         return input_license
 
@@ -390,7 +391,7 @@ def download_oss_info_license(base_path, input_license=""):
 
 
 def add_content(target_path="", input_license="", input_copyright="", output_path="", need_log_file=True):
-    global _result_log
+    global _result_log, spdx_licenses
     _check_only_file_mode = False
     file_to_check_list = []
 
