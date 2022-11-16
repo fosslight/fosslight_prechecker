@@ -9,6 +9,7 @@ import shutil
 import json
 import sys
 import fosslight_util.constant as constant
+import urllib.request
 from yaml import safe_dump
 from fosslight_util.set_log import init_log
 from fosslight_util.spdx_licenses import get_spdx_licenses_json
@@ -21,6 +22,8 @@ from reuse.download import run as reuse_download
 from reuse._comment import EXTENSION_COMMENT_STYLE_MAP_LOWERCASE
 from reuse._main import parser as reuse_arg_parser
 from reuse.project import Project
+from bs4 import BeautifulSoup
+from pathlib import Path
 
 
 PKG_NAME = "fosslight_prechecker"
@@ -29,6 +32,7 @@ EXCLUDE_DIR = ["test", "tests", "doc", "docs"]
 EXCLUDE_PREFIX = ("test", ".", "doc", "__")
 RESOURCES_DIR = 'resources'
 LICENSES_JSON_FILE = 'convert_license.json'
+OPENSOURCE_LGE_COM_URL_PREFIX = "https://opensource.lge.com/license/"
 _result_log = {}
 spdx_licenses = []
 
@@ -88,6 +92,7 @@ def convert_to_spdx_style(input_string):
 
 
 def check_input_license_format(input_license):
+    global spdx_licenses
     if input_license in spdx_licenses:
         return input_license
 
@@ -238,14 +243,57 @@ def save_result_log():
         logger.warning(f"Failed to print add result log. : {ex}")
 
 
-def copy_to_root(input_license):
+def copy_to_root(path_to_find, input_license):
     lic_file = f"{input_license}.txt"
     try:
-        source = os.path.join('LICENSES', f'{lic_file}')
-        destination = 'LICENSE'
+        source = os.path.join(path_to_find, 'LICENSES', f'{lic_file}')
+        destination = os.path.join(path_to_find, 'LICENSE')
         shutil.copyfile(source, destination)
     except Exception as ex:
         dump_error_msg(f"Error - Can't copy license file: {ex}")
+
+
+def lge_lic_download(path_to_find, input_license):
+    success = False
+
+    input_license_url = input_license.replace(' ', '_').replace('/', '_').replace('LicenseRef-', '').replace('-', '_')
+    lic_url = OPENSOURCE_LGE_COM_URL_PREFIX + input_license_url + ".html"
+
+    try:
+        html = urllib.request.urlopen(lic_url)
+        source = html.read()
+        html.close()
+    except urllib.error.URLError:
+        logger.error("Invalid URL address")
+    except ValueError as val_err:
+        logger.error(f"Invalid Value : {val_err}")
+    except Exception as ex:
+        logger.error(f"Error to open url - {lic_url} : {ex}")
+
+    soup = BeautifulSoup(source, 'html.parser')
+    try:
+        lic_text = soup.find("p", "bdTop")
+        Path(os.path.join(os.getcwd(), path_to_find, 'LICENSES')).mkdir(parents=True, exist_ok=True)
+        lic_file_path = os.path.join(path_to_find, 'LICENSES', f'{input_license}.txt')
+
+        with open(lic_file_path, 'w', encoding='utf-8') as f:
+            f.write(lic_text.get_text(separator='\n'))
+        if os.path.isfile(lic_file_path):
+            logger.info(f"Successfully downloaded {lic_file_path}")
+            success = True
+    except Exception as ex:
+        logger.error(f"Error to download license from LGE : {ex}")
+    return success
+
+
+def present_license_file(path_to_find, lic):
+    present = False
+    lic_file_path = os.path.join(os.getcwd(), path_to_find, 'LICENSES')
+    file_name = f"{lic}.txt"
+    if file_name in os.listdir(lic_file_path):
+        present = True
+        logger.info(f"{os.path.join(path_to_find, 'LICENSES', file_name)} already exists.")
+        return present
 
 
 def find_representative_license(path_to_find, input_license):
@@ -254,6 +302,9 @@ def find_representative_license(path_to_find, input_license):
     found_license_file = False
     main_parser = reuse_arg_parser()
     prj = Project(path_to_find)
+    reuse_return_code = 0
+    success_from_lge = False
+    present_lic = False
 
     all_items = os.listdir(path_to_find)
     for item in all_items:
@@ -270,17 +321,24 @@ def find_representative_license(path_to_find, input_license):
     if found_license_file:
         logger.warning(f" # Found representative license file : {found_file}")
     else:
+        logger.warning(" # There is no representative license file")
         input_license = check_input_license_format(input_license)
-
         logger.info(f" Input License : {input_license}")
+
         parsed_args = main_parser.parse_args(['download', f"{input_license}"])
 
         try:
-            logger.warning(" # There is no representative license file")
-            reuse_download(parsed_args, prj)
-            copy_to_root(input_license)
-            if input_license in spdx_licenses:
+            # 0: successfully downloaded, 1: failed to download
+            reuse_return_code = reuse_download(parsed_args, prj)
+            # Check if the license text file is present
+            present_lic = present_license_file(path_to_find, input_license)
+
+            if reuse_return_code == 1 and not present_lic:
+                success_from_lge = lge_lic_download(path_to_find, input_license)
+
+            if reuse_return_code == 0 or success_from_lge or present_lic:
                 logger.warning(f" # Created Representative License File : {input_license}.txt")
+                copy_to_root(path_to_find, input_license)
 
         except Exception as ex:
             dump_error_msg(f"Error - download representative license text: {ex}")
@@ -333,7 +391,7 @@ def download_oss_info_license(base_path, input_license=""):
 
 
 def add_content(target_path="", input_license="", input_copyright="", output_path="", need_log_file=True):
-    global _result_log
+    global _result_log, spdx_licenses
     _check_only_file_mode = False
     file_to_check_list = []
 
@@ -419,7 +477,7 @@ def add_content(target_path="", input_license="", input_copyright="", output_pat
         all_files_list = get_allfiles_list(path_to_find)
 
         # Get missing license / copyright file list
-        missing_license, missing_copyright, _, project, _ = precheck_for_project(path_to_find)
+        missing_license, missing_copyright, _, project, _ = precheck_for_project(path_to_find, 'add')
 
         # Print Skipped Files
         missing_license_filtered, missing_copyright_filtered = \
