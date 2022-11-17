@@ -40,7 +40,7 @@ jobs:
           - os: ubuntu-latest
             TARGET: ubuntu
             CMD_BUILD: >
-                tox -e release
+                tox -e ubuntu
             OUT_FILE_NAME: fosslight_bin_ubuntu18
             ASSET_MIME: application/octet-stream
           - os: windows-latest
@@ -49,6 +49,7 @@ jobs:
                 pyinstaller --onefile cli.py -n cli --additional-hooks-dir=hooks &&
                 move dist/cli.exe fosslight_prechecker_windows.exe &&
                 ./fosslight_prechecker_windows.exe
+                tox -e windows
             OUT_FILE_NAME: fosslight_prechecker_windows.exe
             ASSET_MIME: application/vnd.microsoft.portable-executable
     steps:

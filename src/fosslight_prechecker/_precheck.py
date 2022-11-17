@@ -40,18 +40,18 @@ def exclude_untracked_files(path):
         cmd_result = subprocess.check_output(['git', 'ls-files', '-o'], universal_newlines=True)
         cmd_result = cmd_result.split('\n')
         cmd_result.remove('')
-        if not path.endswith("/"):
-            path += "/"
+        if not path.endswith(f"{os.sep}"):
+            path += f"{os.sep}"
         cmd_result = [file.replace(path, '', 1) for file in cmd_result]
         DEFAULT_EXCLUDE_EXTENSION_FILES.extend(cmd_result)
     except Exception as ex:
         logger.error(f"Error to get git untracked files : {ex}")
 
 
-def exclude_gitignore_files(path):
+def exclude_gitignore_files(current_path, path):
     global DEFAULT_EXCLUDE_EXTENSION_FILES
     try:
-        root_path = VCSStrategyGit.find_root(path)
+        root_path = VCSStrategyGit.find_root(current_path)
         if os.path.isfile(os.path.join(root_path, '.gitignore')):
             cmd_result = subprocess.check_output(['git',
                                                   'ls-files',
@@ -60,8 +60,8 @@ def exclude_gitignore_files(path):
                                                  universal_newlines=True)
             cmd_result = cmd_result.split('\n')
             cmd_result.remove('')
-            if not path.endswith("/"):
-                path += "/"
+            if not path.endswith(f"{os.sep}"):
+                path += f"{os.sep}"
             cmd_result = [file.replace(path, '', 1) for file in cmd_result]
             DEFAULT_EXCLUDE_EXTENSION_FILES.extend(cmd_result)
         else:
@@ -80,7 +80,7 @@ def exclude_git_related_files(path):
         # Exclude untracked files
         exclude_untracked_files(path)
         # Exclude ignore files
-        exclude_gitignore_files(path)
+        exclude_gitignore_files(current_path, path)
 
         # Restore path
         os.chdir(current_path)
@@ -244,14 +244,14 @@ def precheck_for_project(path_to_find, mode='lint'):
 
         # File list that missing license text
         missing_license = [str(sub) for sub in set(report.files_without_licenses)]
-        if not path_to_find.endswith("/"):
-            path_to_find += "/"
+        if not path_to_find.endswith(f"{os.sep}"):
+            path_to_find += f"{os.sep}"
         missing_license = [sub.replace(path_to_find, '') for sub in missing_license]
 
         # File list that missing copyright text
         missing_copyright = [str(sub) for sub in set(report.files_without_copyright)]
-        if not path_to_find.endswith("/"):
-            path_to_find += "/"
+        if not path_to_find.endswith(f"{os.sep}"):
+            path_to_find += f"{os.sep}"
         missing_copyright = [sub.replace(path_to_find, '') for sub in missing_copyright]
     except Exception as ex:
         dump_error_msg(f"Error prechecker lint: {ex}", True)
