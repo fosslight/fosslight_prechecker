@@ -45,11 +45,11 @@ jobs:
             ASSET_MIME: application/octet-stream
           - os: windows-latest
             TARGET: windows
-            CMD_BUILD: >
-                pyinstaller --onefile cli.py -n cli --additional-hooks-dir=hooks &&
+            CMD_BUILD: |
+                tox -e windows
+                pyinstaller --onefile cli.py -n cli --additional-hooks-dir=hooks --collect-data reuse &&
                 move dist/cli.exe fosslight_prechecker_windows.exe &&
                 ./fosslight_prechecker_windows.exe
-                tox -e windows
             OUT_FILE_NAME: fosslight_prechecker_windows.exe
             ASSET_MIME: application/vnd.microsoft.portable-executable
     steps:
