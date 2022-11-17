@@ -40,7 +40,7 @@ def main():
     parser.add_argument('-o', '--output', help='Output file name', type=str, dest='output', default="")
     parser.add_argument('-l', '--license', help="License name to add(used in only 'add' mode)", type=str, dest='license', default="")
     parser.add_argument('-c', '--copyright', help="Copyright to add(used in only 'add' mode)", type=str, dest='copyright', default="")
-    parser.add_argument('--notice', action='store_true', required=False)
+    parser.add_argument('--notice', help="Show OSS notice", action='store_true', required=False)
     try:
         args = parser.parse_args()
     except SystemExit:

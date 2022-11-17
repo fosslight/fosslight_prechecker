@@ -49,12 +49,12 @@ def convert_yml_to_excel(oss_yaml_files, output_file, file_option_on, base_path)
                 oss_items, _ = parsing_yml(yaml_file, base_path)
                 for item in oss_items:
                     items_to_print.extend(item.get_print_array())
-                if not base_path.endswith("/"):
-                    base_path += "/"
+                if not base_path.endswith(f"{os.sep}"):
+                    base_path += f"{os.sep}"
                 yaml_file = yaml_file.replace(base_path, '')
-                yaml_file = yaml_file.replace('/', '_')
-
+                yaml_file = yaml_file.replace(os.sep, '_')
                 yaml_file_sheet = get_sheet_name(yaml_file, sheet_list)
+
                 if yaml_file_sheet:
                     sheet_list[yaml_file_sheet] = items_to_print
                     header[yaml_file_sheet] = HEADER_CONTENT
@@ -69,6 +69,6 @@ def convert_yml_to_excel(oss_yaml_files, output_file, file_option_on, base_path)
             else:
                 logger.warning("Nothing is detected to convert so output file is not generated.")
         else:
-            logger.error(f"Error to write excel file : {msg}")
+            logger.error(f"Fail to write excel file : {msg}")
     except Exception as ex:
         logger.error(f"Error to write excel file : {ex}")
