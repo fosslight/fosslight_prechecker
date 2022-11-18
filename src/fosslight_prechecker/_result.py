@@ -5,6 +5,7 @@
 import os
 import io
 import sys
+import platform
 import yaml
 import fnmatch
 import xml.etree.ElementTree as ET
@@ -24,6 +25,7 @@ MSG_REFERENCE = "Ref. Copyright and License Writing Rules in Source Code. : " + 
 MSG_FOLLOW_LIC_TXT = "Follow the Copyright and License Writing Rules in Source Code. : " + RULE_LINK
 EX_IOERR = 74
 logger = logging.getLogger(constant.LOGGER_NAME)
+is_windows = platform.system() == 'Windows'
 
 
 class ResultItem:
@@ -216,7 +218,10 @@ def create_result_file(output_file_name, format='', _start_time=""):
 
 
 def get_path_in_yaml(oss_item):
-    return [os.path.join(oss_item.relative_path, file) for file in oss_item.source_name_or_path]
+    path_in_yaml = [os.path.join(oss_item.relative_path, file) for file in oss_item.source_name_or_path]
+    if is_windows:
+        path_in_yaml = [path.replace(os.sep, '/') for path in path_in_yaml]
+    return path_in_yaml
 
 
 def extract_files_in_path(remove_file_list, base_file_list, return_found=False):
