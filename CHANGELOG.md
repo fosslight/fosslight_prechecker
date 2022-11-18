@@ -1,10 +1,33 @@
 # Changelog
 
+## v3.0.11 (18/11/2022)
+## Changes
+## 🚀 Features
+
+- Modify to run all mode on Windows @bjk7119 (#117)
+- Exclude untracked files and ignored files in lint mode @bjk7119 (#113)
+
+## 🐛 Hotfixes
+
+- Fix yaml file encoding error @bjk7119 (#120)
+- Replace windows operator to '/' for path in yaml @soimkim (#119)
+- Fix Dep5 encoding error @soimkim (#118)
+
+## 🔧 Maintenance
+
+- Add tox configuration for Windows @bjk7119 (#116)
+- Modify downloading the license text @bjk7119 (#115)
+- Exclude untracked files in input path @bjk7119 (#114)
+
+---
+
 ## v3.0.10 (04/11/2022)
 ## Changes
 ## 🐛 Hotfixes
 
 - Fix bug for not working options(-n, i) @bjk7119 (#111)
+- Set lint mode to default mode. @bjk7119 (#111)
+- Not print progress bar in add mode when interactive working @bjk7119 (#111)
 
 ## 🔧 Maintenance
 
