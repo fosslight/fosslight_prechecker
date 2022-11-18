@@ -2,7 +2,9 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2020 LG Electronics Inc.
 # SPDX-License-Identifier: GPL-3.0-only
-from fosslight_oss_pkg._convert import convert_report
+import multiprocessing
+from fosslight_prechecker.cli import main
 
 if __name__ == '__main__':
-    convert_report("", "", "")
+    multiprocessing.freeze_support()
+    main()

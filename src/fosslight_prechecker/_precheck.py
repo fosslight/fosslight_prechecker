@@ -119,14 +119,10 @@ def find_oss_pkg_info_and_exlcude_file(path, mode='lint'):
                 elif _turn_on_exclude_config and file.startswith('.'):
                     DEFAULT_EXCLUDE_EXTENSION_FILES.append(file_rel_path)
                 elif is_binary(file_abs_path):
-                    if is_windows:
-                        file_rel_path = file_rel_path.replace(os.sep, '/')
                     DEFAULT_EXCLUDE_EXTENSION_FILES.append(file_rel_path)
                 else:
                     extension = file_lower_case.split(".")[-1]
                     if extension in DEFAULT_EXCLUDE_EXTENSION:
-                        if is_windows:
-                            file_rel_path = file_rel_path.replace(os.sep, '/')
                         DEFAULT_EXCLUDE_EXTENSION_FILES.append(file_rel_path)
     except Exception as ex:
         dump_error_msg(f"Error_FIND_OSS_PKG : {ex}")
@@ -159,6 +155,10 @@ def create_reuse_dep5_file(path):
 
         DEFAULT_EXCLUDE_EXTENSION_FILES.extend(_DEFAULT_EXCLUDE_FOLDERS)
         exclude_file_list = list(set(DEFAULT_EXCLUDE_EXTENSION_FILES))
+
+        if is_windows:
+            exclude_file_list = [file.replace(os.sep, '/') for file in exclude_file_list]
+
         for file_to_exclude in exclude_file_list:
             str_contents += f"\nFiles: {file_to_exclude} \nCopyright: -\nLicense: -\n"
 
