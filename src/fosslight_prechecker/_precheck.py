@@ -162,7 +162,7 @@ def create_reuse_dep5_file(path):
         for file_to_exclude in exclude_file_list:
             str_contents += f"\nFiles: {file_to_exclude} \nCopyright: -\nLicense: -\n"
 
-        with open(reuse_config_file, "a") as f:
+        with open(reuse_config_file, "a", encoding="utf8") as f:
             if not need_rollback:
                 f.write(_DEFAULT_CONFIG_PREFIX)
             f.write(str_contents)
