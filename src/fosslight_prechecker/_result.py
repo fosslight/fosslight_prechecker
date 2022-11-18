@@ -180,7 +180,7 @@ def write_result_yaml(result_file: str, exit_code: int, result_item: ResultItem)
         yaml_result = result_item.get_print_yaml()
         # Make yaml file
         with io.open(result_file, 'w', encoding='utf8') as outfile:
-            yaml.dump(yaml_result, outfile, default_flow_style=False, sort_keys=False)
+            yaml.dump(yaml_result, outfile, default_flow_style=False, sort_keys=False, allow_unicode=True)
         success = True
     except Exception as ex:
         logger.error(f"Error_to_write_yaml: {ex}")
