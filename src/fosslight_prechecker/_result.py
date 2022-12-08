@@ -285,7 +285,8 @@ def result_for_summary(path_to_find, oss_pkg_info_files, license_missing_files, 
 
         # Get detected License
         for i, lic in enumerate(sorted(prj_report.used_licenses)):
-            detected_lic.append(lic)
+            if lic != '-':
+                detected_lic.append(lic)
 
     if oss_pkg_info_files:
         oss_yaml_files = find_sbom_yaml_files(path_to_find)
