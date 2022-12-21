@@ -227,12 +227,11 @@ def get_allfiles_list(path):
                     dirs.remove(dir)
                     continue
             for file in files:
-                file_lower_case = file.lower()
-                file_abs_path = os.path.join(root, file_lower_case)
+                file_abs_path = os.path.join(root, file)
                 file_rel_path = os.path.relpath(file_abs_path, path)
                 yield file_rel_path
     except Exception as ex:
-        dump_error_msg(f"Error_Get_AllFiles : {ex}")
+        dump_error_msg(f"Error - get all files list : {ex}")
 
 
 def save_result_log():
@@ -319,11 +318,11 @@ def find_representative_license(path_to_find, input_license):
             found_license_file = True
 
     if found_license_file:
-        logger.warning(f" # Found representative license file : {found_file}")
+        logger.info(f"# Found representative license file : {found_file}")
     else:
-        logger.warning(" # There is no representative license file")
+        logger.info("# There is no representative license file")
         input_license = check_input_license_format(input_license)
-        logger.info(f" Input License : {input_license}")
+        logger.info(f" - Input License : {input_license}")
 
         parsed_args = main_parser.parse_args(['download', f"{input_license}"])
 
@@ -337,7 +336,7 @@ def find_representative_license(path_to_find, input_license):
                 success_from_lge = lge_lic_download(path_to_find, input_license)
 
             if reuse_return_code == 0 or success_from_lge or present_lic:
-                logger.warning(f" # Created Representative License File : {input_license}.txt")
+                logger.warning(f"# Created Representative License File : {input_license}.txt")
                 copy_to_root(path_to_find, input_license)
 
         except Exception as ex:
@@ -426,9 +425,6 @@ def add_content(target_path="", input_license="", input_copyright="", output_pat
     except Exception as ex:
         dump_error_msg(f"Error access to get_spdx_licenses_json : {ex}")
 
-    if input_license != "":
-        find_representative_license(path_to_find, input_license)
-
     # File Only mode (-f option)
     if _check_only_file_mode:
         main_parser = reuse_arg_parser()
@@ -490,5 +486,9 @@ def add_content(target_path="", input_license="", input_copyright="", output_pat
                                       path_to_find,
                                       input_license,
                                       input_copyright)
+
+    # Find and create representative license file
+    if input_license != "":
+        find_representative_license(path_to_find, input_license)
 
     save_result_log()

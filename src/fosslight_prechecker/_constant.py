@@ -8,7 +8,7 @@ DEFAULT_EXCLUDE_EXTENSION = ["jar", "png", "exe", "so", "a", "dll", "jpeg", "jpg
                              "pfm", "otf", "afm", "dfont", "json"]
 OSS_PKG_INFO_FILES = [r"oss-pkg-info[\s\S]*.ya?ml", r"oss-package[\s\S]*.info", r"sbom(-|_)info[\s\S]*.ya?ml",
                       r"requirement(s)?.txt", "package.json", "pom.xml", "build.gradle", "podfile.lock", "go.mod",
-                       "cartfile.resolved", "pubspec.yaml", "package.resolved", "packages.config", "project.assets.json"]
+                      "cartfile.resolved", "pubspec.yaml", "package.resolved", "packages.config", "project.assets.json"]
 HTML_RESULT_EXPAND_LIMIT = 10
 HTML_RESULT_PRINT_LIMIT = 100
 
