@@ -92,9 +92,9 @@ def convert_to_spdx_style(input_string):
 
 
 def check_input_license_format(input_license):
-    global spdx_licenses
-    if input_license in spdx_licenses:
-        return input_license
+    for spdx in spdx_licenses:
+        if input_license.casefold() == spdx.casefold():
+            return spdx
 
     if input_license.startswith('LicenseRef-'):
         return input_license
@@ -105,7 +105,7 @@ def check_input_license_format(input_license):
 
     try:
         # Get frequetly used license from json file
-        converted_license = licensesfromJson.get(input_license.lower())
+        converted_license = licensesfromJson.get(input_license.casefold())
         if converted_license is None:
             converted_license = convert_to_spdx_style(input_license)
     except Exception as ex:
