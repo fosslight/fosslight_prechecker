@@ -6,13 +6,12 @@ import os
 import re
 import logging
 import shutil
-import json
 import sys
 import fosslight_util.constant as constant
 import urllib.request
 from yaml import safe_dump
 from fosslight_util.set_log import init_log
-from fosslight_util.spdx_licenses import get_spdx_licenses_json
+from fosslight_util.spdx_licenses import get_spdx_licenses_json, get_license_from_nick
 from fosslight_util.parsing_yaml import find_sbom_yaml_files, parsing_yml
 from fosslight_util.output_format import check_output_format
 from datetime import datetime
@@ -30,32 +29,11 @@ PKG_NAME = "fosslight_prechecker"
 LICENSE_INCLUDE_FILES = ["license", "license.md", "license.txt", "notice"]
 EXCLUDE_DIR = ["test", "tests", "doc", "docs"]
 EXCLUDE_PREFIX = ("test", ".", "doc", "__")
-RESOURCES_DIR = 'resources'
-LICENSES_JSON_FILE = 'convert_license.json'
 OPENSOURCE_LGE_COM_URL_PREFIX = "https://opensource.lge.com/license/"
 _result_log = {}
 spdx_licenses = []
 
 logger = logging.getLogger(constant.LOGGER_NAME)
-
-
-def get_licenses_from_json():
-    licenses = {}
-    licenses_file = os.path.join(RESOURCES_DIR, LICENSES_JSON_FILE)
-
-    try:
-        base_dir = sys._MEIPASS
-    except Exception:
-        base_dir = os.path.dirname(__file__)
-
-    file_withpath = os.path.join(base_dir, licenses_file)
-    try:
-        with open(file_withpath, 'r') as f:
-            licenses = json.load(f)
-    except Exception as ex:
-        dump_error_msg(f"Error to get license from json file : {ex}")
-
-    return licenses
 
 
 def check_file_extension(file_list):
@@ -99,7 +77,7 @@ def check_input_license_format(input_license):
     if input_license.startswith('LicenseRef-'):
         return input_license
 
-    licensesfromJson = get_licenses_from_json()
+    licensesfromJson = get_license_from_nick()
     if licensesfromJson == "":
         dump_error_msg(" Error - Return Value to get license from Json is none")
 
