@@ -269,8 +269,7 @@ def present_license_file(path_to_find, lic):
     file_name = f"{lic}.txt"
     if file_name in os.listdir(lic_file_path):
         present = True
-        logger.info(f"{os.path.join(path_to_find, 'LICENSES', file_name)} already exists.")
-        return present
+    return present
 
 
 def find_representative_license(path_to_find, input_license):
@@ -290,35 +289,33 @@ def find_representative_license(path_to_find, input_license):
 
     for file in files:
         file_lower_case = file.lower()
-
         if file_lower_case in LICENSE_INCLUDE_FILES or file_lower_case.startswith("license") or file_lower_case.startswith("notice"):
             found_file.append(file)
             found_license_file = True
 
-    if found_license_file:
-        logger.info(f"# Found representative license file : {found_file}")
-    else:
-        logger.info("# There is no representative license file")
-        input_license = check_input_license_format(input_license)
-        logger.info(f" - Input License : {input_license}")
+    input_license = check_input_license_format(input_license)
+    logger.info(f" - Input License : {input_license}")
 
-        parsed_args = main_parser.parse_args(['download', f"{input_license}"])
+    parsed_args = main_parser.parse_args(['download', f"{input_license}"])
 
-        try:
-            # 0: successfully downloaded, 1: failed to download
-            reuse_return_code = reuse_download(parsed_args, prj)
-            # Check if the license text file is present
-            present_lic = present_license_file(path_to_find, input_license)
+    try:
+        # 0: successfully downloaded, 1: failed to download
+        reuse_return_code = reuse_download(parsed_args, prj)
+        # Check if the license text file is present
+        present_lic = present_license_file(path_to_find, input_license)
 
-            if reuse_return_code == 1 and not present_lic:
-                success_from_lge = lge_lic_download(path_to_find, input_license)
+        if reuse_return_code == 1 and not present_lic:
+            # True : successfully downloaded from LGE
+            success_from_lge = lge_lic_download(path_to_find, input_license)
 
-            if reuse_return_code == 0 or success_from_lge or present_lic:
-                logger.warning(f"# Created Representative License File : {input_license}.txt")
+        if reuse_return_code == 0 or success_from_lge:
+            if found_license_file:
+                logger.info(f"# Found representative license file : {found_file}\n")
+            else:
+                logger.warning(f"# Created Representative License File : {input_license}.txt\n")
                 copy_to_root(path_to_find, input_license)
-
-        except Exception as ex:
-            dump_error_msg(f"Error - download representative license text: {ex}")
+    except Exception as ex:
+        dump_error_msg(f"Error - download representative license text: {ex}")
 
 
 def is_exclude_dir(dir_path):
