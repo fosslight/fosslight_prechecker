@@ -36,13 +36,13 @@ spdx_licenses = []
 logger = logging.getLogger(constant.LOGGER_NAME)
 
 
-def check_file_extension(file_list):
+def check_file_extension(file_list, is_all_file_list=False):
     if file_list != "":
         for file in file_list:
             try:
                 file_extension = os.path.splitext(file)[1].lower()
-                if file_extension == "":
-                    logger.info(f" No extension file(s) : {file}")
+                if file_extension == "" and is_all_file_list:
+                    logger.info(f" No extension file : {file}")
                 if file_extension in EXTENSION_COMMENT_STYLE_MAP_LOWERCASE:
                     yield file
             except Exception as ex:
@@ -51,7 +51,7 @@ def check_file_extension(file_list):
 
 def check_license_and_copyright(path_to_find, all_files, missing_license, missing_copyright):
     # Check file extension for each list
-    all_files_filtered = list(check_file_extension(all_files))
+    all_files_filtered = list(check_file_extension(all_files, True))
     missing_license_filtered = list(check_file_extension(missing_license))
     missing_copyright_filtered = list(check_file_extension(missing_copyright))
 
