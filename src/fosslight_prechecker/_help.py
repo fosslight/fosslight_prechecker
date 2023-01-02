@@ -11,7 +11,7 @@ _HELP_MESSAGE_PRECHECKER = """
     Usage: fosslight_prechecker [Mode] [option1] <arg1> [option2] <arg2>...
      ex) fosslight_prechecker lint -p /home/test/src/
          fosslight_prechecker add -p /home/test/test.py -c "2019-2021 LG Electronics Inc." -l "GPL-3.0-only"
-         fosslight_prechecker convert -p /home/test/sbom_info.py
+         fosslight_prechecker convert -p /home/test/sbom_info.yaml
 
     Parameters:
         Mode
