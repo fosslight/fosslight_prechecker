@@ -1,5 +1,25 @@
 # Changelog
 
+## v3.0.12 (02/01/2023)
+## Changes
+## 🐛 Hotfixes
+
+- Bug fix not to print no ext. file name @bjk7119 (#128)
+- Modify to print file wo ext. correctly @bjk7119 (#124)
+- Fix yaml file encoding error @bjk7119 (#120)
+
+## 🔧 Maintenance
+
+- Modify typo of example of convert @bjk7119 (#130)
+- Modify to check file extension efficiently @bjk7119 (#129)
+- Download license file regardless of representative license @bjk7119 (#127)
+- Remove frequent license nick list file @bjk7119 (#126)
+- Modify to match SPDX regardless of case @bjk7119 (#125)
+- Modify to simplify file list in OSS_PKG_FILES @bjk7119 (#123)
+- Add *sbom_info*.yaml pattern to OSS_PKG_INFO_FILES @bjk7119 (#122)
+
+---
+
 ## v3.0.11 (18/11/2022)
 ## Changes
 ## 🚀 Features
