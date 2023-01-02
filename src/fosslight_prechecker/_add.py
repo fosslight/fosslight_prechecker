@@ -15,7 +15,9 @@ from fosslight_util.spdx_licenses import get_spdx_licenses_json, get_license_fro
 from fosslight_util.parsing_yaml import find_sbom_yaml_files, parsing_yml
 from fosslight_util.output_format import check_output_format
 from datetime import datetime
-from fosslight_prechecker._precheck import precheck_for_project, precheck_for_files, dump_error_msg, get_path_to_find
+from fosslight_prechecker._precheck import precheck_for_project, precheck_for_files, dump_error_msg, \
+                                           get_path_to_find, DEFAULT_EXCLUDE_EXTENSION_FILES
+from fosslight_prechecker._result import get_total_file_list
 from reuse.header import run as reuse_header
 from reuse.download import run as reuse_download
 from reuse._comment import EXTENSION_COMMENT_STYLE_MAP_LOWERCASE
@@ -34,33 +36,6 @@ _result_log = {}
 spdx_licenses = []
 
 logger = logging.getLogger(constant.LOGGER_NAME)
-
-
-def check_file_extension(file_list, is_all_file_list=False):
-    if file_list != "":
-        for file in file_list:
-            try:
-                file_extension = os.path.splitext(file)[1].lower()
-                if file_extension == "" and is_all_file_list:
-                    logger.info(f" No extension file : {file}")
-                if file_extension in EXTENSION_COMMENT_STYLE_MAP_LOWERCASE:
-                    yield file
-            except Exception as ex:
-                dump_error_msg(f"Error - Unknown error to check file extension: {ex}")
-
-
-def check_license_and_copyright(path_to_find, all_files, missing_license, missing_copyright):
-    # Check file extension for each list
-    all_files_filtered = list(check_file_extension(all_files, True))
-    missing_license_filtered = list(check_file_extension(missing_license))
-    missing_copyright_filtered = list(check_file_extension(missing_copyright))
-
-    skip_files = sorted(set(all_files_filtered) - set(missing_license_filtered) - set(missing_copyright_filtered))
-    logger.info(f"\n# File list that have both license and copyright : {len(skip_files)} / {len(all_files_filtered)}")
-
-    precheck_for_files(path_to_find, skip_files)
-
-    return missing_license_filtered, missing_copyright_filtered
 
 
 def convert_to_spdx_style(input_string):
@@ -444,26 +419,31 @@ def add_content(target_path="", input_license="", input_copyright="", output_pat
         # Download license text file of OSS-pkg-info.yaml
         download_oss_info_license(path_to_find, input_license)
 
-        # Get all files List in path
-        all_files_list = get_allfiles_list(path_to_find)
-
         # Get missing license / copyright file list
-        missing_license, missing_copyright, _, project, _ = precheck_for_project(path_to_find, 'add')
+        missing_license, missing_copyright, _, project, prj_report = precheck_for_project(path_to_find)
 
-        # Print Skipped Files
-        missing_license_filtered, missing_copyright_filtered = \
-            check_license_and_copyright(path_to_find, all_files_list, missing_license, missing_copyright)
+        # Get total files except excluded file
+        total_files_excluded = get_total_file_list(path_to_find, prj_report, DEFAULT_EXCLUDE_EXTENSION_FILES)
+        skip_files = sorted(set(total_files_excluded) - set(missing_license) - set(missing_copyright))
+        logger.info(f"\n# File list that have both license and copyright : {len(skip_files)} / {len(total_files_excluded)}")
+
+        # Filter by file extension
+        missing_license = [file for file in missing_license if os.path.splitext(file)[1].lower() in EXTENSION_COMMENT_STYLE_MAP_LOWERCASE]
+        missing_copyright = [file for file in missing_copyright if os.path.splitext(file)[1].lower() in EXTENSION_COMMENT_STYLE_MAP_LOWERCASE]
+
+        # Check license and copyright of each file
+        precheck_for_files(path_to_find, skip_files)
 
         # Set missing license and copyright
-        set_missing_license_copyright(missing_license_filtered,
-                                      missing_copyright_filtered,
+        set_missing_license_copyright(missing_license,
+                                      missing_copyright,
                                       project,
                                       path_to_find,
                                       input_license,
                                       input_copyright)
 
     # Find and create representative license file
-    if input_license != "":
+    if input_license != "" and len(missing_license) > 0:
         find_representative_license(path_to_find, input_license)
 
     save_result_log()
