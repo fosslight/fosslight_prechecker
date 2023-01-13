@@ -20,7 +20,7 @@ from fosslight_util.output_format import check_output_format
 
 
 CUSTOMIZED_FORMAT_FOR_PRECHECKER = {'html': '.html', 'xml': '.xml', 'yaml': '.yaml'}
-RULE_LINK = "https://oss.lge.com/guide/process/osc_process/1-identification/copyright_license_rule.html"
+RULE_LINK = "https://opensource.lge.com/guide/19"
 MSG_REFERENCE = "Ref. Copyright and License Writing Rules in Source Code. : " + RULE_LINK
 MSG_FOLLOW_LIC_TXT = "Follow the Copyright and License Writing Rules in Source Code. : " + RULE_LINK
 EX_IOERR = 74

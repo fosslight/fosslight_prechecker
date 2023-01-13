@@ -52,7 +52,7 @@ def main():
     if args.help:
         print_help_msg()
     elif args.version:
-        print_package_version(PKG_NAME, "FOSSLight Prechecker Version")
+        print_package_version(PKG_NAME, "FOSSLight Prechecker Version:")
     elif args.notice:
         try:
             base_path = sys._MEIPASS
