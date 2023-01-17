@@ -247,8 +247,13 @@ def exclude_file_in_yaml(path_to_find, yaml_files, license_missing_files, copyri
     excluded_path = []
     lic_present_path = []
     cop_present_path = []
+    invalid_yaml_files = []
     for file in yaml_files:
         oss_items, _ = parsing_yml(file, path_to_find)
+        # if oss_items is invalid
+        if not oss_items:
+            invalid_yaml_files.append(file)
+
         for oss_item in oss_items:
             if oss_item.exclude:
                 excluded_path.extend(get_path_in_yaml(oss_item))
@@ -263,7 +268,7 @@ def exclude_file_in_yaml(path_to_find, yaml_files, license_missing_files, copyri
     license_missing_files = extract_files_in_path(lic_present_path, list(license_missing_files - set(files_with_exclude_removed)))
     copyright_missing_files = extract_files_in_path(cop_present_path, list(copyright_missing_files - set(files_with_exclude_removed)))
 
-    return license_missing_files, copyright_missing_files
+    return license_missing_files, copyright_missing_files, invalid_yaml_files
 
 
 def get_total_file_list(path_to_find, prj_report, exclude_files):
@@ -294,11 +299,23 @@ def result_for_summary(path_to_find, oss_pkg_info_files, license_missing_files, 
     if oss_pkg_info_files:
         oss_yaml_files = find_sbom_yaml_files(path_to_find)
         # Exclude files in yaml
-        license_missing_files, copyright_missing_files = exclude_file_in_yaml(path_to_find, oss_yaml_files,
-                                                                              set(license_missing_files) - set(oss_pkg_info_files),
-                                                                              set(copyright_missing_files) - set(oss_pkg_info_files))
+        license_missing_files, copyright_missing_files, invalid_yaml_files \
+            = exclude_file_in_yaml(path_to_find, oss_yaml_files,
+                                   set(license_missing_files) - set(oss_pkg_info_files),
+                                   set(copyright_missing_files) - set(oss_pkg_info_files))
         # Subtract excluded files(untracked or ignored file)
         oss_pkg_info_files = list(set(oss_pkg_info_files) - set(exclude_files))
+
+    # Add invalid format to file name
+    if not path_to_find.endswith('/'):
+        path_to_find += '/'
+
+    invalid_yaml_files = [file.replace(path_to_find, '', 1) for file in invalid_yaml_files]
+    for file in invalid_yaml_files:
+        if file in oss_pkg_info_files:
+            oss_pkg_info_files.remove(file)
+            file += " (Invalid format)"
+            oss_pkg_info_files.append(file)
 
     if len(license_missing_files) == 0 and len(copyright_missing_files) == 0:
         prechecker_compliant = True
