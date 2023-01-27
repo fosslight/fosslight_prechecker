@@ -1,5 +1,20 @@
 # Changelog
 
+## v3.0.13 (27/01/2023)
+## Changes
+## 🐛 Hotfixes
+
+- Add git ignore option(-c) for excluding @bjk7119 (#135)
+
+## 🔧 Maintenance
+
+- Unify version output format @bjk7119 (#133)
+- Change package to get release package @bjk7119 (#132)
+- Update version of packages for actions @bjk7119 (#131)
+- Modify typo of example of convert @bjk7119 (#130)
+
+---
+
 ## v3.0.12 (02/01/2023)
 ## Changes
 ## 🐛 Hotfixes
@@ -338,7 +353,3 @@
 
 - Remove waring in publish-release.yml @bjk7119 (#12)
 - Update version in setup.py when release @soimkim (#11)
-
----
-
-## v2.0.0 (22/07/2021)
