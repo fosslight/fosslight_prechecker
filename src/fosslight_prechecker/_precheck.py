@@ -55,7 +55,7 @@ def exclude_gitignore_files(current_path, path):
         if os.path.isfile(os.path.join(root_path, '.gitignore')):
             cmd_result = subprocess.check_output(['git',
                                                   'ls-files',
-                                                  '-i',
+                                                  '-ci',
                                                   '--exclude-from=.gitignore'],
                                                  universal_newlines=True)
             cmd_result = cmd_result.split('\n')
