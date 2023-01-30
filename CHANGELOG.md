@@ -1,5 +1,13 @@
 # Changelog
 
+## v3.0.14 (30/01/2023)
+## Changes
+## 🐛 Hotfixes
+
+- Bug fix to encode html result file @bjk7119 (#136)
+
+---
+
 ## v3.0.13 (27/01/2023)
 ## Changes
 ## 🐛 Hotfixes
@@ -340,16 +348,3 @@
 ## 🔧 Maintenance
 
 - Merge init_log & init_log_item functiions @bjk7119 (#15)
-
----
-
-## v2.0.1 (29/07/2021)
-## Changes
-## 🐛 Hotfixes
-
-- Bug fix to checkout new version @bjk7119 (#13)
-
-## 🔧 Maintenance
-
-- Remove waring in publish-release.yml @bjk7119 (#12)
-- Update version in setup.py when release @soimkim (#11)
