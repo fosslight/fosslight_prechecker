@@ -163,7 +163,7 @@ def write_result_html(result_file: str, exit_code: int, result_item: ResultItem,
         output_dir = os.path.dirname(result_file)
         Path(output_dir).mkdir(parents=True, exist_ok=True)
         html_result = result_for_html(result_item, project, path_to_find)
-        with open(result_file, 'w') as f:
+        with open(result_file, 'w', encoding='utf-8') as f:
             f.write(html_result)
         success = True
     except Exception as ex:
