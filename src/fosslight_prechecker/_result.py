@@ -117,15 +117,7 @@ def result_for_xml(result_item: ResultItem):
             items.set('msg', str_summary)
             _root_xml_item.append(items)
         else:
-            for file_name in (set(result_item._files_without_lic) | set(result_item._files_without_cop)):
-                items = ET.Element('error')
-                items.set('file', file_name)
-                items.set('id', 'rule_key_osc_checker_02')
-                items.set('line', '0')
-                items.set('msg', MSG_FOLLOW_LIC_TXT)
-                _root_xml_item.append(items)
-
-            for file_name in result_item._files_without_cop:
+            for file_name in (set(result_item._files_without_lic) | set(result_item._files_without_both)):
                 items = ET.Element('error')
                 items.set('file', file_name)
                 items.set('id', 'rule_key_osc_checker_02')
