@@ -1,5 +1,13 @@
 # Changelog
 
+## v3.0.15 (02/02/2023)
+## Changes
+## 🐛 Hotfixes
+
+- Fix bug about contents of xml result @bjk7119 (#137)
+
+---
+
 ## v3.0.14 (30/01/2023)
 ## Changes
 ## 🐛 Hotfixes
@@ -340,11 +348,3 @@
 ## 🔧 Maintenance
 
 - Set condition to use FOSSLight Util v1.1.0 or later @bjk7119 (#16)
-
----
-
-## v2.0.2 (12/08/2021)
-## Changes
-## 🔧 Maintenance
-
-- Merge init_log & init_log_item functiions @bjk7119 (#15)
