@@ -46,7 +46,7 @@ def convert_yml_to_excel(oss_yaml_files, output_file, file_option_on, base_path)
 
                 if file_option_on:
                     base_path = os.path.dirname(yaml_file)
-                oss_items, _ = parsing_yml(yaml_file, base_path)
+                oss_items, _, _ = parsing_yml(yaml_file, base_path)
                 for item in oss_items:
                     items_to_print.extend(item.get_print_array())
                 if not base_path.endswith(f"{os.sep}"):
