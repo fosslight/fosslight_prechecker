@@ -281,11 +281,13 @@ def add_reason_to_file_name(oss_pkg_info_files, abnormal_yaml_files, path_to_fin
         if file_name in oss_pkg_info_files:
             oss_pkg_info_files.remove(file_name)
             if val == "yaml_error":
-                file_name += " (Yaml formmat error)"
+                file_name += " (Yaml format error)"
             elif val == "not_supported":
                 file_name += " (Not supported format)"
-            else:
+            elif val == "empty":
                 file_name += " (Empty)"
+            else:
+                file_name += " (Unknown error)"
             oss_pkg_info_files.append(file_name)
     return oss_pkg_info_files
 
@@ -316,7 +318,7 @@ def result_for_summary(path_to_find, oss_pkg_info_files, license_missing_files, 
                                    set(license_missing_files) - set(oss_pkg_info_files),
                                    set(copyright_missing_files) - set(oss_pkg_info_files))
         # Subtract excluded files(untracked or ignored file)
-        # oss_pkg_info_files = list(set(oss_pkg_info_files) - set(exclude_files))
+        oss_pkg_info_files = list(set(oss_pkg_info_files) - set(exclude_files))
 
     # Add invalid format to file name
     oss_pkg_info_files = add_reason_to_file_name(oss_pkg_info_files, abnormal_yaml_files, path_to_find)
