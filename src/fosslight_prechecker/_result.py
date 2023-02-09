@@ -242,7 +242,7 @@ def exclude_file_in_yaml(path_to_find, yaml_files, license_missing_files, copyri
     abnormal_yaml_files = {}
 
     for file in yaml_files:
-        oss_items, _, err_reason = parsing_yml(file, path_to_find)
+        oss_items, _, err_reason = parsing_yml(file, path_to_find, False)
         # if oss_items is abnormal(empty or invalid)
         if not oss_items:
             abnormal_yaml_files[file] = err_reason
