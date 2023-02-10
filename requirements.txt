@@ -3,4 +3,4 @@ binaryornot
 requests
 reuse
 PyYAML
-fosslight_util>=1.4.14
+fosslight_util>=1.4.16

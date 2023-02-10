@@ -323,7 +323,7 @@ def download_oss_info_license(base_path, input_license=""):
         logger.info(f"\n # There is OSS Package Info file(s) : {oss_yaml_files}\n")
 
     for oss_pkg_file in oss_yaml_files:
-        _, license_list = parsing_yml(oss_pkg_file, base_path)
+        _, license_list, _ = parsing_yml(oss_pkg_file, base_path)
 
     for lic in license_list:
         converted_lic_list.append(check_input_license_format(lic))
