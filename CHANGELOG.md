@@ -1,5 +1,13 @@
 # Changelog
 
+## v3.0.16 (10/02/2023)
+## Changes
+## 🔧 Maintenance
+
+- Add yaml error reason to file name @bjk7119 (#138)
+
+---
+
 ## v3.0.15 (02/02/2023)
 ## Changes
 ## 🐛 Hotfixes
@@ -336,15 +344,3 @@
 ## 🔧 Maintenance
 
 - Delete -m option @bjk7119 (#31)
-
----
-
-## v2.0.3 (26/08/2021)
-## Changes
-## 🐛 Hotfixes
-
-- Fix a bug related release action @soimkim (#24)
-
-## 🔧 Maintenance
-
-- Set condition to use FOSSLight Util v1.1.0 or later @bjk7119 (#16)
