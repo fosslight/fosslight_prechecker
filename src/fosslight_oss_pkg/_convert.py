@@ -27,7 +27,7 @@ def convert_report(base_path, output_name, format, need_log_file=True):
 
     success, msg, output_path, output_name, output_extension = check_output_format(output_name, format, CUSTOMIZED_FORMAT_FOR_PRECHECKER)
 
-    logger, _result_log = init_log(os.path.join(output_path, f"fosslight_log_{now}.txt"),
+    logger, _result_log = init_log(os.path.join(output_path, f"fosslight_log_pre_{now}.txt"),
                                    need_log_file, logging.INFO, logging.DEBUG, _PKG_NAME, base_path)
     if success:
         if output_path == "":
@@ -40,7 +40,7 @@ def convert_report(base_path, output_name, format, need_log_file=True):
         if output_name != "":
             output_report = os.path.join(output_path, output_name)
         else:
-            output_report = os.path.join(os.path.abspath(output_path), f"fosslight_report_{now}")
+            output_report = os.path.join(os.path.abspath(output_path), f"fosslight_report_pre_{now}")
     else:
         logger.error(f"Format error - {msg}")
         sys.exit(1)

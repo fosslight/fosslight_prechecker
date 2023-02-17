@@ -271,7 +271,7 @@ def dump_error_msg(error_msg: str, exit=False):
 
 def init(path_to_find, output_path, file_list, need_log_file=True):
     global logger, _result_log
-    logger, _result_log = init_log(os.path.join(output_path, f"fosslight_log_{_start_time}.txt"),
+    logger, _result_log = init_log(os.path.join(output_path, f"fosslight_log_pre_{_start_time}.txt"),
                                    need_log_file, logging.INFO, logging.DEBUG, PKG_NAME, path_to_find)
     if file_list:
         _result_log["File list to check"] = file_list
