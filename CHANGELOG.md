@@ -1,5 +1,13 @@
 # Changelog
 
+## v3.0.17 (23/02/2023)
+## Changes
+## 🔧 Maintenance
+
+- Add the pkg name to log and result file @bjk7119 (#139)
+
+---
+
 ## v3.0.16 (10/02/2023)
 ## Changes
 ## 🔧 Maintenance
@@ -332,15 +340,3 @@
 
 - Modify to print help message one time @bjk7119 (#33)
 - Modify to test add mode @bjk7119 (#32)
-
----
-
-## v2.1.0 (16/09/2021)
-## Changes
-## 🚀 Features
-
-- Apply add mode to add license and copyright @bjk7119 (#30)
-
-## 🔧 Maintenance
-
-- Delete -m option @bjk7119 (#31)
