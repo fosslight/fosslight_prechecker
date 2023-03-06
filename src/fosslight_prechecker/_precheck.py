@@ -246,13 +246,13 @@ def precheck_for_project(path_to_find):
         missing_license = [str(sub) for sub in set(report.files_without_licenses)]
         if not path_to_find.endswith(f"{os.sep}"):
             path_to_find += f"{os.sep}"
-        missing_license = [sub.replace(path_to_find, '') for sub in missing_license]
+        missing_license = [sub.replace(path_to_find, '', 1) for sub in missing_license]
 
         # File list that missing copyright text
         missing_copyright = [str(sub) for sub in set(report.files_without_copyright)]
         if not path_to_find.endswith(f"{os.sep}"):
             path_to_find += f"{os.sep}"
-        missing_copyright = [sub.replace(path_to_find, '') for sub in missing_copyright]
+        missing_copyright = [sub.replace(path_to_find, '', 1) for sub in missing_copyright]
     except Exception as ex:
         dump_error_msg(f"Error prechecker lint: {ex}", True)
 
