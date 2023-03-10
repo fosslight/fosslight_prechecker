@@ -1,5 +1,13 @@
 # Changelog
 
+## v3.0.18 (10/03/2023)
+## Changes
+## 🐛 Hotfixes
+
+- Bug fix of same folder name in lint and add @bjk7119 (#140)
+
+---
+
 ## v3.0.17 (23/02/2023)
 ## Changes
 ## 🔧 Maintenance
@@ -327,16 +335,3 @@
 ## 🔧 Maintenance
 
 - Use python-debian v0.1.40 @bjk7119 (#34)
-
----
-
-## v2.1.1 (12/10/2021)
-## Changes
-## 🐛 Hotfixes
-
-- Fix to Flake8 v4.0.0 bug -> using v3.9.2 (when using tox) @bjk7119 (#33)
-
-## 🔧 Maintenance
-
-- Modify to print help message one time @bjk7119 (#33)
-- Modify to test add mode @bjk7119 (#32)
