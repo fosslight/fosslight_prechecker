@@ -45,7 +45,7 @@ def exclude_untracked_files(path):
         cmd_result = [file.replace(path, '', 1) for file in cmd_result]
         DEFAULT_EXCLUDE_EXTENSION_FILES.extend(cmd_result)
     except Exception as ex:
-        logger.error(f"Error to get git untracked files : {ex}")
+        logger.warning(f"Error to get git untracked files : {ex}")
 
 
 def exclude_gitignore_files(current_path, path):
@@ -66,9 +66,8 @@ def exclude_gitignore_files(current_path, path):
             DEFAULT_EXCLUDE_EXTENSION_FILES.extend(cmd_result)
         else:
             return
-
     except Exception as ex:
-        logger.error(f"Error to get git ignored files : {ex}")
+        logger.warning(f"Error to get git ignored files : {ex}")
 
 
 def exclude_git_related_files(path):
@@ -85,7 +84,7 @@ def exclude_git_related_files(path):
         # Restore path
         os.chdir(current_path)
     except Exception as ex:
-        logger.error(f"Error to get git related files : {ex}")
+        logger.warning(f"Error to get git related files : {ex}")
 
 
 def find_oss_pkg_info_and_exlcude_file(path):
