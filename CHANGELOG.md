@@ -1,5 +1,13 @@
 # Changelog
 
+## v3.0.20 (15/03/2023)
+## Changes
+## 🔧 Maintenance
+
+- Modify condition to exclude git ignore file @bjk7119 (#142)
+
+---
+
 ## v3.0.19 (15/03/2023)
 ## Changes
 ## 🔧 Maintenance
@@ -323,11 +331,3 @@
 ## 🚀 Features
 
 - Add code of downloading license text @bjk7119 (#38)
-
----
-
-## v2.1.3 (21/10/2021)
-## Changes
-## 🔧 Maintenance
-
-- Change mode name : report -> convert @bjk7119 (#35)
