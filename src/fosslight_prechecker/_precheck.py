@@ -52,20 +52,19 @@ def exclude_gitignore_files(current_path, path):
     global DEFAULT_EXCLUDE_EXTENSION_FILES
     try:
         root_path = VCSStrategyGit.find_root(current_path)
-        if os.path.isfile(os.path.join(root_path, '.gitignore')):
-            cmd_result = subprocess.check_output(['git',
-                                                  'ls-files',
-                                                  '-ci',
-                                                  '--exclude-from=.gitignore'],
-                                                 universal_newlines=True)
-            cmd_result = cmd_result.split('\n')
-            cmd_result.remove('')
-            if not path.endswith(f"{os.sep}"):
-                path += f"{os.sep}"
-            cmd_result = [file.replace(path, '', 1) for file in cmd_result]
-            DEFAULT_EXCLUDE_EXTENSION_FILES.extend(cmd_result)
-        else:
-            return
+        if root_path:
+            if os.path.isfile(os.path.join(root_path, '.gitignore')):
+                cmd_result = subprocess.check_output(['git',
+                                                    'ls-files',
+                                                    '-ci',
+                                                    '--exclude-from=.gitignore'],
+                                                    universal_newlines=True)
+                cmd_result = cmd_result.split('\n')
+                cmd_result.remove('')
+                if not path.endswith(f"{os.sep}"):
+                    path += f"{os.sep}"
+                cmd_result = [file.replace(path, '', 1) for file in cmd_result]
+                DEFAULT_EXCLUDE_EXTENSION_FILES.extend(cmd_result)
     except Exception as ex:
         logger.warning(f"Error to get git ignored files : {ex}")
 
