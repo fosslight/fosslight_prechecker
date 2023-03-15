@@ -45,7 +45,7 @@ def exclude_untracked_files(path):
         cmd_result = [file.replace(path, '', 1) for file in cmd_result]
         DEFAULT_EXCLUDE_EXTENSION_FILES.extend(cmd_result)
     except Exception as ex:
-        logger.error(f"Error to get git untracked files : {ex}")
+        logger.warning(f"Error to get git untracked files : {ex}")
 
 
 def exclude_gitignore_files(current_path, path):
@@ -66,9 +66,8 @@ def exclude_gitignore_files(current_path, path):
             DEFAULT_EXCLUDE_EXTENSION_FILES.extend(cmd_result)
         else:
             return
-
     except Exception as ex:
-        logger.error(f"Error to get git ignored files : {ex}")
+        logger.warning(f"Error to get git ignored files : {ex}")
 
 
 def exclude_git_related_files(path):
@@ -85,7 +84,7 @@ def exclude_git_related_files(path):
         # Restore path
         os.chdir(current_path)
     except Exception as ex:
-        logger.error(f"Error to get git related files : {ex}")
+        logger.warning(f"Error to get git related files : {ex}")
 
 
 def find_oss_pkg_info_and_exlcude_file(path):
@@ -271,10 +270,11 @@ def dump_error_msg(error_msg: str, exit=False):
 
 def init(path_to_find, output_path, file_list, need_log_file=True):
     global logger, _result_log
-    logger, _result_log = init_log(os.path.join(output_path, f"fosslight_log_pre_{_start_time}.txt"),
-                                   need_log_file, logging.INFO, logging.DEBUG, PKG_NAME, path_to_find)
     if file_list:
         _result_log["File list to check"] = file_list
+        path_to_find = file_list
+    logger, _result_log = init_log(os.path.join(output_path, f"fosslight_log_pre_{_start_time}.txt"),
+                                   need_log_file, logging.INFO, logging.DEBUG, PKG_NAME, path_to_find)
 
 
 def get_path_to_find(target_path, _check_only_file_mode):
