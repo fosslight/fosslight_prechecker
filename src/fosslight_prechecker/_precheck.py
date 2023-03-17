@@ -48,10 +48,10 @@ def exclude_untracked_files(path):
         logger.warning(f"Error to get git untracked files : {ex}")
 
 
-def exclude_gitignore_files(current_path, path):
+def exclude_gitignore_files(path):
     global DEFAULT_EXCLUDE_EXTENSION_FILES
     try:
-        root_path = VCSStrategyGit.find_root(current_path)
+        root_path = VCSStrategyGit.find_root(os.getcwd())
         if root_path:
             if os.path.isfile(os.path.join(root_path, '.gitignore')):
                 cmd_result = subprocess.check_output(['git',
@@ -78,7 +78,7 @@ def exclude_git_related_files(path):
         # Exclude untracked files
         exclude_untracked_files(path)
         # Exclude ignore files
-        exclude_gitignore_files(current_path, path)
+        exclude_gitignore_files(path)
 
         # Restore path
         os.chdir(current_path)
