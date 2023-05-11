@@ -1,5 +1,13 @@
 # Changelog
 
+## v3.0.23 (11/05/2023)
+## Changes
+## 🐛 Hotfixes
+
+- Fix to find file path for executable @bjk7119 (#147)
+
+---
+
 ## v3.0.22 (11/05/2023)
 ## Changes
 ## 🔧 Maintenance
@@ -329,11 +337,3 @@
 ## Changes
 ## 🔧 Maintenance
 * When converting Yaml, modify it so that Copyright can be read as a list.
-
----
-
-## v2.1.6 (19/11/2021)
-## Changes
-## 🔧 Maintenance
-
-- Add sheet name(BIN(Yocto)) to use Yocto report @bjk7119 (#42)
