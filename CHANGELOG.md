@@ -1,5 +1,13 @@
 # Changelog
 
+## v3.0.22 (11/05/2023)
+## Changes
+## 🔧 Maintenance
+
+- Apply fosslgiht_util v1.4.23 or later @bjk7119 (#146)
+
+---
+
 ## v3.0.21 (11/05/2023)
 ## Changes
 ## 🐛 Hotfixes
@@ -329,11 +337,3 @@
 ## 🔧 Maintenance
 
 - Add sheet name(BIN(Yocto)) to use Yocto report @bjk7119 (#42)
-
----
-
-## v2.1.5 (17/11/2021)
-## Changes
-## 🐛 Hotfixes
-
-- Bug fix to create .xlsx file @bjk7119 (#40)
