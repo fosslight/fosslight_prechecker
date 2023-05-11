@@ -60,7 +60,7 @@ jobs:
           - os: windows-latest
             TARGET: windows
             CMD_BUILD: >
-                pyinstaller --onefile cli.py -n cli --additional-hooks-dir=hooks --collect-data reuse --add-binary "LICENSE;LICENSES" --add-binary "LICENSES\LicenseRef-3rd_party_licenses.txt;LICENSES" &&
+                pyinstaller --onefile cli.py -n cli --additional-hooks-dir=hooks --collect-datas reuse --collect-datas fosslight_util --add-binary "LICENSE;LICENSES" --add-binary "LICENSES\LicenseRef-3rd_party_licenses.txt;LICENSES" &&
                 move dist/cli.exe fosslight_prechecker_windows.exe
             OUT_FILE_NAME: fosslight_prechecker_windows.exe
             ASSET_MIME: application/vnd.microsoft.portable-executable
