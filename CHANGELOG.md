@@ -1,5 +1,19 @@
 # Changelog
 
+## v3.0.21 (11/05/2023)
+## Changes
+## 🐛 Hotfixes
+
+- Fix to find file path if run executable file @bjk7119 (#144)
+
+## 🔧 Maintenance
+
+- Update package version for github actions @bjk7119 (#144)
+- Update the ubuntu version for deploy action @dd-jy (#145)
+- Modify to find VCS root path  @bjk7119 (#143)
+
+---
+
 ## v3.0.20 (15/03/2023)
 ## Changes
 ## 🔧 Maintenance
@@ -323,11 +337,3 @@
 ## 🐛 Hotfixes
 
 - Bug fix to create .xlsx file @bjk7119 (#40)
-
----
-
-## v2.1.4 (07/11/2021)
-## Changes
-## 🚀 Features
-
-- Add code of downloading license text @bjk7119 (#38)
