@@ -47,7 +47,7 @@ jobs:
             TARGET: windows
             CMD_BUILD: |
                 tox -e windows
-                pyinstaller --onefile cli.py -n cli --additional-hooks-dir=hooks --collect-data reuse &&
+                pyinstaller --onefile cli.py -n cli --additional-hooks-dir=hooks --collect-datas reuse --collect-datas fosslight_util &&
                 move dist/cli.exe fosslight_prechecker_windows.exe &&
                 ./fosslight_prechecker_windows.exe
             OUT_FILE_NAME: fosslight_prechecker_windows.exe

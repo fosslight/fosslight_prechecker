@@ -11,7 +11,7 @@ jobs:
   update-changelog:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v3.4.0
       with:
         fetch-depth: 0
         ref: main
@@ -65,7 +65,7 @@ jobs:
             OUT_FILE_NAME: fosslight_prechecker_windows.exe
             ASSET_MIME: application/vnd.microsoft.portable-executable
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v3.4.0
       with:
         ref: main
     - name: Set up Python 3.8
@@ -91,10 +91,10 @@ jobs:
         asset_content_type: ${{ matrix.ASSET_MIME}}
 
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     needs: build
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v3.4.0
       with:
         ref: main
     - name: Set up Python
