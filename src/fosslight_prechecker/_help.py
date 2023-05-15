@@ -17,7 +17,7 @@ _HELP_MESSAGE_PRECHECKER = """
         Mode
             lint\t\t    (Default) Check whether the copyright and license writing rules are complied with
             convert\t\t    Convert sbom_info.yaml -> FOSSLight-Report.xlsx
-            add\t\t\t    Add missing license and copyright
+            add\t\t\t    Add missing license, copyright, and download url
 
         Options:
             -h\t\t\t    Print help message
@@ -33,7 +33,8 @@ _HELP_MESSAGE_PRECHECKER = """
 
         Options for only 'add' mode
             -l <license>\t    License name(SPDX format) to add
-            -c <copyright>\t    Copyright to add(ex, 2015-2021 LG Electronics Inc.)"""
+            -c <copyright>\t    Copyright to add(ex, 2015-2021 LG Electronics Inc.)
+            -u <dl_location>\t    Download Location to add(ex, https://github.com/fosslight/fosslight_prechecker)"""
 
 
 def print_help_msg(exitOpt=True):

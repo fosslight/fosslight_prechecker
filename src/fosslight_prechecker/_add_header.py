@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# Copyright (c) 2021 LG Electronics Inc.
 # SPDX-FileCopyrightText: 2019 Free Software Foundation Europe e.V. <https://fsfe.org>
 # SPDX-FileCopyrightText: 2019 Stefan Bakker <s.bakker777@gmail.com>
 # SPDX-FileCopyrightText: 2019 Kirill Elagin <kirelagin@gmail.com>
@@ -7,24 +10,23 @@
 # SPDX-FileCopyrightText: 2021 Alliander N.V. <https://alliander.com>
 # SPDX-FileCopyrightText: 2021 Robin Vobruba <hoijui.quaero@gmail.com>
 # SPDX-FileCopyrightText: 2022 Florian Snow <florian@familysnow.net>
-# SPDX-FileCopyrightText: 2022 Yaman Qalieh
-# SPDX-FileCopyrightText: 2022 Carmen Bianca Bakker <carmenbianca@fsfe.org>
-#
 # SPDX-License-Identifier: GPL-3.0-only
+
 import logging
 import datetime
 import argparse
 import sys
+import re
 import fosslight_util.constant as constant
+from os import PathLike
 from gettext import gettext as _
 from pathlib import Path
-from typing import NamedTuple, Set
+from typing import NamedTuple, Optional, Set
 
 from jinja2 import Environment, FileSystemLoader, PackageLoader, Template
 from jinja2.exceptions import TemplateNotFound
-from boolean.boolean import Expression, ParseError
+from boolean.boolean import ParseError, Expression
 from license_expression import ExpressionError
-
 
 from reuse.lint import (
     add_arguments as lint_add_arguments,
@@ -34,77 +36,63 @@ from reuse._util import (
     PathType,
     _COPYRIGHT_STYLES,
     _COPYRIGHT_PATTERNS,
+    _END_PATTERN,
     _LICENSING,
     filter_ignore_block,
     find_license_identifiers,
+    contains_spdx_info,
+    detect_line_endings,
     _determine_license_path,
     make_copyright_line,
     merge_copyright_lines,
-    spdx_identifier,
+    spdx_identifier
 )
 from reuse._comment import (
     NAME_STYLE_MAP,
+    CCommentStyle,
     CommentCreateError,
     CommentStyle,
-    PythonCommentStyle,
+    EmptyCommentStyle,
+    HtmlCommentStyle,
+    PythonCommentStyle
 )
 from reuse.header import (
     MissingSpdxInfo,
+    _get_comment_style,
     _verify_write_access,
     _verify_paths_line_handling,
     _verify_paths_comment_style,
-    _find_template,
     _is_uncommentable,
     _determine_license_suffix_path,
-    _add_header_to_file,
     _find_first_spdx_comment,
-    _extract_shebang
+    _extract_shebang,
 )
 from reuse.download import (
     add_arguments as download_add_arguments,
     run as reuse_download
 )
-from reuse._format import fill_all, fill_paragraph, INDENT
+from reuse._format import fill_all
 from reuse.project import Project
 
+
 logger = logging.getLogger(constant.LOGGER_NAME)
-__REUSE_version__ = "3.0"
-
-_DESCRIPTION_LINES = [
-    _(
-        "reuse is a tool for compliance with the REUSE"
-        " recommendations. See <https://reuse.software/> for more"
-        " information, and <https://reuse.readthedocs.io/> for the online"
-        " documentation."
-    ),
-    _(
-        "This version of reuse is compatible with version {} of the REUSE"
-        " Specification."
-    ).format(__REUSE_version__),
-    _("Support the FSFE's work:"),
-]
-
-_INDENTED_LINE = _(
-    "Donations are critical to our strength and autonomy. They enable us to"
-    " continue working for Free Software wherever necessary. Please consider"
-    " making a donation at <https://fsfe.org/donate/>."
-)
-
-_DESCRIPTION_TEXT = (
-    fill_all("\n\n".join(_DESCRIPTION_LINES))
-    + "\n\n"
-    + fill_paragraph(_INDENTED_LINE, indent_width=INDENT)
-)
-
-_EPILOG_TEXT = ""
 
 #: Simple structure for holding SPDX information.
 #:
 #: The two iterables MUST be sets.
 SpdxInfo = NamedTuple(
     "SpdxInfo",
-    [("spdx_expressions", Set[Expression]), ("copyright_lines", Set[str])],
+    [("spdx_expressions", Set[Expression]), ("copyright_lines", Set[str]), ("dl_url", Set[str])]
 )
+
+_DL_URL_PATTERNS = [
+    re.compile(r"(?P<dl_url>SPDX-PackageDownloadLocation:[ \t]+(.*?))" + _END_PATTERN)
+]
+
+_DL_URL_STYLES = {
+    "spdx": "SPDX-PackageDownloadLocation:",
+    "string": "PackageDownloadLocation",
+}
 
 
 def get_loader():
@@ -116,7 +104,7 @@ def get_loader():
     return loader
 
 
-_ENV = Environment(loader=PackageLoader("reuse", "templates"), trim_blocks=True)
+_ENV = Environment(loader=get_loader(), trim_blocks=True)
 DEFAULT_TEMPLATE = _ENV.get_template("default_template.jinja2")
 
 
@@ -125,7 +113,8 @@ def _find_template(project: Project, name: str) -> Template:
 
     :raises TemplateNotFound: if template could not be found.
     """
-    template_dir = project.root / ".reuse/templates"
+    template_dir = project.root / ".fosslight_prechecker/templates"
+    logger.warning(f"template_dir:{template_dir}")
     env = Environment(
         loader=FileSystemLoader(str(template_dir)), trim_blocks=True
     )
@@ -154,6 +143,7 @@ def extract_spdx_info(text: str) -> SpdxInfo:
     expression_matches = set(find_license_identifiers(text))
     expressions = set()
     copyright_matches = set()
+    dl_url = set()
     for expression in expression_matches:
         try:
             expressions.add(_LICENSING.parse(expression))
@@ -170,8 +160,13 @@ def extract_spdx_info(text: str) -> SpdxInfo:
             if match is not None:
                 copyright_matches.add(match.groupdict()["copyright"].strip())
                 break
+        for pattern in _DL_URL_PATTERNS:
+            match = pattern.search(line)
+            if match is not None:
+                dl_url.add(match.groupdict()["dl_url"].strip())
+                break
 
-    return SpdxInfo(expressions, copyright_matches)
+    return SpdxInfo(expressions, copyright_matches, dl_url)
 
 
 def _create_new_header(
@@ -192,23 +187,26 @@ def _create_new_header(
     if style is None:
         style = PythonCommentStyle
 
-    rendered = template.render(
-        copyright_lines=sorted(spdx_info.copyright_lines),
-        spdx_expressions=sorted(map(str, spdx_info.spdx_expressions)),
-    ).strip("\n")
+    try:
+        rendered = template.render(
+            copyright_lines=sorted(spdx_info.copyright_lines),
+            spdx_expressions=sorted(map(str, spdx_info.spdx_expressions)),
+            dl_url=sorted(spdx_info.dl_url),
+        ).strip("\n")
+    except Exception as ex:
+        logger.info(f"Error to create new header: {ex}")
 
     if template_is_commented:
         result = rendered
     else:
-        result = style.create_comment(rendered, force_multi=force_multi).strip(
-            "\n"
-        )
+        result = style.create_comment(rendered, force_multi=force_multi).strip("\n")
 
     # Verify that the result contains all SpdxInfo.
     new_spdx_info = extract_spdx_info(result)
     if (
         spdx_info.copyright_lines != new_spdx_info.copyright_lines
         and spdx_info.spdx_expressions != new_spdx_info.spdx_expressions
+        and spdx_info.dl_url != new_spdx_info.dl_url
     ):
         logger.debug(
             _(
@@ -269,6 +267,7 @@ def create_header(
         spdx_info = SpdxInfo(
             spdx_info.spdx_expressions.union(existing_spdx.spdx_expressions),
             spdx_copyrights,
+            spdx_info.dl_url.union(existing_spdx.dl_url),
         )
 
     new_header += _create_new_header(
@@ -288,7 +287,6 @@ def find_and_replace_header(
     template_is_commented: bool = False,
     style: CommentStyle = None,
     force_multi: bool = False,
-    merge_copyrights: bool = False,
 ) -> str:
     """Find the first SPDX comment block in *text*. That comment block is
     replaced by a new comment block containing *spdx_info*. It is formatted as
@@ -327,17 +325,21 @@ def find_and_replace_header(
 
     # Keep special first-line-of-file lines as the first line in the file,
     # or say, move our comments after it.
-    if style.SHEBANGS:
-        for shebang in style.SHEBANGS:
-            # Extract shebang from header and put it in before. It's a bit
-            # messy, but it ends up working.
-            if header.startswith(shebang) and not before.strip():
-                before, header = _extract_shebang(shebang, header)
-            elif after.startswith(shebang) and not any((before, header)):
-                before, after = _extract_shebang(shebang, after)
-            else:
-                continue
-            break
+    for prefix in (
+        prefix
+        for com_style, prefix in (
+            (CCommentStyle, "#!"),  # e.g. V-Lang
+            (HtmlCommentStyle, "<?xml"),  # e.g. XML/XHTML
+            (PythonCommentStyle, "#!"),  # e.g. Shell, Python
+        )
+        if style is com_style
+    ):
+        # Extract shebang from header and put it in before. It's a bit messy,
+        # but it ends up working.
+        if header.startswith(prefix) and not before.strip():
+            before, header = _extract_shebang(prefix, header)
+        elif after.startswith(prefix) and not any((before, header)):
+            before, after = _extract_shebang(prefix, after)
 
     header = create_header(
         spdx_info,
@@ -346,7 +348,6 @@ def find_and_replace_header(
         template_is_commented=template_is_commented,
         style=style,
         force_multi=force_multi,
-        merge_copyrights=merge_copyrights,
     )
 
     new_text = f"{header}\n"
@@ -357,144 +358,106 @@ def find_and_replace_header(
     return new_text
 
 
-def add_header(args, project: Project, out=sys.stdout) -> int:
-    """Add headers to files."""
-    # pylint: disable=too-many-branches,too-many-locals,too-many-statements
-    if "addheader" in args.parser.prog.split():
-        logger.warning(
-            _(
-                "'reuse addheader' has been deprecated in favour of"
-                " 'reuse annotate'"
-            )
-        )
-
-    if not any((args.copyright, args.license)):
-        args.parser.error(_("option --copyright or --license is required"))
-
-    if args.exclude_year and args.year:
-        args.parser.error(
-            _("option --exclude-year and --year are mutually exclusive")
-        )
-
-    if args.single_line and args.multi_line:
-        args.parser.error(
-            _("option --single-line and --multi-line are mutually exclusive")
-        )
-
-    if args.style is not None and args.skip_unrecognised:
-        logger.warning(
-            _(
-                "--skip-unrecognised has no effect when used together with"
-                " --style"
-            )
-        )
-    if args.explicit_license:
-        logger.warning(
-            _(
-                "--explicit-license has been deprecated in favour of"
-                " --force-dot-license"
-            )
-        )
-        args.force_dot_license = True
-
-    if args.recursive:
-        paths = set()
-        all_files = [path.resolve() for path in project.all_files()]
-        for path in args.path:
-            if path.is_file():
-                paths.add(path)
-            else:
-                paths |= {
-                    child
-                    for child in all_files
-                    if path.resolve() in child.parents
-                }
-    else:
-        paths = args.path
-
-    paths = {_determine_license_path(path) for path in paths}
-
-    if not args.force_dot_license:
-        _verify_write_access(paths, args.parser)
-
-    # Verify line handling and comment styles before proceeding
-    if args.style is None and not args.force_dot_license:
-        _verify_paths_line_handling(
-            paths,
-            args.parser,
-            force_single=args.single_line,
-            force_multi=args.multi_line,
-        )
-        if not args.skip_unrecognised:
-            _verify_paths_comment_style(paths, args.parser)
-
-    template = None
-    commented = False
-    if args.template:
-        try:
-            template = _find_template(project, args.template)
-        except TemplateNotFound:
-            args.parser.error(
-                _("template {template} could not be found").format(
-                    template=args.template
-                )
-            )
-
-        if ".commented" in Path(template.name).suffixes:
-            commented = True
-
-    year = None
-    if not args.exclude_year:
-        if args.year and len(args.year) > 1:
-            year = f"{min(args.year)} - {max(args.year)}"
-        elif args.year:
-            year = args.year.pop()
-        else:
-            year = datetime.date.today().year
-
-    expressions = set(args.license) if args.license is not None else set()
-    copyright_style = (
-        args.copyright_style if args.copyright_style is not None else "spdx"
-    )
-    copyright_lines = (
-        {
-            make_copyright_line(x, year=year, copyright_style=copyright_style)
-            for x in args.copyright
-        }
-        if args.copyright is not None
-        else set()
-    )
-
-    spdx_info = SpdxInfo(expressions, copyright_lines)
-
+def _add_header_to_file(
+    path: PathLike,
+    spdx_info: SpdxInfo,
+    template: Template,
+    template_is_commented: bool,
+    style: Optional[str],
+    force_multi: bool = False,
+    skip_existing: bool = False,
+    out=sys.stdout,
+) -> int:
+    """Helper function."""
+    # pylint: disable=too-many-arguments
     result = 0
-    for path in paths:
-        uncommentable = _is_uncommentable(path)
-        if uncommentable or args.force_dot_license:
-            new_path = _determine_license_suffix_path(path)
-            if uncommentable:
-                logger.info(
-                    _(
-                        "'{path}' is a binary, therefore using '{new_path}'"
-                        " for the header"
-                    ).format(path=path, new_path=new_path)
-                )
-            path = Path(new_path)
-            path.touch()
-        result += _add_header_to_file(
-            path=path,
-            spdx_info=spdx_info,
+    if style is not None:
+        style = NAME_STYLE_MAP[style]
+    else:
+        style = _get_comment_style(path)
+        if style is None:
+            out.write(_("Skipped unrecognised file {path}").format(path=path))
+            out.write("\n")
+            return result
+
+    with path.open("r", encoding="utf-8", newline="") as fp:
+        text = fp.read()
+
+    # Ideally, this check is done elsewhere. But that would necessitate reading
+    # the file contents before this function is called.
+    if skip_existing and contains_spdx_info(text):
+        out.write(
+            _(
+                "Skipped file '{path}' already containing SPDX information"
+            ).format(path=path)
+        )
+        out.write("\n")
+        return result
+
+    # Detect and remember line endings for later conversion.
+    line_ending = detect_line_endings(text)
+    # Normalise line endings.
+    text = text.replace(line_ending, "\n")
+
+    try:
+        output = find_and_replace_header(
+            text,
+            spdx_info,
             template=template,
-            template_is_commented=commented,
-            style=args.style,
-            force_multi=args.multi_line,
-            skip_existing=args.skip_existing,
-            merge_copyrights=args.merge_copyrights,
-            replace=not args.no_replace,
-            out=out,
+            template_is_commented=template_is_commented,
+            style=style,
+            force_multi=force_multi,
         )
 
-    return min(result, 1)
+    except CommentCreateError:
+        out.write(
+            _("Error: Could not create comment for '{path}'").format(path=path)
+        )
+        out.write("\n")
+        result = 1
+    except MissingSpdxInfo:
+        out.write(
+            _(
+                "Error: Generated comment header for '{path}' is missing"
+                " copyright lines or license expressions. The template is"
+                " probably incorrect. Did not write new header."
+            ).format(path=path)
+        )
+        out.write("\n")
+        result = 1
+    else:
+        with path.open("w", encoding="utf-8", newline=line_ending) as fp:
+            fp.write(output)
+        # TODO: This may need to be rephrased more elegantly.
+        out.write(_("Successfully changed header of {path}").format(path=path))
+        out.write("\n")
+
+    return result
+
+
+def add_command(
+    subparsers,
+    name: str,
+    add_arguments_func,
+    run_func,
+    formatter_class=None,
+    description: str = None,
+    help: str = None,
+    aliases: list = None,
+) -> None:
+    """Add a subparser for a command."""
+    if formatter_class is None:
+        formatter_class = argparse.RawTextHelpFormatter
+    subparser = subparsers.add_parser(
+        name,
+        formatter_class=formatter_class,
+        description=description,
+        help=help,
+        aliases=aliases or [],
+    )
+    add_arguments_func(subparser)
+    subparser.set_defaults(func=run_func)
+    subparser.set_defaults(parser=subparser)
 
 
 def header_add_arguments(parser) -> None:
@@ -512,6 +475,13 @@ def header_add_arguments(parser) -> None:
         action="append",
         type=spdx_identifier,
         help=_("SPDX Identifier, repeatable"),
+    )
+    parser.add_argument(
+        "--dlurl",
+        "-u",
+        action="append",
+        type=str,
+        help=_("download location statement, repeatable"),
     )
     parser.add_argument(
         "--year",
@@ -599,39 +569,10 @@ def header_add_arguments(parser) -> None:
     parser.add_argument("path", action="store", nargs="+", type=PathType("r"))
 
 
-def add_command(  # pylint: disable=too-many-arguments,redefined-builtin
-    subparsers,
-    name: str,
-    add_arguments_func,
-    run_func,
-    formatter_class=None,
-    description: str = None,
-    help: str = None,
-    aliases: list = None,
-) -> None:
-    """Add a subparser for a command."""
-    if formatter_class is None:
-        formatter_class = argparse.RawTextHelpFormatter
-    subparser = subparsers.add_parser(
-        name,
-        formatter_class=formatter_class,
-        description=description,
-        help=help,
-        aliases=aliases or [],
-    )
-    add_arguments_func(subparser)
-    subparser.set_defaults(func=run_func)
-    subparser.set_defaults(parser=subparser)
-
-
 def reuse_parser() -> argparse.ArgumentParser:
     """Create the parser and return it."""
     # pylint: disable=redefined-outer-name
-    parser = argparse.ArgumentParser(
-        formatter_class=argparse.RawTextHelpFormatter,
-        description=_DESCRIPTION_TEXT,
-        epilog=_EPILOG_TEXT,
-    )
+    parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument(
         "--debug", action="store_true", help=_("enable debug statements")
     )
@@ -639,11 +580,6 @@ def reuse_parser() -> argparse.ArgumentParser:
         "--include-submodules",
         action="store_true",
         help=_("do not skip over Git submodules"),
-    )
-    parser.add_argument(
-        "--include-meson-subprojects",
-        action="store_true",
-        help=_("do not skip over Meson subprojects"),
     )
     parser.add_argument(
         "--no-multiprocessing",
@@ -681,11 +617,6 @@ def reuse_parser() -> argparse.ArgumentParser:
                 " copyright holders and licenses to add to the headers of the"
                 " given files.\n"
                 "\n"
-                "The first comment is replaced with a new header containing"
-                " the new copyright and licensing information and its former"
-                " copyright and licensing. If you want to keep the first"
-                " comment intact, use --no-replace.\n"
-                "\n"
                 "The comment style should be auto-detected for your files. If"
                 " a comment style could not be detected and --skip-unrecognised"
                 " is not specified, the process aborts. Use --style to specify"
@@ -704,7 +635,40 @@ def reuse_parser() -> argparse.ArgumentParser:
                 " how to use this feature.\n"
                 "\n"
                 "If a binary file is detected, or if --explicit-license is"
-                " specified, the header is placed in a .license file."
+                " specified, the header is placed in a .license file.\n"
+                # TODO: Remove this
+                "\n"
+                "IMPORTANT: This is currently EXPERIMENTAL!"
+            )
+        ),
+    )
+
+    add_command(
+        subparsers,
+        "lint",
+        lint_add_arguments,
+        lint_run,
+        help=_("list all non-compliant files"),
+        description=fill_all(
+            _(
+                "Lint the project directory for compliance with"
+                " the REUSE Specification. You can"
+                " find the latest version of the specification at"
+                " <https://reuse.software/spec/>.\n"
+                "\n"
+                "Specifically, the following criteria are checked:\n"
+                "\n"
+                "- Are there any bad (unrecognised, not compliant with SPDX)"
+                " licenses in the project?\n"
+                "\n"
+                "- Are any licenses referred to inside of the project, but"
+                " not included in the LICENSES/ directory?\n"
+                "\n"
+                "- Are any licenses included in the LICENSES/ directory that"
+                " are not used inside of the project?\n"
+                "\n"
+                "- Do all files have valid copyright and licensing"
+                " information?"
             )
         ),
     )
@@ -734,35 +698,151 @@ def reuse_parser() -> argparse.ArgumentParser:
             )
         ),
     )
+    return parser
 
-    add_command(
-        subparsers,
-        "lint",
-        lint_add_arguments,
-        lint_run,
-        help=_("list all non-compliant files"),
-        description=fill_all(
+
+def make_dl_url_line(statement: str, dl_url_style: str = "spdx") -> str:
+    """Given a statement, prefix it with ``SPDX-PackageDownloadLocation:`` if it is
+    not already prefixed with some manner of copyright tag.
+    """
+    if "\n" in statement:
+        raise RuntimeError(f"Unexpected newline in '{statement}'")
+
+    dl_url_prefix = _DL_URL_STYLES.get(dl_url_style)
+    if dl_url_prefix is None:
+        raise RuntimeError("Unexpected dl_url_prefix style: Need 'spdx', 'string'")
+
+    for pattern in _DL_URL_PATTERNS:
+        try:
+            match = pattern.search(statement)
+        except Exception as ex:
+            logger.info(f"Error to search url pattern : {ex}")
+        if match is not None:
+            return statement
+    return f"{dl_url_prefix} {statement}"
+
+
+def add_header(args, project: Project, out=sys.stdout) -> int:
+    """Add headers to files."""
+    # pylint: disable=too-many-branches
+    if not any((args.copyright, args.license, args.dlurl)):
+        args.parser.error(_("option --copyright or --license is required"))
+
+    if args.exclude_year and args.year:
+        args.parser.error(
+            _("option --exclude-year and --year are mutually exclusive")
+        )
+
+    if args.single_line and args.multi_line:
+        args.parser.error(
+            _("option --single-line and --multi-line are mutually exclusive")
+        )
+
+    if args.style is not None and args.skip_unrecognised:
+        logger.warning(
             _(
-                "Lint the project directory for compliance with"
-                " version {reuse_version} of the REUSE Specification. You can"
-                " find the latest version of the specification at"
-                " <https://reuse.software/spec/>.\n"
-                "\n"
-                "Specifically, the following criteria are checked:\n"
-                "\n"
-                "- Are there any bad (unrecognised, not compliant with SPDX)"
-                " licenses in the project?\n"
-                "\n"
-                "- Are any licenses referred to inside of the project, but"
-                " not included in the LICENSES/ directory?\n"
-                "\n"
-                "- Are any licenses included in the LICENSES/ directory that"
-                " are not used inside of the project?\n"
-                "\n"
-                "- Do all files have valid copyright and licensing"
-                " information?"
-            ).format(reuse_version=__REUSE_version__)
-        ),
+                "--skip-unrecognised has no effect when used together with"
+                " --style"
+            )
+        )
+
+    if args.explicit_license:
+        logger.warning(
+            _(
+                "--explicit-license has been deprecated in favour of"
+                " --force-dot-license"
+            )
+        )
+        args.force_dot_license = True
+
+    paths = [_determine_license_path(path) for path in args.path]
+
+    if not args.force_dot_license:
+        _verify_write_access(paths, args.parser)
+
+    # Verify line handling and comment styles before proceeding
+    if args.style is None and not args.force_dot_license:
+        _verify_paths_line_handling(
+            paths,
+            args.parser,
+            force_single=args.single_line,
+            force_multi=args.multi_line,
+        )
+        if not args.skip_unrecognised:
+            _verify_paths_comment_style(paths, args.parser)
+
+    template = None
+    commented = False
+    if args.template:
+        try:
+            template = _find_template(project, args.template)
+        except TemplateNotFound:
+            args.parser.error(
+                _("template {template} could not be found").format(
+                    template=args.template
+                )
+            )
+
+        if ".commented" in Path(template.name).suffixes:
+            commented = True
+
+    year = None
+    if not args.exclude_year:
+        if args.year:
+            year = args.year
+        else:
+            year = datetime.date.today().year
+
+    expressions = set(args.license) if args.license is not None else set()
+    copyright_style = (
+        args.copyright_style if args.copyright_style is not None else "spdx"
+    )
+    # same as copyright_style
+    dl_url_style = (
+        args.copyright_style if args.copyright_style is not None else "spdx"
+    )
+    copyright_lines = (
+        {
+            make_copyright_line(x, year=year, copyright_style=copyright_style)
+            for x in args.copyright
+        }
+        if args.copyright is not None
+        else set()
     )
 
-    return parser
+    dl_url_lines = (
+        {
+            make_dl_url_line(url, dl_url_style=dl_url_style)
+            for url in args.dlurl
+        }
+        if args.dlurl is not None
+        else set()
+    )
+    spdx_info = SpdxInfo(expressions, copyright_lines, dl_url_lines)
+
+    result = 0
+    for path in paths:
+        uncommentable = _is_uncommentable(path)
+        if uncommentable or args.force_dot_license:
+            new_path = _determine_license_suffix_path(path)
+            if uncommentable:
+                logger.info(
+                    _(
+                        "'{path}' is a binary, therefore using '{new_path}'"
+                        " for the header"
+                    ).format(path=path, new_path=new_path)
+                )
+            path = Path(new_path)
+            path.touch()
+        result += _add_header_to_file(
+            path=path,
+            spdx_info=spdx_info,
+            template=template,
+            template_is_commented=commented,
+            style=args.style,
+            force_multi=args.multi_line,
+            skip_existing=args.skip_existing,
+            out=out,
+        )
+
+    return min(result, 1)
