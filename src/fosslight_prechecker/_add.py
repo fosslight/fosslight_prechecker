@@ -18,10 +18,9 @@ from datetime import datetime
 from fosslight_prechecker._precheck import precheck_for_project, precheck_for_files, dump_error_msg, \
                                            get_path_to_find, DEFAULT_EXCLUDE_EXTENSION_FILES
 from fosslight_prechecker._result import get_total_file_list
-from reuse.header import run as reuse_header
+from fosslight_prechecker._add_header import add_header, reuse_parser
 from reuse.download import run as reuse_download
 from reuse._comment import EXTENSION_COMMENT_STYLE_MAP_LOWERCASE
-from reuse._main import parser as reuse_arg_parser
 from reuse.project import Project
 from bs4 import BeautifulSoup
 from pathlib import Path
@@ -110,7 +109,7 @@ def set_missing_license_copyright(missing_license_filtered, missing_copyright_fi
     input_copyright = ""
 
     try:
-        main_parser = reuse_arg_parser()
+        main_parser = reuse_parser()
     except Exception as ex:
         dump_error_msg(f"Error_get_arg_parser : {ex}")
 
@@ -133,7 +132,7 @@ def set_missing_license_copyright(missing_license_filtered, missing_copyright_fi
             logger.warning(f"  * Your input license : {input_license}")
             parsed_args = main_parser.parse_args(['addheader', '--license', str(input_license)] + missing_license_list)
             try:
-                reuse_header(parsed_args, project)
+                add_header(parsed_args, project)
             except Exception as ex:
                 dump_error_msg(f"Error_call_run_in_license : {ex}")
     else:
@@ -165,7 +164,7 @@ def set_missing_license_copyright(missing_license_filtered, missing_copyright_fi
                                                   f'SPDX-FileCopyrightText: {input_copyright}',
                                                   '--exclude-year'] + missing_copyright_list)
             try:
-                reuse_header(parsed_args, project)
+                add_header(parsed_args, project)
             except Exception as ex:
                 dump_error_msg(f"Error_call_run_in_copyright : {ex}")
     else:
@@ -251,7 +250,7 @@ def find_representative_license(path_to_find, input_license):
     files = []
     found_file = []
     found_license_file = False
-    main_parser = reuse_arg_parser()
+    main_parser = reuse_parser()
     prj = Project(path_to_find)
     reuse_return_code = 0
     success_from_lge = False
@@ -308,7 +307,7 @@ def download_oss_info_license(base_path, input_license=""):
     license_list = []
     converted_lic_list = []
     oss_yaml_files = []
-    main_parser = reuse_arg_parser()
+    main_parser = reuse_parser()
     prj = Project(base_path)
 
     oss_yaml_files = find_sbom_yaml_files(base_path)
@@ -377,7 +376,7 @@ def add_content(target_path="", input_license="", input_copyright="", output_pat
 
     # File Only mode (-f option)
     if _check_only_file_mode:
-        main_parser = reuse_arg_parser()
+        main_parser = reuse_parser()
         missing_license_list, missing_copyright_list, project = precheck_for_files(path_to_find, file_to_check_list)
 
         if input_license == "" and input_copyright == "":
@@ -390,7 +389,7 @@ def add_content(target_path="", input_license="", input_copyright="", output_pat
                 logger.warning(f"  * Your input license : {converted_license}")
                 parsed_args = main_parser.parse_args(['addheader', '--license', f"{converted_license}"] + missing_license_list)
                 try:
-                    reuse_header(parsed_args, project)
+                    add_header(parsed_args, project)
                 except Exception as ex:
                     dump_error_msg(f"Error_call_run_in_license_file_only : {ex}")
         else:
@@ -409,7 +408,7 @@ def add_content(target_path="", input_license="", input_copyright="", output_pat
                                                       f"SPDX-FileCopyrightText: {input_copyright}",
                                                       '--exclude-year'] + missing_copyright_list)
             try:
-                reuse_header(parsed_args, project)
+                add_header(parsed_args, project)
             except Exception as ex:
                 dump_error_msg(f"Error_call_run_in_copyright_file_only : {ex}")
         else:
