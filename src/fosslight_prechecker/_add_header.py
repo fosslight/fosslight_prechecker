@@ -17,6 +17,7 @@ import datetime
 import argparse
 import sys
 import re
+import os
 import fosslight_util.constant as constant
 from os import PathLike
 from gettext import gettext as _
@@ -108,31 +109,6 @@ _ENV = Environment(loader=get_loader(), trim_blocks=True)
 DEFAULT_TEMPLATE = _ENV.get_template("default_template.jinja2")
 
 
-def _find_template(project: Project, name: str) -> Template:
-    """Find a template given a name.
-
-    :raises TemplateNotFound: if template could not be found.
-    """
-    template_dir = project.root / ".fosslight_prechecker/templates"
-    logger.warning(f"template_dir:{template_dir}")
-    env = Environment(
-        loader=FileSystemLoader(str(template_dir)), trim_blocks=True
-    )
-
-    names = [name]
-    if not name.endswith(".jinja2"):
-        names.append(f"{name}.jinja2")
-    if not name.endswith(".commented.jinja2"):
-        names.append(f"{name}.commented.jinja2")
-
-    for item in names:
-        try:
-            return env.get_template(item)
-        except TemplateNotFound:
-            pass
-    raise TemplateNotFound(name)
-
-
 def extract_spdx_info(text: str) -> SpdxInfo:
     """Extract SPDX information from comments in a string.
 
@@ -184,6 +160,7 @@ def _create_new_header(
     """
     if template is None:
         template = DEFAULT_TEMPLATE
+        logger.warning(f"Using default template: {template}")
     if style is None:
         style = PythonCommentStyle
 
@@ -773,18 +750,18 @@ def add_header(args, project: Project, out=sys.stdout) -> int:
 
     template = None
     commented = False
-    if args.template:
-        try:
-            template = _find_template(project, args.template)
-        except TemplateNotFound:
-            args.parser.error(
-                _("template {template} could not be found").format(
-                    template=args.template
-                )
-            )
+    # if args.template:
+    #     try:
+    #         template = _find_template(project, args.template)
+    #     except TemplateNotFound:
+    #         args.parser.error(
+    #             _("template {template} could not be found").format(
+    #                 template=args.template
+    #             )
+    #         )
 
-        if ".commented" in Path(template.name).suffixes:
-            commented = True
+    #     if ".commented" in Path(template.name).suffixes:
+    #         commented = True
 
     year = None
     if not args.exclude_year:

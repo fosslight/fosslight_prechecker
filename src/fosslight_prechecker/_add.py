@@ -374,6 +374,7 @@ def add_content(target_path="", input_license="", input_copyright="", input_dl_u
     global _result_log, spdx_licenses
     _check_only_file_mode = False
     file_to_check_list = []
+    missing_license = []
 
     path_to_find, file_to_check_list, _check_only_file_mode = get_path_to_find(target_path, _check_only_file_mode)
 

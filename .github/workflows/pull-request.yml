@@ -47,7 +47,7 @@ jobs:
             TARGET: windows
             CMD_BUILD: |
                 tox -e windows
-                pyinstaller --onefile cli.py -n cli --additional-hooks-dir=hooks --collect-datas reuse --collect-datas fosslight_util &&
+                pyinstaller --onefile cli.py -n cli --additional-hooks-dir=hooks --collect-datas reuse --collect-datas fosslight_util --add-data="src\fosslight_prechecker\templates\default_template.jinja2;." &&
                 move dist/cli.exe fosslight_prechecker_windows.exe &&
                 ./fosslight_prechecker_windows.exe
             OUT_FILE_NAME: fosslight_prechecker_windows.exe

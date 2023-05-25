@@ -13,12 +13,12 @@ with open('README.md', 'r', 'utf-8') as f:
 with open('requirements.txt', 'r', 'utf-8') as f:
     required = f.read().splitlines()
 
-_PACKAEG_NAME = 'fosslight_prechecker'
+_PACKAGE_NAME = 'fosslight_prechecker'
 _LICENSE_FILE = 'LICENSE'
 _LICENSE_DIR = 'LICENSES'
 
 if __name__ == "__main__":
-    dest_path = os.path.join('src', _PACKAEG_NAME, _LICENSE_DIR)
+    dest_path = os.path.join('src', _PACKAGE_NAME, _LICENSE_DIR)
     try:
         if not os.path.exists(dest_path):
             os.mkdir(dest_path)
@@ -51,7 +51,7 @@ if __name__ == "__main__":
             "Programming Language :: Python :: 3.8",
             "Programming Language :: Python :: 3.9"],
         install_requires=required,
-        package_data={_PACKAEG_NAME: ['resources/convert_license.json', os.path.join(_LICENSE_DIR, '*'), 'templates/*']},
+        package_data={_PACKAGE_NAME: [os.path.join('resources', 'convert_license.json'), os.path.join(_LICENSE_DIR, '*'), os.path.join('templates', '*')]},
         include_package_data=True,
         entry_points={
             "console_scripts": [
