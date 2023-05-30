@@ -18,10 +18,9 @@ from datetime import datetime
 from fosslight_prechecker._precheck import precheck_for_project, precheck_for_files, dump_error_msg, \
                                            get_path_to_find, DEFAULT_EXCLUDE_EXTENSION_FILES
 from fosslight_prechecker._result import get_total_file_list
-from reuse.header import run as reuse_header
+from fosslight_prechecker._add_header import add_header, reuse_parser
 from reuse.download import run as reuse_download
 from reuse._comment import EXTENSION_COMMENT_STYLE_MAP_LOWERCASE
-from reuse._main import parser as reuse_arg_parser
 from reuse.project import Project
 from bs4 import BeautifulSoup
 from pathlib import Path
@@ -105,16 +104,73 @@ def input_copyright_while_running():
     return input_copyright
 
 
-def set_missing_license_copyright(missing_license_filtered, missing_copyright_filtered, project, path_to_find, license, copyright):
+def input_dl_url_while_running():
+    input_dl_url = ""
+    input_dl_url = input("# Input Download URL to write to missing files (ex, https://github.com/fosslight/fosslight-prechecker): ")
+    if input_dl_url == 'Quit' or input_dl_url == 'quit' or input_dl_url == 'Q':
+        return
+
+    return input_dl_url
+
+
+def add_dl_url_into_file(main_parser, project, path_to_find, input_dl_url, file_list):
+    logger.info("\n# Adding Download Location into your files")
+    logger.warning(f"  * Your input DownloadLocation : {input_dl_url}")
+    add_dl_url_list = [os.path.join(path_to_find, file) for file in file_list]
+    parsed_args = main_parser.parse_args(['addheader', '--dlurl', input_dl_url] + add_dl_url_list)
+
+    try:
+        add_header(parsed_args, project)
+    except Exception as ex:
+        dump_error_msg(f"Error_to_add_url : {ex}")
+
+
+def add_license_into_file(main_parser, project, input_license, file_list):
+    converted_license = check_input_license_format(input_license)
+    logger.warning(f"  * Your input license : {converted_license}")
+    parsed_args = main_parser.parse_args(['addheader', '--license', str(converted_license)] + file_list)
+    try:
+        add_header(parsed_args, project)
+    except Exception as ex:
+        dump_error_msg(f"Error_call_run_in_license : {ex}")
+
+
+def add_copyright_into_file(main_parser, project, input_copyright, file_list):
+    input_copyright = f"Copyright {input_copyright}"
+
+    input_ok = check_input_copyright_format(input_copyright)
+    if input_ok is False:
+        return
+
+    logger.warning(f"  * Your input Copyright : {input_copyright}")
+    parsed_args = main_parser.parse_args(['addheader', '--copyright',
+                                          f'SPDX-FileCopyrightText: {input_copyright}',
+                                          '--exclude-year'] + file_list)
+    try:
+        add_header(parsed_args, project)
+    except Exception as ex:
+        dump_error_msg(f"Error_call_run_in_copyright : {ex}")
+
+
+def set_missing_license_copyright(missing_license_filtered, missing_copyright_filtered, project,
+                                  path_to_find, license, copyright, total_files_excluded, input_dl_url):
     input_license = ""
     input_copyright = ""
 
     try:
-        main_parser = reuse_arg_parser()
+        main_parser = reuse_parser()
     except Exception as ex:
         dump_error_msg(f"Error_get_arg_parser : {ex}")
 
-    # Print missing License
+    if license == "" and copyright == "" and input_dl_url == "":
+        input_license = input_license_while_running()
+        input_copyright = input_copyright_while_running()
+        input_dl_url = input_dl_url_while_running()
+    else:
+        input_license = license
+        input_copyright = copyright
+
+    # Add input_license into missing License files
     if missing_license_filtered is not None and len(missing_license_filtered) > 0:
         missing_license_list = []
 
@@ -123,23 +179,12 @@ def set_missing_license_copyright(missing_license_filtered, missing_copyright_fi
             logger.info(f"  * {lic_file}")
             missing_license_list.append(os.path.join(path_to_find, lic_file))
 
-        if license == "" and copyright == "":
-            input_license = input_license_while_running()
-        else:
-            input_license = license
-
         if input_license != "":
-            input_license = check_input_license_format(input_license)
-            logger.warning(f"  * Your input license : {input_license}")
-            parsed_args = main_parser.parse_args(['addheader', '--license', str(input_license)] + missing_license_list)
-            try:
-                reuse_header(parsed_args, project)
-            except Exception as ex:
-                dump_error_msg(f"Error_call_run_in_license : {ex}")
+            add_license_into_file(main_parser, project, input_license, missing_license_list)
     else:
         logger.info("# There is no missing license file\n")
 
-    # Print missing Copyright
+    # Add input_copyright into missing Copyright files
     if missing_copyright_filtered is not None and len(missing_copyright_filtered) > 0:
         missing_copyright_list = []
 
@@ -148,28 +193,14 @@ def set_missing_license_copyright(missing_license_filtered, missing_copyright_fi
             logger.info(f"  * {cop_file}")
             missing_copyright_list.append(os.path.join(path_to_find, cop_file))
 
-        if license == "" and copyright == "":
-            input_copyright = input_copyright_while_running()
-        else:
-            input_copyright = copyright
-
         if input_copyright != "":
-            input_copyright = f"Copyright {input_copyright}"
-
-            input_ok = check_input_copyright_format(input_copyright)
-            if input_ok is False:
-                return
-
-            logger.warning(f"  * Your input Copyright : {input_copyright}")
-            parsed_args = main_parser.parse_args(['addheader', '--copyright',
-                                                  f'SPDX-FileCopyrightText: {input_copyright}',
-                                                  '--exclude-year'] + missing_copyright_list)
-            try:
-                reuse_header(parsed_args, project)
-            except Exception as ex:
-                dump_error_msg(f"Error_call_run_in_copyright : {ex}")
+            add_copyright_into_file(main_parser, project, input_copyright, missing_copyright_list)
     else:
         logger.info("\n# There is no missing copyright file\n")
+
+    # Add input_dl_url into all files in input path
+    if input_dl_url:
+        add_dl_url_into_file(main_parser, project, path_to_find, input_dl_url, total_files_excluded)
 
 
 def get_allfiles_list(path):
@@ -251,7 +282,7 @@ def find_representative_license(path_to_find, input_license):
     files = []
     found_file = []
     found_license_file = False
-    main_parser = reuse_arg_parser()
+    main_parser = reuse_parser()
     prj = Project(path_to_find)
     reuse_return_code = 0
     success_from_lge = False
@@ -269,7 +300,7 @@ def find_representative_license(path_to_find, input_license):
             found_license_file = True
 
     input_license = check_input_license_format(input_license)
-    logger.info(f" - Input License : {input_license}")
+    logger.info(f"\n - Representative license : {input_license}")
 
     parsed_args = main_parser.parse_args(['download', f"{input_license}"])
 
@@ -308,7 +339,7 @@ def download_oss_info_license(base_path, input_license=""):
     license_list = []
     converted_lic_list = []
     oss_yaml_files = []
-    main_parser = reuse_arg_parser()
+    main_parser = reuse_parser()
     prj = Project(base_path)
 
     oss_yaml_files = find_sbom_yaml_files(base_path)
@@ -339,10 +370,11 @@ def download_oss_info_license(base_path, input_license=""):
         logger.info(" # There is no license in the path \n")
 
 
-def add_content(target_path="", input_license="", input_copyright="", output_path="", need_log_file=True):
+def add_content(target_path="", input_license="", input_copyright="", input_dl_url="", output_path="", need_log_file=True):
     global _result_log, spdx_licenses
     _check_only_file_mode = False
     file_to_check_list = []
+    missing_license = []
 
     path_to_find, file_to_check_list, _check_only_file_mode = get_path_to_find(target_path, _check_only_file_mode)
 
@@ -377,43 +409,33 @@ def add_content(target_path="", input_license="", input_copyright="", output_pat
 
     # File Only mode (-f option)
     if _check_only_file_mode:
-        main_parser = reuse_arg_parser()
+        main_parser = reuse_parser()
         missing_license_list, missing_copyright_list, project = precheck_for_files(path_to_find, file_to_check_list)
 
-        if input_license == "" and input_copyright == "":
+        if input_license == "" and input_copyright == "" and input_dl_url == "":
             input_copyright = input_copyright_while_running()
             input_license = input_license_while_running()
+            input_dl_url = input_dl_url_while_running()
 
+        # Add License
         if missing_license_list is not None and len(missing_license_list) > 0:
             if input_license != "":
-                converted_license = check_input_license_format(input_license)
-                logger.warning(f"  * Your input license : {converted_license}")
-                parsed_args = main_parser.parse_args(['addheader', '--license', f"{converted_license}"] + missing_license_list)
-                try:
-                    reuse_header(parsed_args, project)
-                except Exception as ex:
-                    dump_error_msg(f"Error_call_run_in_license_file_only : {ex}")
+                add_license_into_file(main_parser, project, input_license, missing_license_list)
+
         else:
             logger.info("# There is no missing license file")
 
+        # Add Copyright
         if missing_copyright_list is not None and len(missing_copyright_list) > 0:
             if input_copyright != "":
-                input_copyright = f"Copyright {input_copyright}"
-
-                input_ok = check_input_copyright_format(input_copyright)
-                if input_ok is False:
-                    return
-
-                logger.warning(f"  * Your input Copyright : {input_copyright}")
-                parsed_args = main_parser.parse_args(['addheader', '--copyright',
-                                                      f"SPDX-FileCopyrightText: {input_copyright}",
-                                                      '--exclude-year'] + missing_copyright_list)
-            try:
-                reuse_header(parsed_args, project)
-            except Exception as ex:
-                dump_error_msg(f"Error_call_run_in_copyright_file_only : {ex}")
+                add_copyright_into_file(main_parser, project, input_copyright, missing_copyright_list)
         else:
             logger.info("# There is no missing copyright file\n")
+
+        # Add Download URL
+        if input_dl_url:
+            add_dl_url_into_file(main_parser, project, path_to_find, input_dl_url, file_to_check_list)
+
     # Path mode (-p option)
     else:
         # Download license text file of OSS-pkg-info.yaml
@@ -440,7 +462,9 @@ def add_content(target_path="", input_license="", input_copyright="", output_pat
                                       project,
                                       path_to_find,
                                       input_license,
-                                      input_copyright)
+                                      input_copyright,
+                                      total_files_excluded,
+                                      input_dl_url)
 
     # Find and create representative license file
     if input_license != "" and len(missing_license) > 0:

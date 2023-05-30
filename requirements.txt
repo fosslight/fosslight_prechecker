@@ -1,6 +1,7 @@
 python-debian==0.1.40
 binaryornot
 requests
-reuse
+reuse==1.1.2
 PyYAML
 fosslight_util>=1.4.23
+jinja2

@@ -265,16 +265,16 @@ def exclude_file_in_yaml(path_to_find, yaml_files, license_missing_files, copyri
 
 
 def get_total_file_list(path_to_find, prj_report, exclude_files):
-    if not path_to_find.endswith('/'):
-        path_to_find += '/'
+    if not path_to_find.endswith(f'{os.path.sep}'):
+        path_to_find += f'{os.path.sep}'
     total_files = [str(file_report.path).replace(path_to_find, '', 1) for file_report in prj_report.file_reports]
     total_files_excluded = list(set(total_files) - set(exclude_files))
     return total_files_excluded
 
 
 def add_reason_to_file_name(oss_pkg_info_files, abnormal_yaml_files, path_to_find):
-    if not path_to_find.endswith('/'):
-        path_to_find += '/'
+    if not path_to_find.endswith(f'{os.path.sep}'):
+        path_to_find += f'{os.path.sep}'
 
     for key, val in abnormal_yaml_files.items():
         file_name = key.replace(path_to_find, '', 1)
