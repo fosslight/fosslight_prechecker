@@ -1,32 +1,25 @@
 # Changelog
 
+## v3.0.24 (12/06/2023)
+## Changes
+## 🔧 Maintenance
+
+- Add download url in file header using '-u' option @bjk7119 (#149)
+
+---
+
 ## v3.0.23 (11/05/2023)
 ## Changes
 ## 🐛 Hotfixes
 
 - Fix to find file path for executable @bjk7119 (#147)
 
----
-
-## v3.0.22 (11/05/2023)
-## Changes
-## 🔧 Maintenance
-
-- Apply fosslgiht_util v1.4.23 or later @bjk7119 (#146)
-
----
-
-## v3.0.21 (11/05/2023)
-## Changes
-## 🐛 Hotfixes
-
-- Fix to find file path if run executable file @bjk7119 (#144)
-
 ## 🔧 Maintenance
 
 - Update package version for github actions @bjk7119 (#144)
 - Update the ubuntu version for deploy action @dd-jy (#145)
 - Modify to find VCS root path  @bjk7119 (#143)
+- Apply fosslgiht_util v1.4.23 or later @bjk7119 (#146)
 
 ---
 
@@ -337,3 +330,11 @@
 ## Changes
 ## 🔧 Maintenance
 * When converting Yaml, modify it so that Copyright can be read as a list.
+
+---
+
+## v2.1.6 (19/11/2021)
+## Changes
+## 🔧 Maintenance
+
+- Add sheet name(BIN(Yocto)) to use Yocto report @bjk7119 (#42)
