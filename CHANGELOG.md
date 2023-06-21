@@ -1,5 +1,13 @@
 # Changelog
 
+## v3.0.25 (21/06/2023)
+## Changes
+## 🐛 Hotfixes
+
+- Bug fix to add comment into .txt file @bjk7119 (#150)
+
+---
+
 ## v3.0.24 (12/06/2023)
 ## Changes
 ## 🔧 Maintenance
@@ -330,11 +338,3 @@
 ## Changes
 ## 🔧 Maintenance
 * When converting Yaml, modify it so that Copyright can be read as a list.
-
----
-
-## v2.1.6 (19/11/2021)
-## Changes
-## 🔧 Maintenance
-
-- Add sheet name(BIN(Yocto)) to use Yocto report @bjk7119 (#42)
