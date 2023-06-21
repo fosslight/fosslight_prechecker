@@ -450,6 +450,7 @@ def add_content(target_path="", input_license="", input_copyright="", input_dl_u
         logger.info(f"\n# File list that have both license and copyright : {len(skip_files)} / {len(total_files_excluded)}")
 
         # Filter by file extension
+        total_files_excluded = [file for file in total_files_excluded if os.path.splitext(file)[1].lower() in EXTENSION_COMMENT_STYLE_MAP_LOWERCASE]
         missing_license = [file for file in missing_license if os.path.splitext(file)[1].lower() in EXTENSION_COMMENT_STYLE_MAP_LOWERCASE]
         missing_copyright = [file for file in missing_copyright if os.path.splitext(file)[1].lower() in EXTENSION_COMMENT_STYLE_MAP_LOWERCASE]
 
