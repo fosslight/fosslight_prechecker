@@ -33,7 +33,7 @@ if __name__ == "__main__":
 
     setup(
         name='fosslight_prechecker',
-        version='3.0.24',
+        version='3.0.25',
         package_dir={"": "src"},
         packages=find_packages(where='src'),
         description='FOSSLight Prechecker',
