@@ -303,7 +303,7 @@ def find_representative_license(path_to_find, input_license):
     logger.info(f"\n - Representative license : {input_license}")
 
     parsed_args = main_parser.parse_args(['download', f"{input_license}"])
-
+    input_license = input_license.replace(os.path.sep, '')
     try:
         # 0: successfully downloaded, 1: failed to download
         reuse_return_code = reuse_download(parsed_args, prj)

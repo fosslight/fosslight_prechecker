@@ -17,15 +17,13 @@ import datetime
 import argparse
 import sys
 import re
-import os
 import fosslight_util.constant as constant
 from os import PathLike
 from gettext import gettext as _
 from pathlib import Path
 from typing import NamedTuple, Optional, Set
 
-from jinja2 import Environment, FileSystemLoader, PackageLoader, Template
-from jinja2.exceptions import TemplateNotFound
+from jinja2 import Environment, FileSystemLoader, PackageLoader, Template, select_autoescape
 from boolean.boolean import ParseError, Expression
 from license_expression import ExpressionError
 
@@ -105,7 +103,7 @@ def get_loader():
     return loader
 
 
-_ENV = Environment(loader=get_loader(), trim_blocks=True)
+_ENV = Environment(loader=get_loader(), autoescape=select_autoescape([]), trim_blocks=True)
 DEFAULT_TEMPLATE = _ENV.get_template("default_template.jinja2")
 
 
