@@ -10,6 +10,7 @@ _HELP_MESSAGE_PRECHECKER = """
 
     Usage: fosslight_prechecker [Mode] [option1] <arg1> [option2] <arg2>...
      ex) fosslight_prechecker lint -p /home/test/src/
+         fosslight_prechecker lint -p /home/test/src/ -e test.py dep/temp
          fosslight_prechecker add -p /home/test/test.py -c "2019-2021 LG Electronics Inc." -l "GPL-3.0-only"
          fosslight_prechecker convert -p /home/test/sbom_info.yaml
 
@@ -23,6 +24,7 @@ _HELP_MESSAGE_PRECHECKER = """
             -h\t\t\t    Print help message
             -v\t\t\t    Print FOSSLight Prechecker version
             -p <path>\t\t    Path to check(Default: current directory)
+            -e <path>\t\t    Path to exclude from checking(only work with 'lint' mode)
             -f <format>\t\t    Result format(yaml, xml, html)
             -o <file_name>\t    Output file name
             -i\t\t\t    Don't both write log file and show progress bar
