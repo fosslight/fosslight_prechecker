@@ -5,13 +5,12 @@
 import os
 import io
 import sys
-import platform
+import re
 import yaml
 import fnmatch
 import xml.etree.ElementTree as ET
 import logging
 import fosslight_util.constant as constant
-import re
 from pathlib import Path
 from reuse.project import Project
 from fosslight_prechecker._result_html import result_for_html
@@ -25,7 +24,6 @@ MSG_REFERENCE = "Ref. Copyright and License Writing Rules in Source Code. : " + 
 MSG_FOLLOW_LIC_TXT = "Follow the Copyright and License Writing Rules in Source Code. : " + RULE_LINK
 EX_IOERR = 74
 logger = logging.getLogger(constant.LOGGER_NAME)
-is_windows = platform.system() == 'Windows'
 
 
 class ResultItem:
@@ -211,8 +209,7 @@ def create_result_file(output_file_name, format='', _start_time=""):
 
 def get_path_in_yaml(oss_item):
     path_in_yaml = [os.path.join(oss_item.relative_path, file) for file in oss_item.source_name_or_path]
-    if is_windows:
-        path_in_yaml = [path.replace(os.sep, '/') for path in path_in_yaml]
+    path_in_yaml = [path.replace('\\', '/') for path in path_in_yaml]
     return path_in_yaml
 
 
@@ -228,10 +225,13 @@ def extract_files_in_path(remove_file_list, base_file_list, return_found=False):
         remained_file_to_remove = list(set(remove_file_list) - set(intersection_files))
 
     for remove_pattern in remained_file_to_remove:
-        for file in remained_base_files[:]:
-            if fnmatch.fnmatch(file, remove_pattern) or re.search(remove_pattern, file):
-                extract_files.append(file)
-                remained_base_files.remove(file)
+        try:
+            for file in remained_base_files[:]:         
+                if fnmatch.fnmatch(file, remove_pattern) or re.search(remove_pattern, file):
+                    extract_files.append(file)
+                    remained_base_files.remove(file)
+        except Exception as ex:
+            logger.info(f"Error to match pattern. Need to check the pattern({remove_pattern}) in yaml: {ex}")
     return extract_files if return_found else remained_base_files
 
 
