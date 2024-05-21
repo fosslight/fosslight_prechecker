@@ -1,5 +1,18 @@
 # Changelog
 
+## v3.0.26 (21/05/2024)
+## Changes
+## 🐛 Hotfixes
+
+- Fix to error about escape character @bjk7119 (#155)
+
+## 🔧 Maintenance
+
+- Use common action flow @bjk7119 (#153)
+- Fix the snyk vulnerability @dd-jy (#151)
+
+---
+
 ## v3.0.25 (21/06/2023)
 ## Changes
 ## 🐛 Hotfixes
@@ -331,10 +344,3 @@
 
 - Comment out some sentences in the PR template @soimkim (#44)
 - Fix to print help message if don't write mode @bjk7119 (#43)
-
----
-
-## v2.1.7 (17/01/2022)
-## Changes
-## 🔧 Maintenance
-* When converting Yaml, modify it so that Copyright can be read as a list.
