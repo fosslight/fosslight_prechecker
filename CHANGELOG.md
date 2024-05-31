@@ -1,5 +1,13 @@
 # Changelog
 
+## v3.0.27 (31/05/2024)
+## Changes
+## 🚀 Features
+
+- Supports for excluding paths in lint mode @SeongjunJo (#156)
+
+---
+
 ## v3.0.26 (21/05/2024)
 ## Changes
 ## 🐛 Hotfixes
@@ -335,12 +343,3 @@
 
 - Change appending list in for loop to using yield @bjk7119 (#46)
 - Apply f-string format @bjk7119 (#45)
-
----
-
-## v2.1.8 (24/02/2022)
-## Changes
-## 🔧 Maintenance
-
-- Comment out some sentences in the PR template @soimkim (#44)
-- Fix to print help message if don't write mode @bjk7119 (#43)
