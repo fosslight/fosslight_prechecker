@@ -9,6 +9,7 @@ import shutil
 import sys
 import fosslight_util.constant as constant
 import urllib.request
+import argparse
 from yaml import safe_dump
 from fosslight_util.set_log import init_log
 from fosslight_util.spdx_licenses import get_spdx_licenses_json, get_license_from_nick
@@ -37,13 +38,13 @@ spdx_licenses = []
 logger = logging.getLogger(constant.LOGGER_NAME)
 
 
-def convert_to_spdx_style(input_string):
+def convert_to_spdx_style(input_string: str) -> str:
     input_string = input_string.replace(" ", "-")
     input_converted = f"LicenseRef-{input_string}"
     return input_converted
 
 
-def check_input_license_format(input_license):
+def check_input_license_format(input_license: str) -> str:
     for spdx in spdx_licenses:
         if input_license.casefold() == spdx.casefold():
             return spdx
@@ -66,7 +67,7 @@ def check_input_license_format(input_license):
     return converted_license
 
 
-def check_input_copyright_format(input_copyright):
+def check_input_copyright_format(input_copyright: str) -> bool:
     regex = re.compile(r'Copyright(\s)+(\(c\)\s)?\s*\d{4}(-\d{4})*(\s)+(\S)+')
     check_ok = True
 
@@ -77,7 +78,7 @@ def check_input_copyright_format(input_copyright):
     return check_ok
 
 
-def input_license_while_running():
+def input_license_while_running() -> str:
     input_license = ""
 
     logger.info("# Select a license to write in the license missing files ")
@@ -95,7 +96,7 @@ def input_license_while_running():
     return input_license
 
 
-def input_copyright_while_running():
+def input_copyright_while_running() -> None | str:
     input_copyright = ""
     input_copyright = input("# Input Copyright to write in the copyright missing files (ex, <year> <name>): ")
     if input_copyright == 'Quit' or input_copyright == 'quit' or input_copyright == 'Q':
@@ -104,7 +105,7 @@ def input_copyright_while_running():
     return input_copyright
 
 
-def input_dl_url_while_running():
+def input_dl_url_while_running() -> None | str:
     input_dl_url = ""
     input_dl_url = input("# Input Download URL to write to missing files (ex, https://github.com/fosslight/fosslight-prechecker): ")
     if input_dl_url == 'Quit' or input_dl_url == 'quit' or input_dl_url == 'Q':
@@ -113,7 +114,13 @@ def input_dl_url_while_running():
     return input_dl_url
 
 
-def add_dl_url_into_file(main_parser, project, path_to_find, input_dl_url, file_list):
+def add_dl_url_into_file(
+    main_parser: argparse.ArgumentParser, 
+    project: Project, 
+    path_to_find: str, 
+    input_dl_url: str, 
+    file_list: list[str]
+) -> None:
     logger.info("\n# Adding Download Location into your files")
     logger.warning(f"  * Your input DownloadLocation : {input_dl_url}")
     add_dl_url_list = [os.path.join(path_to_find, file) for file in file_list]
@@ -125,7 +132,12 @@ def add_dl_url_into_file(main_parser, project, path_to_find, input_dl_url, file_
         dump_error_msg(f"Error_to_add_url : {ex}")
 
 
-def add_license_into_file(main_parser, project, input_license, file_list):
+def add_license_into_file(
+    main_parser: argparse.ArgumentParser, 
+    project: Project, 
+    input_license: str, 
+    file_list: list[str]
+) -> None:
     converted_license = check_input_license_format(input_license)
     logger.warning(f"  * Your input license : {converted_license}")
     parsed_args = main_parser.parse_args(['addheader', '--license', str(converted_license)] + file_list)
@@ -135,7 +147,12 @@ def add_license_into_file(main_parser, project, input_license, file_list):
         dump_error_msg(f"Error_call_run_in_license : {ex}")
 
 
-def add_copyright_into_file(main_parser, project, input_copyright, file_list):
+def add_copyright_into_file(
+    main_parser: argparse.ArgumentParser, 
+    project: Project, 
+    input_copyright: str, 
+    file_list: list[str]
+) -> None:
     input_copyright = f"Copyright {input_copyright}"
 
     input_ok = check_input_copyright_format(input_copyright)
@@ -152,8 +169,16 @@ def add_copyright_into_file(main_parser, project, input_copyright, file_list):
         dump_error_msg(f"Error_call_run_in_copyright : {ex}")
 
 
-def set_missing_license_copyright(missing_license_filtered, missing_copyright_filtered, project,
-                                  path_to_find, license, copyright, total_files_excluded, input_dl_url):
+def set_missing_license_copyright(
+    missing_license_filtered: list[str] | None, 
+    missing_copyright_filtered: list[str] | None, 
+    project: Project,
+    path_to_find: str, 
+    license: str, 
+    copyright: str, 
+    total_files_excluded: list[str], 
+    input_dl_url: str
+) -> None:
     input_license = ""
     input_copyright = ""
 
@@ -218,7 +243,7 @@ def get_allfiles_list(path):
         dump_error_msg(f"Error - get all files list : {ex}")
 
 
-def save_result_log():
+def save_result_log() -> None:
     try:
         _str_final_result_log = safe_dump(_result_log, allow_unicode=True, sort_keys=True)
         logger.info(_str_final_result_log)
@@ -226,7 +251,7 @@ def save_result_log():
         logger.warning(f"Failed to print add result log. : {ex}")
 
 
-def copy_to_root(path_to_find, input_license):
+def copy_to_root(path_to_find: str, input_license: str) -> None:
     lic_file = f"{input_license}.txt"
     try:
         source = os.path.join(path_to_find, 'LICENSES', f'{lic_file}')
@@ -236,7 +261,7 @@ def copy_to_root(path_to_find, input_license):
         dump_error_msg(f"Error - Can't copy license file: {ex}")
 
 
-def lge_lic_download(path_to_find, input_license):
+def lge_lic_download(path_to_find: str, input_license: str) -> bool:
     success = False
 
     input_license_url = input_license.replace(' ', '_').replace('/', '_').replace('LicenseRef-', '').replace('-', '_')
@@ -269,7 +294,7 @@ def lge_lic_download(path_to_find, input_license):
     return success
 
 
-def present_license_file(path_to_find, lic):
+def present_license_file(path_to_find: str, lic: str) -> bool:
     present = False
     lic_file_path = os.path.join(os.getcwd(), path_to_find, 'LICENSES')
     file_name = f"{lic}.txt"
@@ -278,7 +303,7 @@ def present_license_file(path_to_find, lic):
     return present
 
 
-def find_representative_license(path_to_find, input_license):
+def find_representative_license(path_to_find: str, input_license: str) -> None:
     files = []
     found_file = []
     found_license_file = False
@@ -324,7 +349,7 @@ def find_representative_license(path_to_find, input_license):
         dump_error_msg(f"Error - download representative license text: {ex}")
 
 
-def is_exclude_dir(dir_path):
+def is_exclude_dir(dir_path: str) -> bool | None:
     if dir_path != "":
         dir_path = dir_path.lower()
         dir_path = dir_path if dir_path.endswith(
@@ -335,7 +360,7 @@ def is_exclude_dir(dir_path):
     return
 
 
-def download_oss_info_license(base_path, input_license=""):
+def download_oss_info_license(base_path: str, input_license: str = "") -> None:
     license_list = []
     converted_lic_list = []
     oss_yaml_files = []
@@ -370,7 +395,14 @@ def download_oss_info_license(base_path, input_license=""):
         logger.info(" # There is no license in the path \n")
 
 
-def add_content(target_path="", input_license="", input_copyright="", input_dl_url="", output_path="", need_log_file=True):
+def add_content(
+    target_path: str = "", 
+    input_license: str = "", 
+    input_copyright: str = "", 
+    input_dl_url: str = "", 
+    output_path: str = "", 
+    need_log_file: bool = True
+) -> None:
     global _result_log, spdx_licenses
     _check_only_file_mode = False
     file_to_check_list = []

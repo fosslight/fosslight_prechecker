@@ -17,7 +17,7 @@ HEADER_CONTENT = ['ID', 'Source Name or Path', 'OSS Name',
 MAX_SHEET_NAME_LEN = 31
 
 
-def get_sheet_name(yaml_file, sheet_list):
+def get_sheet_name(yaml_file: str, sheet_list: dict[str, list]) -> str:
     if len(yaml_file) > MAX_SHEET_NAME_LEN:
         yaml_file = yaml_file[0:MAX_SHEET_NAME_LEN]
 
@@ -33,7 +33,12 @@ def get_sheet_name(yaml_file, sheet_list):
     return yaml_file
 
 
-def convert_yml_to_excel(oss_yaml_files, output_file, file_option_on, base_path):
+def convert_yml_to_excel(
+    oss_yaml_files: list[str], 
+    output_file: str, 
+    file_option_on: bool, 
+    base_path: str
+) -> None:
     sheet_list = {}
     header = {}
 

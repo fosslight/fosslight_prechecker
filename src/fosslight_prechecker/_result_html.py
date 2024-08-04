@@ -7,9 +7,10 @@ from reuse import report
 from reuse.project import Project
 from fosslight_prechecker._constant import HTML_FORMAT_PREFIX, HTML_CELL_PREFIX, HTML_FORMAT_SUFFIX, HTML_EXPAND_PREFIX,\
                                            HTML_COMPLIANCE_SUFFIX, HTML_RESULT_PRINT_LIMIT, HTML_RESULT_EXPAND_LIMIT, HTML_CELL_HEAD_ROW
+from fosslight_prechecker._result import ResultItem
 
 
-def check_length_of_print_list(input_list: list, list_len: int):
+def check_length_of_print_list(input_list: list, list_len: int) -> str:
     print_cnt = 0
     print_str = ""
     if not input_list:
@@ -30,7 +31,7 @@ def check_length_of_print_list(input_list: list, list_len: int):
     return print_str
 
 
-def get_html_summary(result_item):
+def get_html_summary(result_item: ResultItem) -> str:
     pkg_file_str = check_length_of_print_list(result_item._oss_pkg_files, len(result_item._oss_pkg_files))
     detected_lic_str = check_length_of_print_list(result_item._detected_licenses, len(result_item._detected_licenses))
 
@@ -44,21 +45,29 @@ def get_html_summary(result_item):
     return html_lint_str
 
 
-def get_html_compliance(result_item):
+def get_html_compliance(result_item: ResultItem) -> str:
     return f"Compliant: {result_item.compliant_result}{HTML_COMPLIANCE_SUFFIX}"
 
 
-def get_num_of_not_compliant(result_item):
+def get_num_of_not_compliant(result_item: ResultItem) -> int:
     return int(result_item._count_without_lic) + int(result_item._count_without_cop)
 
 
-def get_file_report(project, path_to_find, file):
+def get_file_report(
+    project: Project, 
+    path_to_find: str, 
+    file: str
+) -> str:
     file_abs_path = os.path.abspath(os.path.join(path_to_find, file))
     file_rep = report.FileReport.generate(project, file_abs_path)
     return file_rep
 
 
-def get_html_cell(result_item, project: Project, path_to_find):
+def get_html_cell(
+    result_item: ResultItem, 
+    project: Project, 
+    path_to_find: str
+) -> str:
     cell_str = ""
     for both_file in result_item._files_without_both:
         cell_str += f"""<tr>
@@ -87,7 +96,11 @@ def get_html_cell(result_item, project: Project, path_to_find):
     return cell_str
 
 
-def result_for_html(result_item, project: Project, path_to_find):
+def result_for_html(
+    result_item: ResultItem, 
+    project: Project, 
+    path_to_find: str
+) -> str:
     compliance_str = get_html_compliance(result_item)
     summary_str = get_html_summary(result_item)
     cell_contents_str = ""

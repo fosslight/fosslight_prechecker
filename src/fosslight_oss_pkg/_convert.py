@@ -19,7 +19,12 @@ _PKG_NAME = "fosslight_prechecker"
 logger = logging.getLogger(LOGGER_NAME)
 
 
-def convert_report(base_path, output_name, format, need_log_file=True):
+def convert_report(
+    base_path: str, 
+    output_name: str, 
+    format: str, 
+    need_log_file=True
+) -> None:
     oss_yaml_files = []
     file_option_on = False
     output_report = ""
