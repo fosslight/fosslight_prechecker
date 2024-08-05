@@ -298,8 +298,8 @@ def init(
     path_to_find: str, 
     output_path: str, 
     file_list: list[str], 
-    need_log_file=True, 
-    exclude_path=[]
+    need_log_file: bool = True, 
+    exclude_path: list = []
 ) -> None:
     global logger, _result_log
 
@@ -351,9 +351,9 @@ def run_lint(
     target_path: str, 
     disable: bool, 
     output_file_name: str, 
-    format='', 
-    need_log_file=True, 
-    exclude_path=[]
+    format: str = '', 
+    need_log_file: bool = True, 
+    exclude_path: list = []
 ) -> None:
     global _turn_on_exclude_config, _check_only_file_mode, _start_time
 
