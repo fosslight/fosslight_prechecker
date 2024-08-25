@@ -23,7 +23,7 @@ def get_sheet_name(yaml_file: str, sheet_list: Dict[str, list]) -> str:
         yaml_file = yaml_file[0:MAX_SHEET_NAME_LEN]
 
     count = 1
-    while yaml_file in sheet_list:
+    while yaml_file in sheet_list.keys():
         end_idx = MAX_SHEET_NAME_LEN - 1 - len(str(count))
         yaml_file = f"{yaml_file[0:end_idx]}_{count}"
         count += 1
