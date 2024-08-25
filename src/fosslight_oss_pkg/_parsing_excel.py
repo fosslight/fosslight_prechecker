@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 import logging
 import os
-from typing import Dict
+from typing import Dict, List
 from fosslight_util.constant import LOGGER_NAME
 from fosslight_util.parsing_yaml import parsing_yml
 from fosslight_util.output_format import write_output_file
@@ -18,7 +18,7 @@ HEADER_CONTENT = ['ID', 'Source Name or Path', 'OSS Name',
 MAX_SHEET_NAME_LEN = 31
 
 
-def get_sheet_name(yaml_file: str, sheet_list: Dict[str, list]) -> str:
+def get_sheet_name(yaml_file: str, sheet_list: Dict[str, List]) -> str:
     if len(yaml_file) > MAX_SHEET_NAME_LEN:
         yaml_file = yaml_file[0:MAX_SHEET_NAME_LEN]
 
@@ -35,7 +35,7 @@ def get_sheet_name(yaml_file: str, sheet_list: Dict[str, list]) -> str:
 
 
 def convert_yml_to_excel(
-    oss_yaml_files: list[str], 
+    oss_yaml_files: List[str], 
     output_file: str, 
     file_option_on: bool, 
     base_path: str

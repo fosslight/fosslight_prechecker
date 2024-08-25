@@ -11,7 +11,7 @@ import platform
 import re
 import subprocess
 from datetime import datetime
-from typing import Tuple
+from typing import Tuple, List
 from binaryornot.check import is_binary
 import fosslight_util.constant as constant
 from fosslight_util.set_log import init_log
@@ -88,7 +88,7 @@ def exclude_git_related_files(path: str) -> None:
         logger.warning(f"Error to get git related files : {ex}")
 
 
-def find_oss_pkg_info_and_exclude_file(path: str) -> list[str]:
+def find_oss_pkg_info_and_exclude_file(path: str) -> List[str]:
     global DEFAULT_EXCLUDE_EXTENSION_FILES
     oss_pkg_info = []
     git_present = shutil.which("git")
@@ -200,7 +200,7 @@ def remove_reuse_dep5_file(
         dump_error_msg(f"Error_Remove_Dep5 : {ex}")
 
 
-def precheck_for_files(path: str, files: list[str]) -> Tuple[list[str], list[str], Project]:
+def precheck_for_files(path: str, files: List[str]) -> Tuple[list[str], List[str], Project]:
     global DEFAULT_EXCLUDE_EXTENSION_FILES
 
     missing_license_list = []
@@ -243,7 +243,7 @@ def precheck_for_files(path: str, files: list[str]) -> Tuple[list[str], list[str
     return missing_license_list, missing_copyright_list, prj
 
 
-def precheck_for_project(path_to_find: str) -> Tuple[list[str], list[str], list[str], Project, ProjectReport]:
+def precheck_for_project(path_to_find: str) -> Tuple[List[str], List[str], List[str], Project, ProjectReport]:
     missing_license = []
     missing_copyright = []
 
@@ -277,7 +277,7 @@ def precheck_for_project(path_to_find: str) -> Tuple[list[str], list[str], list[
     return missing_license, missing_copyright, oss_pkg_info_files, project, report
 
 
-def filter_missing_list(missing_list: list[str]) -> list[str]:
+def filter_missing_list(missing_list: List[str]) -> List[str]:
     filtered_list = []
     for file in missing_list:
         abs_path = os.path.abspath(file)
@@ -297,7 +297,7 @@ def dump_error_msg(error_msg: str, exit=False) -> None:
 def init(
     path_to_find: str, 
     output_path: str, 
-    file_list: list[str], 
+    file_list: List[str], 
     need_log_file: bool = True, 
     exclude_path: list = []
 ) -> None:
@@ -310,7 +310,7 @@ def init(
                                    need_log_file, logging.INFO, logging.DEBUG, PKG_NAME, path_to_find, exclude_path)
 
 
-def get_path_to_find(target_path: str, _check_only_file_mode: bool) -> Tuple[str, list[str], bool]:
+def get_path_to_find(target_path: str, _check_only_file_mode: bool) -> Tuple[str, List[str], bool]:
     is_file = False
     is_folder = False
     file_to_check_list = []
@@ -339,7 +339,7 @@ def get_path_to_find(target_path: str, _check_only_file_mode: bool) -> Tuple[str
     return path_to_find, file_to_check_list, _check_only_file_mode
 
 
-def set_exclude_list(path_to_find: str, exclude_path: list[str]):
+def set_exclude_list(path_to_find: str, exclude_path: List[str]):
     global user_exclude_list
 
     for path in exclude_path:

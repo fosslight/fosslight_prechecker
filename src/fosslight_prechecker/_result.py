@@ -11,6 +11,7 @@ import fnmatch
 import xml.etree.ElementTree as ET
 import logging
 import fosslight_util.constant as constant
+from typing import List
 from pathlib import Path
 from reuse.project import Project
 from fosslight_prechecker._result_html import result_for_html
@@ -91,7 +92,7 @@ class ResultItem:
         return root_item
 
 
-def is_list_empty(list: list):
+def is_list_empty(list: List):
     if list:
         return list
     else:

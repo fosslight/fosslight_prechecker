@@ -25,6 +25,7 @@ from reuse._comment import EXTENSION_COMMENT_STYLE_MAP_LOWERCASE
 from reuse.project import Project
 from bs4 import BeautifulSoup
 from pathlib import Path
+from typing import List
 
 
 PKG_NAME = "fosslight_prechecker"
@@ -119,7 +120,7 @@ def add_dl_url_into_file(
     project: Project, 
     path_to_find: str, 
     input_dl_url: str, 
-    file_list: list[str]
+    file_list: List[str]
 ) -> None:
     logger.info("\n# Adding Download Location into your files")
     logger.warning(f"  * Your input DownloadLocation : {input_dl_url}")
@@ -136,7 +137,7 @@ def add_license_into_file(
     main_parser: argparse.ArgumentParser, 
     project: Project, 
     input_license: str, 
-    file_list: list[str]
+    file_list: List[str]
 ) -> None:
     converted_license = check_input_license_format(input_license)
     logger.warning(f"  * Your input license : {converted_license}")
@@ -151,7 +152,7 @@ def add_copyright_into_file(
     main_parser: argparse.ArgumentParser, 
     project: Project, 
     input_copyright: str, 
-    file_list: list[str]
+    file_list: List[str]
 ) -> None:
     input_copyright = f"Copyright {input_copyright}"
 
@@ -170,13 +171,13 @@ def add_copyright_into_file(
 
 
 def set_missing_license_copyright(
-    missing_license_filtered: list[str] | None, 
-    missing_copyright_filtered: list[str] | None, 
+    missing_license_filtered: List[str] | None, 
+    missing_copyright_filtered: List[str] | None, 
     project: Project,
     path_to_find: str, 
     license: str, 
     copyright: str, 
-    total_files_excluded: list[str], 
+    total_files_excluded: List[str], 
     input_dl_url: str
 ) -> None:
     input_license = ""
