@@ -11,7 +11,7 @@ import fnmatch
 import xml.etree.ElementTree as ET
 import logging
 import fosslight_util.constant as constant
-from typing import List
+from typing import List, Any
 from pathlib import Path
 from reuse.project import Project
 from fosslight_prechecker._result_html import result_for_html
@@ -99,7 +99,7 @@ def is_list_empty(list: List):
         return "N/A"
 
 
-def result_for_xml(result_item: ResultItem):
+def result_for_xml(result_item: Any):
     str_xml_result = ""
     _root_xml_item = ET.Element('results')
 
@@ -136,7 +136,7 @@ def result_for_xml(result_item: ResultItem):
     return _root_xml_item
 
 
-def write_result_xml(result_file: str, exit_code: int, result_item: ResultItem, _result_log: str):
+def write_result_xml(result_file: str, exit_code: int, result_item: Any, _result_log: str):
     success = False
     # Create a new XML file with the results
     try:
@@ -151,7 +151,7 @@ def write_result_xml(result_file: str, exit_code: int, result_item: ResultItem, 
     return success, exit_code
 
 
-def write_result_html(result_file: str, exit_code: int, result_item: ResultItem, project: Project, path_to_find):
+def write_result_html(result_file: str, exit_code: int, result_item: Any, project: Project, path_to_find):
     success = False
     try:
         output_dir = os.path.dirname(result_file)
@@ -166,7 +166,7 @@ def write_result_html(result_file: str, exit_code: int, result_item: ResultItem,
     return success, exit_code
 
 
-def write_result_yaml(result_file: str, exit_code: int, result_item: ResultItem):
+def write_result_yaml(result_file: str, exit_code: int, result_item: Any):
     success = False
     try:
         output_dir = os.path.dirname(result_file)
