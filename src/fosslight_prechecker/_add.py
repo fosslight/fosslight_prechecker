@@ -116,10 +116,10 @@ def input_dl_url_while_running() -> None | str:
 
 
 def add_dl_url_into_file(
-    main_parser: argparse.ArgumentParser, 
-    project: Project, 
-    path_to_find: str, 
-    input_dl_url: str, 
+    main_parser: argparse.ArgumentParser,
+    project: Project,
+    path_to_find: str,
+    input_dl_url: str,
     file_list: List[str]
 ) -> None:
     logger.info("\n# Adding Download Location into your files")
@@ -134,9 +134,9 @@ def add_dl_url_into_file(
 
 
 def add_license_into_file(
-    main_parser: argparse.ArgumentParser, 
-    project: Project, 
-    input_license: str, 
+    main_parser: argparse.ArgumentParser,
+    project: Project,
+    input_license: str,
     file_list: List[str]
 ) -> None:
     converted_license = check_input_license_format(input_license)
@@ -149,9 +149,9 @@ def add_license_into_file(
 
 
 def add_copyright_into_file(
-    main_parser: argparse.ArgumentParser, 
-    project: Project, 
-    input_copyright: str, 
+    main_parser: argparse.ArgumentParser,
+    project: Project,
+    input_copyright: str,
     file_list: List[str]
 ) -> None:
     input_copyright = f"Copyright {input_copyright}"
@@ -171,13 +171,13 @@ def add_copyright_into_file(
 
 
 def set_missing_license_copyright(
-    missing_license_filtered: List[str] | None, 
-    missing_copyright_filtered: List[str] | None, 
+    missing_license_filtered: List[str] | None,
+    missing_copyright_filtered: List[str] | None,
     project: Project,
-    path_to_find: str, 
-    license: str, 
-    copyright: str, 
-    total_files_excluded: List[str], 
+    path_to_find: str,
+    license: str,
+    copyright: str,
+    total_files_excluded: List[str],
     input_dl_url: str
 ) -> None:
     input_license = ""
@@ -397,11 +397,11 @@ def download_oss_info_license(base_path: str, input_license: str = "") -> None:
 
 
 def add_content(
-    target_path: str = "", 
-    input_license: str = "", 
-    input_copyright: str = "", 
-    input_dl_url: str = "", 
-    output_path: str = "", 
+    target_path: str = "",
+    input_license: str = "",
+    input_copyright: str = "",
+    input_dl_url: str = "",
+    output_path: str = "",
     need_log_file: bool = True
 ) -> None:
     global _result_log, spdx_licenses
@@ -483,7 +483,8 @@ def add_content(
         logger.info(f"\n# File list that have both license and copyright : {len(skip_files)} / {len(total_files_excluded)}")
 
         # Filter by file extension
-        total_files_excluded = [file for file in total_files_excluded if os.path.splitext(file)[1].lower() in EXTENSION_COMMENT_STYLE_MAP_LOWERCASE]
+        total_files_excluded = [file for file in total_files_excluded
+                                if os.path.splitext(file)[1].lower() in EXTENSION_COMMENT_STYLE_MAP_LOWERCASE]
         missing_license = [file for file in missing_license if os.path.splitext(file)[1].lower() in EXTENSION_COMMENT_STYLE_MAP_LOWERCASE]
         missing_copyright = [file for file in missing_copyright if os.path.splitext(file)[1].lower() in EXTENSION_COMMENT_STYLE_MAP_LOWERCASE]
 

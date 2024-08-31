@@ -20,9 +20,9 @@ logger = logging.getLogger(LOGGER_NAME)
 
 
 def convert_report(
-    base_path: str, 
-    output_name: str, 
-    format: str, 
+    base_path: str,
+    output_name: str,
+    format: str,
     need_log_file: bool = True
 ) -> None:
     oss_yaml_files = []

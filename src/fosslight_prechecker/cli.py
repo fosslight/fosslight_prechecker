@@ -13,7 +13,7 @@ from fosslight_prechecker._add import add_content
 from fosslight_prechecker._precheck import run_lint
 
 
-def run_main(mode : str, path, output, format, no_log, disable, copyright, license, dl_url, parser, exclude_path):
+def run_main(mode: str, path, output, format, no_log, disable, copyright, license, dl_url, parser, exclude_path):
     if mode != "add" and (copyright != "" or license != ""):
         parser.print_help()
         sys.exit(1)

@@ -7,10 +7,10 @@ from reuse import report
 from reuse.project import Project
 from fosslight_prechecker._constant import HTML_FORMAT_PREFIX, HTML_CELL_PREFIX, HTML_FORMAT_SUFFIX, HTML_EXPAND_PREFIX,\
                                            HTML_COMPLIANCE_SUFFIX, HTML_RESULT_PRINT_LIMIT, HTML_RESULT_EXPAND_LIMIT, HTML_CELL_HEAD_ROW
-from typing import List
-from _result import ResultItem
+from typing import Any
 
-def check_length_of_print_list(input_list: List, list_len: int) -> str:
+
+def check_length_of_print_list(input_list: list, list_len: int) -> str:
     print_cnt = 0
     print_str = ""
     if not input_list:
@@ -31,7 +31,7 @@ def check_length_of_print_list(input_list: List, list_len: int) -> str:
     return print_str
 
 
-def get_html_summary(result_item: ResultItem) -> str:
+def get_html_summary(result_item: Any) -> str:
     pkg_file_str = check_length_of_print_list(result_item._oss_pkg_files, len(result_item._oss_pkg_files))
     detected_lic_str = check_length_of_print_list(result_item._detected_licenses, len(result_item._detected_licenses))
 
@@ -45,17 +45,17 @@ def get_html_summary(result_item: ResultItem) -> str:
     return html_lint_str
 
 
-def get_html_compliance(result_item: ResultItem) -> str:
+def get_html_compliance(result_item: Any) -> str:
     return f"Compliant: {result_item.compliant_result}{HTML_COMPLIANCE_SUFFIX}"
 
 
-def get_num_of_not_compliant(result_item: ResultItem) -> int:
+def get_num_of_not_compliant(result_item: Any) -> int:
     return int(result_item._count_without_lic) + int(result_item._count_without_cop)
 
 
 def get_file_report(
-    project: Project, 
-    path_to_find: str, 
+    project: Project,
+    path_to_find: str,
     file: str
 ) -> str:
     file_abs_path = os.path.abspath(os.path.join(path_to_find, file))
@@ -64,8 +64,8 @@ def get_file_report(
 
 
 def get_html_cell(
-    result_item: ResultItem, 
-    project: Project, 
+    result_item: Any,
+    project: Project,
     path_to_find: str
 ) -> str:
     cell_str = ""
@@ -97,8 +97,8 @@ def get_html_cell(
 
 
 def result_for_html(
-    result_item: ResultItem, 
-    project: Project, 
+    result_item: Any,
+    project: Project,
     path_to_find: str
 ) -> str:
     compliance_str = get_html_compliance(result_item)

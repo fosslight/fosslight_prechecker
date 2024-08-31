@@ -35,9 +35,9 @@ def get_sheet_name(yaml_file: str, sheet_list: Dict[str, List]) -> str:
 
 
 def convert_yml_to_excel(
-    oss_yaml_files: List[str], 
-    output_file: str, 
-    file_option_on: bool, 
+    oss_yaml_files: List[str],
+    output_file: str,
+    file_option_on: bool,
     base_path: str
 ) -> None:
     sheet_list = {}

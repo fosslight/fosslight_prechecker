@@ -182,8 +182,8 @@ def create_reuse_dep5_file(path: str) -> Tuple[bool, str, str]:
 
 
 def remove_reuse_dep5_file(
-    rollback: bool, 
-    file_to_remove: str, 
+    rollback: bool,
+    file_to_remove: str,
     temp_dir_name: str
 ) -> None:
     try:
@@ -295,10 +295,10 @@ def dump_error_msg(error_msg: str, exit=False) -> None:
 
 
 def init(
-    path_to_find: str, 
-    output_path: str, 
-    file_list: List[str], 
-    need_log_file: bool = True, 
+    path_to_find: str,
+    output_path: str,
+    file_list: List[str],
+    need_log_file: bool = True,
     exclude_path: list = []
 ) -> None:
     global logger, _result_log
@@ -348,11 +348,11 @@ def set_exclude_list(path_to_find: str, exclude_path: List[str]):
 
 
 def run_lint(
-    target_path: str, 
-    disable: bool, 
-    output_file_name: str, 
-    format: str = '', 
-    need_log_file: bool = True, 
+    target_path: str,
+    disable: bool,
+    output_file_name: str,
+    format: str = '',
+    need_log_file: bool = True,
     exclude_path: list = []
 ) -> None:
     global _turn_on_exclude_config, _check_only_file_mode, _start_time

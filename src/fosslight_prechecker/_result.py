@@ -11,7 +11,6 @@ import fnmatch
 import xml.etree.ElementTree as ET
 import logging
 import fosslight_util.constant as constant
-from typing import List, Any
 from pathlib import Path
 from reuse.project import Project
 from fosslight_prechecker._result_html import result_for_html
@@ -92,14 +91,14 @@ class ResultItem:
         return root_item
 
 
-def is_list_empty(list: List):
+def is_list_empty(list: list):
     if list:
         return list
     else:
         return "N/A"
 
 
-def result_for_xml(result_item: Any):
+def result_for_xml(result_item: ResultItem):
     str_xml_result = ""
     _root_xml_item = ET.Element('results')
 
@@ -136,7 +135,7 @@ def result_for_xml(result_item: Any):
     return _root_xml_item
 
 
-def write_result_xml(result_file: str, exit_code: int, result_item: Any, _result_log: str):
+def write_result_xml(result_file: str, exit_code: int, result_item: ResultItem, _result_log: str):
     success = False
     # Create a new XML file with the results
     try:
@@ -151,7 +150,7 @@ def write_result_xml(result_file: str, exit_code: int, result_item: Any, _result
     return success, exit_code
 
 
-def write_result_html(result_file: str, exit_code: int, result_item: Any, project: Project, path_to_find):
+def write_result_html(result_file: str, exit_code: int, result_item: ResultItem, project: Project, path_to_find):
     success = False
     try:
         output_dir = os.path.dirname(result_file)
@@ -166,7 +165,7 @@ def write_result_html(result_file: str, exit_code: int, result_item: Any, projec
     return success, exit_code
 
 
-def write_result_yaml(result_file: str, exit_code: int, result_item: Any):
+def write_result_yaml(result_file: str, exit_code: int, result_item: ResultItem):
     success = False
     try:
         output_dir = os.path.dirname(result_file)
@@ -230,7 +229,7 @@ def extract_files_in_path(remove_file_list, base_file_list, return_found=False):
 
     for remove_pattern in remained_file_to_remove:
         try:
-            for file in remained_base_files[:]:         
+            for file in remained_base_files[:]:
                 if fnmatch.fnmatch(file, remove_pattern) or re.search(remove_pattern, file):
                     extract_files.append(file)
                     remained_base_files.remove(file)
