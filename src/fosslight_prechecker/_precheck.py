@@ -200,7 +200,7 @@ def remove_reuse_dep5_file(
         dump_error_msg(f"Error_Remove_Dep5 : {ex}")
 
 
-def precheck_for_files(path: str, files: List[str]) -> Tuple[list[str], List[str], Project]:
+def precheck_for_files(path: str, files: List[str]) -> Tuple[List[str], List[str], Project]:
     global DEFAULT_EXCLUDE_EXTENSION_FILES
 
     missing_license_list = []
