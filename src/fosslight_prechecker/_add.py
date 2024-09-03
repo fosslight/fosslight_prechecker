@@ -25,7 +25,7 @@ from reuse._comment import EXTENSION_COMMENT_STYLE_MAP_LOWERCASE
 from reuse.project import Project
 from bs4 import BeautifulSoup
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 
 PKG_NAME = "fosslight_prechecker"
@@ -97,7 +97,7 @@ def input_license_while_running() -> str:
     return input_license
 
 
-def input_copyright_while_running() -> None | str:
+def input_copyright_while_running() -> Optional[str]:
     input_copyright = ""
     input_copyright = input("# Input Copyright to write in the copyright missing files (ex, <year> <name>): ")
     if input_copyright == 'Quit' or input_copyright == 'quit' or input_copyright == 'Q':
@@ -106,7 +106,7 @@ def input_copyright_while_running() -> None | str:
     return input_copyright
 
 
-def input_dl_url_while_running() -> None | str:
+def input_dl_url_while_running() -> Optional[str]:
     input_dl_url = ""
     input_dl_url = input("# Input Download URL to write to missing files (ex, https://github.com/fosslight/fosslight-prechecker): ")
     if input_dl_url == 'Quit' or input_dl_url == 'quit' or input_dl_url == 'Q':
@@ -171,8 +171,8 @@ def add_copyright_into_file(
 
 
 def set_missing_license_copyright(
-    missing_license_filtered: List[str] | None,
-    missing_copyright_filtered: List[str] | None,
+    missing_license_filtered: Optional[List[str]],
+    missing_copyright_filtered: Optional[List[str]],
     project: Project,
     path_to_find: str,
     license: str,
@@ -350,7 +350,7 @@ def find_representative_license(path_to_find: str, input_license: str) -> None:
         dump_error_msg(f"Error - download representative license text: {ex}")
 
 
-def is_exclude_dir(dir_path: str) -> bool | None:
+def is_exclude_dir(dir_path: str) -> Optional[bool]:
     if dir_path != "":
         dir_path = dir_path.lower()
         dir_path = dir_path if dir_path.endswith(
