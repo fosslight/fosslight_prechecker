@@ -40,6 +40,6 @@ _HELP_MESSAGE_PRECHECKER = """
             -u <dl_location>\t    Download Location to add(ex, "https://github.com/fosslight/fosslight_prechecker")"""
 
 
-def print_help_msg(exitOpt=True):
+def print_help_msg(exitOpt: bool = True) -> None:
     helpMsg = PrintHelpMsg(_HELP_MESSAGE_PRECHECKER)
     helpMsg.print_help_msg(exitOpt)

@@ -11,6 +11,7 @@ import platform
 import re
 import subprocess
 from datetime import datetime
+from typing import Tuple, List
 from binaryornot.check import is_binary
 import fosslight_util.constant as constant
 from fosslight_util.set_log import init_log
@@ -35,7 +36,7 @@ _result_log = {}
 logger = logging.getLogger(constant.LOGGER_NAME)
 
 
-def exclude_untracked_files(path):
+def exclude_untracked_files(path: str) -> None:
     global DEFAULT_EXCLUDE_EXTENSION_FILES
     try:
         cmd_result = subprocess.check_output(['git', 'ls-files', '-o'], universal_newlines=True)
@@ -49,7 +50,7 @@ def exclude_untracked_files(path):
         logger.warning(f"Error to get git untracked files : {ex}")
 
 
-def exclude_gitignore_files(path):
+def exclude_gitignore_files(path: str) -> None:
     global DEFAULT_EXCLUDE_EXTENSION_FILES
     try:
         root_path = VCSStrategyGit.find_root(os.getcwd())
@@ -70,7 +71,7 @@ def exclude_gitignore_files(path):
         logger.warning(f"Error to get git ignored files : {ex}")
 
 
-def exclude_git_related_files(path):
+def exclude_git_related_files(path: str) -> None:
     try:
         # Change currnt path for git command
         current_path = os.getcwd()
@@ -87,7 +88,7 @@ def exclude_git_related_files(path):
         logger.warning(f"Error to get git related files : {ex}")
 
 
-def find_oss_pkg_info_and_exclude_file(path):
+def find_oss_pkg_info_and_exclude_file(path: str) -> List[str]:
     global DEFAULT_EXCLUDE_EXTENSION_FILES
     oss_pkg_info = []
     git_present = shutil.which("git")
@@ -138,7 +139,7 @@ def find_oss_pkg_info_and_exclude_file(path):
     return oss_pkg_info
 
 
-def create_reuse_dep5_file(path):
+def create_reuse_dep5_file(path: str) -> Tuple[bool, str, str]:
     global DEFAULT_EXCLUDE_EXTENSION_FILES
     # Create .reuse/dep5 for excluding directories from reuse.
     _DEFAULT_CONFIG_PREFIX = "Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/\nUpstream-Name: \
@@ -180,7 +181,11 @@ def create_reuse_dep5_file(path):
     return need_rollback, file_to_remove, dir_to_remove
 
 
-def remove_reuse_dep5_file(rollback, file_to_remove, temp_dir_name):
+def remove_reuse_dep5_file(
+    rollback: bool,
+    file_to_remove: str,
+    temp_dir_name: str
+) -> None:
     try:
         if rollback:
             _origin_file = os.path.join(os.path.dirname(file_to_remove), os.path.basename(REUSE_CONFIG_FILE))
@@ -195,7 +200,7 @@ def remove_reuse_dep5_file(rollback, file_to_remove, temp_dir_name):
         dump_error_msg(f"Error_Remove_Dep5 : {ex}")
 
 
-def precheck_for_files(path, files):
+def precheck_for_files(path: str, files: List[str]) -> Tuple[List[str], List[str], Project]:
     global DEFAULT_EXCLUDE_EXTENSION_FILES
 
     missing_license_list = []
@@ -238,7 +243,7 @@ def precheck_for_files(path, files):
     return missing_license_list, missing_copyright_list, prj
 
 
-def precheck_for_project(path_to_find):
+def precheck_for_project(path_to_find: str) -> Tuple[List[str], List[str], List[str], Project, ProjectReport]:
     missing_license = []
     missing_copyright = []
 
@@ -272,7 +277,7 @@ def precheck_for_project(path_to_find):
     return missing_license, missing_copyright, oss_pkg_info_files, project, report
 
 
-def filter_missing_list(missing_list):
+def filter_missing_list(missing_list: List[str]) -> List[str]:
     filtered_list = []
     for file in missing_list:
         abs_path = os.path.abspath(file)
@@ -281,7 +286,7 @@ def filter_missing_list(missing_list):
     return filtered_list
 
 
-def dump_error_msg(error_msg: str, exit=False):
+def dump_error_msg(error_msg: str, exit=False) -> None:
     global error_items
     error_items.append(error_msg)
     if exit:
@@ -289,7 +294,13 @@ def dump_error_msg(error_msg: str, exit=False):
         sys.exit(1)
 
 
-def init(path_to_find, output_path, file_list, need_log_file=True, exclude_path=[]):
+def init(
+    path_to_find: str,
+    output_path: str,
+    file_list: List[str],
+    need_log_file: bool = True,
+    exclude_path: list = []
+) -> None:
     global logger, _result_log
 
     if file_list:
@@ -299,7 +310,7 @@ def init(path_to_find, output_path, file_list, need_log_file=True, exclude_path=
                                    need_log_file, logging.INFO, logging.DEBUG, PKG_NAME, path_to_find, exclude_path)
 
 
-def get_path_to_find(target_path, _check_only_file_mode):
+def get_path_to_find(target_path: str, _check_only_file_mode: bool) -> Tuple[str, List[str], bool]:
     is_file = False
     is_folder = False
     file_to_check_list = []
@@ -328,7 +339,7 @@ def get_path_to_find(target_path, _check_only_file_mode):
     return path_to_find, file_to_check_list, _check_only_file_mode
 
 
-def set_exclude_list(path_to_find, exclude_path):
+def set_exclude_list(path_to_find: str, exclude_path: List[str]):
     global user_exclude_list
 
     for path in exclude_path:
@@ -336,7 +347,14 @@ def set_exclude_list(path_to_find, exclude_path):
             user_exclude_list.append(os.path.abspath(os.path.join(path_to_find, path)))
 
 
-def run_lint(target_path, disable, output_file_name, format='', need_log_file=True, exclude_path=[]):
+def run_lint(
+    target_path: str,
+    disable: bool,
+    output_file_name: str,
+    format: str = '',
+    need_log_file: bool = True,
+    exclude_path: list = []
+) -> None:
     global _turn_on_exclude_config, _check_only_file_mode, _start_time
 
     file_to_check_list = []

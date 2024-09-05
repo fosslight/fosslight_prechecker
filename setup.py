@@ -51,7 +51,11 @@ if __name__ == "__main__":
             "Programming Language :: Python :: 3.8",
             "Programming Language :: Python :: 3.9"],
         install_requires=required,
-        package_data={_PACKAGE_NAME: [os.path.join('resources', 'convert_license.json'), os.path.join(_LICENSE_DIR, '*'), os.path.join('templates', '*')]},
+        package_data={
+            _PACKAGE_NAME: [
+                os.path.join('resources', 'convert_license.json'), os.path.join(_LICENSE_DIR, '*'), os.path.join('templates', '*')
+            ]
+        },
         include_package_data=True,
         entry_points={
             "console_scripts": [
