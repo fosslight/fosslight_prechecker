@@ -210,8 +210,8 @@ def create_result_file(output_file_name, format='', _start_time=""):
     return result_file, output_path, output_extension
 
 
-def get_path_in_yaml(oss_item):
-    path_in_yaml = [os.path.join(oss_item.relative_path, file) for file in oss_item.source_name_or_path]
+def get_path_in_yaml(file_item):
+    path_in_yaml = [os.path.join(file_item.relative_path, file_item.source_name_or_path)]
     path_in_yaml = [path.replace('\\', '/') for path in path_in_yaml]
     return path_in_yaml
 
@@ -244,20 +244,27 @@ def exclude_file_in_yaml(path_to_find, yaml_files, license_missing_files, copyri
     cop_present_path = []
     abnormal_yaml_files = {}
 
-    for file in yaml_files:
-        oss_items, _, err_reason = parsing_yml(file, path_to_find, False)
-        # if oss_items is abnormal(empty or invalid)
-        if not oss_items:
-            abnormal_yaml_files[file] = err_reason
+    for yaml_file in yaml_files:
+        file_items, _, err_reason = parsing_yml(yaml_file, path_to_find, False)
+        # if file_items is abnormal(empty or invalid)
+        if not file_items:
+            abnormal_yaml_files[yaml_file] = err_reason
 
-        for oss_item in oss_items:
-            if oss_item.exclude:
-                excluded_path.extend(get_path_in_yaml(oss_item))
-            else:
-                if oss_item.license:
-                    lic_present_path.extend(get_path_in_yaml(oss_item))
-                if oss_item.copyright:
-                    cop_present_path.extend(get_path_in_yaml(oss_item))
+        for file_item in file_items:
+            license_added = False
+            copyright_added = False
+            excluded_file = False
+            for oss_item in file_item.oss_items:
+                if (not excluded_file) and oss_item.exclude:
+                    excluded_file = True
+                    excluded_path.extend(get_path_in_yaml(file_item))
+                else:
+                    if (not license_added) and oss_item.license:
+                        license_added = True
+                        lic_present_path.extend(get_path_in_yaml(file_item))
+                    if (not copyright_added) and oss_item.copyright:
+                        copyright_added = True
+                        cop_present_path.extend(get_path_in_yaml(file_item))
 
     total_missing_files = list(license_missing_files.union(copyright_missing_files))
     files_with_exclude_removed = extract_files_in_path(excluded_path, total_missing_files, True)
