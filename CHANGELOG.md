@@ -1,5 +1,19 @@
 # Changelog
 
+## v4.0.0 (08/09/2024)
+## Changes
+## 🐛 Hotfixes
+
+- Fix a bug related to type @soimkim (#160)
+
+## 🔧 Maintenance
+
+- Refactoring OSS item @soimkim (#162)
+- Add type hints to each function @ParkSangsin (#159)
+- Limit installation to fosslight_util 1.4.* @soimkim (#161)
+
+---
+
 ## v3.0.27 (31/05/2024)
 ## Changes
 ## 🚀 Features
@@ -334,12 +348,3 @@
 - Modify function of converting excel to yaml @bjk7119 (#54)
 - Remove yaml parsing code @bjk7119 (#48)
 - Add a commit message checker @soimkim (#47)
-
----
-
-## v2.1.9 (11/03/2022)
-## Changes
-## 🔧 Maintenance
-
-- Change appending list in for loop to using yield @bjk7119 (#46)
-- Apply f-string format @bjk7119 (#45)
