@@ -8,6 +8,9 @@ from typing import Dict, List
 from fosslight_util.constant import LOGGER_NAME
 from fosslight_util.parsing_yaml import parsing_yml
 from fosslight_util.output_format import write_output_file
+from fosslight_util.oss_item import ScannerItem
+from fosslight_prechecker._constant import PKG_NAME
+from datetime import datetime
 
 logger = logging.getLogger(LOGGER_NAME)
 
@@ -41,8 +44,9 @@ def convert_yml_to_excel(
     base_path: str
 ) -> None:
     sheet_list = {}
-    header = {}
-
+    start_time = datetime.now().strftime('%y%m%d_%H%M')
+    scan_item = ScannerItem(PKG_NAME, start_time)
+    scan_item.set_cover_pathinfo(base_path, "")
     for yaml_file in oss_yaml_files:
         try:
             if os.path.isfile(yaml_file):
@@ -52,27 +56,30 @@ def convert_yml_to_excel(
 
                 if file_option_on:
                     base_path = os.path.dirname(yaml_file)
-                oss_items, _, _ = parsing_yml(yaml_file, base_path)
-                # if oss_items is abnormal(empty or invalid)
-                if not oss_items:
+                file_items, _, _ = parsing_yml(yaml_file, base_path)
+                # if file_items is abnormal(empty or invalid)
+                if not file_items:
                     continue
 
-                for item in oss_items:
-                    items_to_print.extend(item.get_print_array())
                 if not base_path.endswith(f"{os.sep}"):
                     base_path += f"{os.sep}"
-                yaml_file = yaml_file.replace(base_path, '')
-                yaml_file = yaml_file.replace(os.sep, '_')
-                yaml_file_sheet = get_sheet_name(yaml_file, sheet_list)
+                tmp_yaml_file = yaml_file.replace(base_path, '')
+                tmp_yaml_file = tmp_yaml_file.replace(os.sep, '_')
+                yaml_file_sheet = get_sheet_name(tmp_yaml_file, sheet_list)
 
                 if yaml_file_sheet:
-                    sheet_list[yaml_file_sheet] = items_to_print
-                    header[yaml_file_sheet] = HEADER_CONTENT
+                    scan_item.set_cover_comment(f"Converted file:{yaml_file}")
+                    row_items = [HEADER_CONTENT]
+                    for file_item in file_items:
+                        row_items.extend(file_item.get_print_array())
+                    sheet_list[yaml_file_sheet] = row_items
+                
         except Exception as ex:
             logger.error(f"Read yaml file: {ex}")
 
     try:
-        success, msg, result_file = write_output_file(output_file, '.xlsx', sheet_list, header)
+        scan_item.external_sheets = sheet_list
+        success, msg, result_file = write_output_file(output_file, '.xlsx', scan_item)
         if success:
             if result_file:
                 logger.warning(f"Output: {result_file}")
