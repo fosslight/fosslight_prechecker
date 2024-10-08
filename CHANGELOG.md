@@ -1,5 +1,14 @@
 # Changelog
 
+## v4.0.1 (08/10/2024)
+## Changes
+## 🔧 Maintenance
+
+- Fix the github action issue @dd-jy (#165)
+- Change fosslight_util ver limit @dd-jy (#164)
+
+---
+
 ## v4.0.0 (08/09/2024)
 ## Changes
 ## 🐛 Hotfixes
@@ -313,38 +322,3 @@
 - Add expand button in html @bjk7119 (#75)
 - Add execution error handling for html @bjk7119 (#74)
 - Change field's name in yaml file @bjk7119 (#72)
-
----
-
-## v2.2.0 (16/06/2022)
-## Changes
-## 🚀 Features
-
-- Make the sheet to convert selectable. (-s sheet name option) @soimkim (#65)
-- Add the i (--ignore) option to not create a log file. @soimkim (#64)
-- Add creating xml result file @bjk7119 (#53)
-- Add code of creating yaml result file @bjk7119 (#52)
-- Change -p, -f option @bjk7119 (#51)
-
-## 🐛 Hotfixes
-
-- Fix the bug that Excel cannot be created if there is only one row in Convert mode @soimkim (#58)
-
-## 🔧 Maintenance
-
-- Change path to analyze path to print in lint mode @bjk7119 (#71)
-- Find sheet names without case sensitivity @soimkim (#70)
-- Exclude for sbom info yaml file in Lint mode @bjk7119 (#68)
-- update the minimum version of fosslight_util @bjk7119 (#67)
-- Modification for compliance with pep8 @bjk7119 (#66)
-- Exclude for open source package file in w/o list @bjk7119 (#63)
-- Apply -o option in add mode @bjk7119 (#62)
-- Check compliant except for files for which Exclude is True @soimkim (#61)
-- Remove duplicate files in w/o license or copyright list @bjk7119 (#60)
-- Load SRC, BIN Sheet in excel @soimkim (#59)
-- Apply changed parsing_yaml return value @bjk7119 (#57)
-- Apply parsing and convert new yaml format @bjk7119 (#56)
-- Add excution error result @bjk7119 (#55)
-- Modify function of converting excel to yaml @bjk7119 (#54)
-- Remove yaml parsing code @bjk7119 (#48)
-- Add a commit message checker @soimkim (#47)
