@@ -25,7 +25,7 @@ def run_main(mode: str, path, output, format, no_log, disable, copyright, licens
     elif mode == "convert":
         convert_report(path, output, format, no_log)
     else:
-        print("Not supported mode. Select one of 'lint', 'add', or 'convert'")
+        print("(mode) Not supported mode. Select one of 'lint', 'add', or 'convert'")
 
 
 def main():

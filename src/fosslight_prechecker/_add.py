@@ -73,7 +73,7 @@ def check_input_copyright_format(input_copyright: str) -> bool:
     check_ok = True
 
     if regex.match(input_copyright) is None:
-        logger.warning(" You have to input with following format - '<year> <name>'")
+        logger.warning("(-c option) You have to input with following format - '<year> <name>'")
         check_ok = False
 
     return check_ok
@@ -422,7 +422,7 @@ def add_content(
                                    need_log_file, logging.INFO, logging.DEBUG, PKG_NAME, path_to_find)
 
     if not os.path.isdir(path_to_find):
-        logger.error(f"Check the path to find : {path_to_find}")
+        logger.error(f"(-p option) Check the path to find : {path_to_find}")
         sys.exit(1)
 
     # Get SPDX License List

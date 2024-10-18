@@ -414,5 +414,5 @@ def run_lint(
             logger.warning("Can't make result file\n")
         sys.exit(exit_code)
     else:
-        logger.error(f"Check the path to find : {target_path}")
+        logger.error(f"(-p option) Check the path to find : {target_path}")
         sys.exit(1)

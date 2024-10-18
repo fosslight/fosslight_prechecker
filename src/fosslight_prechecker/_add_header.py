@@ -748,18 +748,6 @@ def add_header(args, project: Project, out=sys.stdout) -> int:
 
     template = None
     commented = False
-    # if args.template:
-    #     try:
-    #         template = _find_template(project, args.template)
-    #     except TemplateNotFound:
-    #         args.parser.error(
-    #             _("template {template} could not be found").format(
-    #                 template=args.template
-    #             )
-    #         )
-
-    #     if ".commented" in Path(template.name).suffixes:
-    #         commented = True
 
     year = None
     if not args.exclude_year:
