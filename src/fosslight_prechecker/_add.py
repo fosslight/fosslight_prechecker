@@ -15,6 +15,7 @@ from fosslight_util.set_log import init_log
 from fosslight_util.spdx_licenses import get_spdx_licenses_json, get_license_from_nick
 from fosslight_util.parsing_yaml import find_sbom_yaml_files, parsing_yml
 from fosslight_util.output_format import check_output_format
+from fosslight_util.exclude import excluding_files
 from datetime import datetime
 from fosslight_prechecker._precheck import precheck_for_project, precheck_for_files, dump_error_msg, \
                                            get_path_to_find, DEFAULT_EXCLUDE_EXTENSION_FILES
@@ -402,7 +403,8 @@ def add_content(
     input_copyright: str = "",
     input_dl_url: str = "",
     output_path: str = "",
-    need_log_file: bool = True
+    need_log_file: bool = True,
+    exclude_path: list = []
 ) -> None:
     global _result_log, spdx_licenses
     _check_only_file_mode = False
@@ -416,6 +418,9 @@ def add_content(
         output_path = os.getcwd()
     else:
         output_path = os.path.abspath(output_path)
+
+    user_exclude_path = excluding_files(exclude_path, path_to_find)
+    abs_path_to_exclude = [os.path.abspath(path) for path in user_exclude_path]
 
     now = datetime.now().strftime('%y%m%d_%H%M')
     logger, _result_log = init_log(os.path.join(output_path, f"fosslight_log_pre_{now}.txt"),
@@ -440,7 +445,6 @@ def add_content(
     except Exception as ex:
         dump_error_msg(f"Error access to get_spdx_licenses_json : {ex}")
 
-    # File Only mode (-f option)
     if _check_only_file_mode:
         main_parser = reuse_parser()
         missing_license_list, missing_copyright_list, project = precheck_for_files(path_to_find, file_to_check_list)
@@ -468,17 +472,15 @@ def add_content(
         # Add Download URL
         if input_dl_url:
             add_dl_url_into_file(main_parser, project, path_to_find, input_dl_url, file_to_check_list)
-
-    # Path mode (-p option)
     else:
         # Download license text file of OSS-pkg-info.yaml
         download_oss_info_license(path_to_find, input_license)
 
         # Get missing license / copyright file list
-        missing_license, missing_copyright, _, project, prj_report = precheck_for_project(path_to_find)
+        missing_license, missing_copyright, _, project, prj_report = precheck_for_project(path_to_find, abs_path_to_exclude)
 
         # Get total files except excluded file
-        total_files_excluded = get_total_file_list(path_to_find, prj_report, DEFAULT_EXCLUDE_EXTENSION_FILES)
+        total_files_excluded = get_total_file_list(path_to_find, prj_report, DEFAULT_EXCLUDE_EXTENSION_FILES, abs_path_to_exclude)
         skip_files = sorted(set(total_files_excluded) - set(missing_license) - set(missing_copyright))
         logger.info(f"\n# File list that have both license and copyright : {len(skip_files)} / {len(total_files_excluded)}")
 

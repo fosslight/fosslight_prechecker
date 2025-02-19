@@ -16,6 +16,7 @@ from binaryornot.check import is_binary
 import fosslight_util.constant as constant
 from fosslight_util.set_log import init_log
 from fosslight_util.timer_thread import TimerThread
+from fosslight_util.exclude import excluding_files
 from reuse import report
 from reuse.project import Project
 from reuse.report import ProjectReport
@@ -26,7 +27,6 @@ from fosslight_prechecker._constant import DEFAULT_EXCLUDE_EXTENSION, OSS_PKG_IN
 is_windows = platform.system() == 'Windows'
 REUSE_CONFIG_FILE = ".reuse/dep5"
 DEFAULT_EXCLUDE_EXTENSION_FILES = []  # Exclude files from reuse
-user_exclude_list = []  # Exclude paths from checking
 _turn_on_exclude_config = True
 _check_only_file_mode = False
 error_items = []
@@ -88,7 +88,7 @@ def exclude_git_related_files(path: str) -> None:
         logger.warning(f"Error to get git related files : {ex}")
 
 
-def find_oss_pkg_info_and_exclude_file(path: str) -> List[str]:
+def find_oss_pkg_info_and_exclude_file(path: str, abs_path_to_exclude: List) -> List[str]:
     global DEFAULT_EXCLUDE_EXTENSION_FILES
     oss_pkg_info = []
     git_present = shutil.which("git")
@@ -98,13 +98,13 @@ def find_oss_pkg_info_and_exclude_file(path: str) -> List[str]:
 
     try:
         for root, dirs, files in os.walk(path):
-            if os.path.abspath(root) in user_exclude_list:
+            if os.path.abspath(root) in abs_path_to_exclude:
                 continue
             for dir in dirs:
                 # For hidden folders
                 dir_path = os.path.join(root, dir)
                 dir_abs_path = os.path.abspath(dir_path)
-                if any(os.path.commonpath([dir_abs_path, exclude_path]) == exclude_path for exclude_path in user_exclude_list):
+                if any(os.path.commonpath([dir_abs_path, exclude_path]) == exclude_path for exclude_path in abs_path_to_exclude):
                     continue
                 if dir.startswith("."):
                     all_files_in_dir = [os.path.join(root, dir, file)
@@ -116,7 +116,7 @@ def find_oss_pkg_info_and_exclude_file(path: str) -> List[str]:
             for file in files:
                 file_path = os.path.join(root, file)
                 file_abs_path = os.path.abspath(file_path)
-                if any(os.path.commonpath([file_abs_path, exclude_path]) == exclude_path for exclude_path in user_exclude_list):
+                if any(os.path.commonpath([file_abs_path, exclude_path]) == exclude_path for exclude_path in abs_path_to_exclude):
                     continue
                 file_lower_case = file.lower()
                 file_rel_path = os.path.relpath(file_path, path)
@@ -243,11 +243,11 @@ def precheck_for_files(path: str, files: List[str]) -> Tuple[List[str], List[str
     return missing_license_list, missing_copyright_list, prj
 
 
-def precheck_for_project(path_to_find: str) -> Tuple[List[str], List[str], List[str], Project, ProjectReport]:
+def precheck_for_project(path_to_find: str, abs_path_to_exclude: List) -> Tuple[List[str], List[str], List[str], Project, ProjectReport]:
     missing_license = []
     missing_copyright = []
 
-    oss_pkg_info_files = find_oss_pkg_info_and_exclude_file(path_to_find)
+    oss_pkg_info_files = find_oss_pkg_info_and_exclude_file(path_to_find, abs_path_to_exclude)
     if _turn_on_exclude_config:
         need_rollback, temp_file_name, temp_dir_name = create_reuse_dep5_file(path_to_find)
 
@@ -259,14 +259,14 @@ def precheck_for_project(path_to_find: str) -> Tuple[List[str], List[str], List[
         missing_license = [str(sub) for sub in set(report.files_without_licenses)]
         if not path_to_find.endswith(f"{os.sep}"):
             path_to_find += f"{os.sep}"
-        missing_license = filter_missing_list(missing_license)
+        missing_license = filter_missing_list(missing_license, abs_path_to_exclude)
         missing_license = [sub.replace(path_to_find, '', 1) for sub in missing_license]
 
         # File list that missing copyright text
         missing_copyright = [str(sub) for sub in set(report.files_without_copyright)]
         if not path_to_find.endswith(f"{os.sep}"):
             path_to_find += f"{os.sep}"
-        missing_copyright = filter_missing_list(missing_copyright)
+        missing_copyright = filter_missing_list(missing_copyright, abs_path_to_exclude)
         missing_copyright = [sub.replace(path_to_find, '', 1) for sub in missing_copyright]
 
     except Exception as ex:
@@ -277,11 +277,11 @@ def precheck_for_project(path_to_find: str) -> Tuple[List[str], List[str], List[
     return missing_license, missing_copyright, oss_pkg_info_files, project, report
 
 
-def filter_missing_list(missing_list: List[str]) -> List[str]:
+def filter_missing_list(missing_list: List[str], abs_path_to_exclude: List) -> List[str]:
     filtered_list = []
     for file in missing_list:
         abs_path = os.path.abspath(file)
-        if not any(os.path.commonpath([abs_path, path]) == path for path in user_exclude_list):
+        if not any(os.path.commonpath([abs_path, path]) == path for path in abs_path_to_exclude):
             filtered_list.append(file)
     return filtered_list
 
@@ -339,14 +339,6 @@ def get_path_to_find(target_path: str, _check_only_file_mode: bool) -> Tuple[str
     return path_to_find, file_to_check_list, _check_only_file_mode
 
 
-def set_exclude_list(path_to_find: str, exclude_path: List[str]):
-    global user_exclude_list
-
-    for path in exclude_path:
-        if path.strip != "":
-            user_exclude_list.append(os.path.abspath(os.path.join(path_to_find, path)))
-
-
 def run_lint(
     target_path: str,
     disable: bool,
@@ -357,6 +349,7 @@ def run_lint(
 ) -> None:
     global _turn_on_exclude_config, _check_only_file_mode, _start_time
 
+    abs_path_to_exclude = []
     file_to_check_list = []
     _exit_code = 0
     path_to_find = ""
@@ -371,7 +364,8 @@ def run_lint(
         dump_error_msg(f"Error - locale : {ex}")
 
     path_to_find, file_to_check_list, _check_only_file_mode = get_path_to_find(target_path, _check_only_file_mode)
-    set_exclude_list(path_to_find, exclude_path)
+    user_exclude_path = excluding_files(exclude_path, path_to_find)
+    abs_path_to_exclude = [os.path.abspath(path) for path in user_exclude_path]
 
     result_file, output_path, output_extension = create_result_file(output_file_name, format, _start_time)
     init(path_to_find, output_path, file_to_check_list, need_log_file, exclude_path)
@@ -389,7 +383,7 @@ def run_lint(
         if _check_only_file_mode:
             license_missing_files, copyright_missing_files, project = precheck_for_files(path_to_find, file_to_check_list)
         else:
-            license_missing_files, copyright_missing_files, oss_pkg_info, project, report = precheck_for_project(path_to_find)
+            license_missing_files, copyright_missing_files, oss_pkg_info, project, report = precheck_for_project(path_to_find, abs_path_to_exclude)
 
         if need_log_file:
             timer.stop = True
@@ -404,7 +398,7 @@ def run_lint(
                                          file_to_check_list,
                                          error_items,
                                          DEFAULT_EXCLUDE_EXTENSION_FILES,
-                                         user_exclude_list)
+                                         abs_path_to_exclude)
 
         success, exit_code = write_result_file(result_file, output_extension, _exit_code,
                                                result_item, _result_log, project, path_to_find)
