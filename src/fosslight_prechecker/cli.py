@@ -21,7 +21,7 @@ def run_main(mode: str, path, output, format, no_log, disable, copyright, licens
     if mode == "lint":
         run_lint(path, disable, output, format, no_log, exclude_path)
     elif mode == "add":
-        add_content(path, license, copyright, dl_url, output, no_log)
+        add_content(path, license, copyright, dl_url, output, no_log, exclude_path)
     elif mode == "convert":
         convert_report(path, output, format, no_log)
     else:

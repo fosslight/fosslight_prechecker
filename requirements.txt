@@ -3,5 +3,5 @@ binaryornot
 requests
 reuse==1.1.2
 PyYAML
-fosslight_util==2.*
+fosslight_util>=2.1.10
 jinja2
