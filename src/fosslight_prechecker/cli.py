@@ -11,10 +11,11 @@ from fosslight_prechecker._help import print_help_msg
 from fosslight_prechecker._constant import PKG_NAME
 from fosslight_prechecker._add import add_content
 from fosslight_prechecker._precheck import run_lint
+from fosslight_prechecker._download_lic import download_license
 
 
 def run_main(mode: str, path, output, format, no_log, disable, copyright, license, dl_url, parser, exclude_path):
-    if mode != "add" and (copyright != "" or license != ""):
+    if mode not in ['add', 'download'] and (copyright != "" or license != "" or dl_url != ""):
         parser.print_help()
         sys.exit(1)
 
@@ -24,13 +25,15 @@ def run_main(mode: str, path, output, format, no_log, disable, copyright, licens
         add_content(path, license, copyright, dl_url, output, no_log, exclude_path)
     elif mode == "convert":
         convert_report(path, output, format, no_log)
+    elif mode == "download":
+        download_license(path, license)
     else:
-        print("(mode) Not supported mode. Select one of 'lint', 'add', or 'convert'")
+        print("(mode) Not supported mode. Select one of 'lint', 'add', 'convert', or 'download'")
 
 
 def main():
     parser = argparse.ArgumentParser(description='FOSSLight Prechecker', prog='fosslight_prechecker', add_help=False)
-    parser.add_argument('mode', nargs='?', help='lint(default) | convert | add', choices=['lint', 'add', 'convert'], default='lint')
+    parser.add_argument('mode', nargs='?', help='lint(default) | convert | add | download', choices=['lint', 'add', 'convert', 'download'], default='lint')
     parser.add_argument('-h', '--help', help='Print help message', action='store_true', dest='help')
     parser.add_argument('-i', '--ignore', help='Do not write log to file', action='store_false', dest='log')
     parser.add_argument('-v', '--version', help='Print FOSSLight Prechecker version', action='store_true', dest='version')
@@ -38,7 +41,7 @@ def main():
     parser.add_argument('-p', '--path', help='Path to check', type=str, dest='path', default="")
     parser.add_argument('-f', '--format', help='Format of ouput', type=str, dest='format', default="")
     parser.add_argument('-o', '--output', help='Output file name', type=str, dest='output', default="")
-    parser.add_argument('-l', '--license', help="License name to add(used in only 'add' mode)", type=str, dest='license', default="")
+    parser.add_argument('-l', '--license', help="License name to add or download(used in both 'add' and 'download' mode)", type=str, dest='license', default="")
     parser.add_argument('-c', '--copyright', help="Copyright to add(used in only 'add' mode)", type=str, dest='copyright', default="")
     parser.add_argument('-u', '--dlurl', help="Download URL to add(used in only 'add' mode)", type=str, dest='dlurl', default="")
     parser.add_argument('-e', '--exclude', help='Path to exclude from checking', nargs='*', dest='exclude_path', default=[])

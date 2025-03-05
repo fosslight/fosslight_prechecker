@@ -13,12 +13,14 @@ _HELP_MESSAGE_PRECHECKER = """
          fosslight_prechecker lint -p /home/test/src/ -e test.py dep/temp
          fosslight_prechecker add -p /home/test/test.py -c "2019-2021 LG Electronics Inc." -l "GPL-3.0-only"
          fosslight_prechecker convert -p /home/test/sbom_info.yaml
+         fosslight_prechecker download -l "MIT"
 
     Parameters:
         Mode
             lint\t\t    (Default) Check whether the copyright and license writing rules are complied with
             convert\t\t    Convert sbom_info.yaml -> FOSSLight-Report.xlsx
             add\t\t\t    Add missing license, copyright, and download url
+            download\t\t    Download the license text of the license specified in sbom-info.yaml
 
         Options:
             -h\t\t\t    Print help message
@@ -30,15 +32,19 @@ _HELP_MESSAGE_PRECHECKER = """
             -i\t\t\t    Don't both write log file and show progress bar
             --notice\t\t    Print the open source license notice text.
 
-        Option for only 'lint' mode
+        Option for 'lint' mode
             -n\t\t\t    Don't exclude venv*, node_modules, .*/, and the result of FOSSLight Scanners from the analysis
 
-        Options for only 'add' mode
+        Options for 'add' mode
             Please enter any argument with double quotation marks("").
             -l <license>\t    License name(SPDX format) to add(ex, "Apache-2.0")
             -c <copyright>\t    Copyright to add(ex, "2015-2021 LG Electronics Inc.")
-            -u <dl_location>\t    Download Location to add(ex, "https://github.com/fosslight/fosslight_prechecker")"""
+            -u <dl_location>\t    Download Location to add(ex, "https://github.com/fosslight/fosslight_prechecker")
 
+        Options for 'download' mode
+            Please enter any argument with double quotation marks("").
+            -l <license>\t    License to be representative license
+        """
 
 def print_help_msg(exitOpt: bool = True) -> None:
     helpMsg = PrintHelpMsg(_HELP_MESSAGE_PRECHECKER)
