@@ -5,15 +5,12 @@
 import os
 import re
 import logging
-import shutil
 import sys
 import fosslight_util.constant as constant
-import urllib.request
 import argparse
 from yaml import safe_dump
 from fosslight_util.set_log import init_log
 from fosslight_util.spdx_licenses import get_spdx_licenses_json, get_license_from_nick
-from fosslight_util.parsing_yaml import find_sbom_yaml_files, parsing_yml
 from fosslight_util.output_format import check_output_format
 from fosslight_util.exclude import excluding_files
 from datetime import datetime
@@ -21,19 +18,14 @@ from fosslight_prechecker._precheck import precheck_for_project, precheck_for_fi
                                            get_path_to_find, DEFAULT_EXCLUDE_EXTENSION_FILES
 from fosslight_prechecker._result import get_total_file_list
 from fosslight_prechecker._add_header import add_header, reuse_parser
-from reuse.download import run as reuse_download
 from reuse._comment import EXTENSION_COMMENT_STYLE_MAP_LOWERCASE
 from reuse.project import Project
-from bs4 import BeautifulSoup
-from pathlib import Path
 from typing import List, Optional
 
 
 PKG_NAME = "fosslight_prechecker"
-LICENSE_INCLUDE_FILES = ["license", "license.md", "license.txt", "notice"]
 EXCLUDE_DIR = ["test", "tests", "doc", "docs"]
 EXCLUDE_PREFIX = ("test", ".", "doc", "__")
-OPENSOURCE_LGE_COM_URL_PREFIX = "https://opensource.lge.com/license/"
 _result_log = {}
 spdx_licenses = []
 
@@ -253,104 +245,6 @@ def save_result_log() -> None:
         logger.warning(f"Failed to print add result log. : {ex}")
 
 
-def copy_to_root(path_to_find: str, input_license: str) -> None:
-    lic_file = f"{input_license}.txt"
-    try:
-        source = os.path.join(path_to_find, 'LICENSES', f'{lic_file}')
-        destination = os.path.join(path_to_find, 'LICENSE')
-        shutil.copyfile(source, destination)
-    except Exception as ex:
-        dump_error_msg(f"Error - Can't copy license file: {ex}")
-
-
-def lge_lic_download(path_to_find: str, input_license: str) -> bool:
-    success = False
-
-    input_license_url = input_license.replace(' ', '_').replace('/', '_').replace('LicenseRef-', '').replace('-', '_')
-    lic_url = OPENSOURCE_LGE_COM_URL_PREFIX + input_license_url + ".html"
-
-    try:
-        html = urllib.request.urlopen(lic_url)
-        source = html.read()
-        html.close()
-    except urllib.error.URLError:
-        logger.error("Invalid URL address")
-    except ValueError as val_err:
-        logger.error(f"Invalid Value : {val_err}")
-    except Exception as ex:
-        logger.error(f"Error to open url - {lic_url} : {ex}")
-
-    soup = BeautifulSoup(source, 'html.parser')
-    try:
-        lic_text = soup.find("p", "bdTop")
-        Path(os.path.join(os.getcwd(), path_to_find, 'LICENSES')).mkdir(parents=True, exist_ok=True)
-        lic_file_path = os.path.join(path_to_find, 'LICENSES', f'{input_license}.txt')
-
-        with open(lic_file_path, 'w', encoding='utf-8') as f:
-            f.write(lic_text.get_text(separator='\n'))
-        if os.path.isfile(lic_file_path):
-            logger.info(f"Successfully downloaded {lic_file_path}")
-            success = True
-    except Exception as ex:
-        logger.error(f"Error to download license from LGE : {ex}")
-    return success
-
-
-def present_license_file(path_to_find: str, lic: str) -> bool:
-    present = False
-    lic_file_path = os.path.join(os.getcwd(), path_to_find, 'LICENSES')
-    file_name = f"{lic}.txt"
-    if file_name in os.listdir(lic_file_path):
-        present = True
-    return present
-
-
-def find_representative_license(path_to_find: str, input_license: str) -> None:
-    files = []
-    found_file = []
-    found_license_file = False
-    main_parser = reuse_parser()
-    prj = Project(path_to_find)
-    reuse_return_code = 0
-    success_from_lge = False
-    present_lic = False
-
-    all_items = os.listdir(path_to_find)
-    for item in all_items:
-        if os.path.isfile(item):
-            files.append(os.path.basename(item))
-
-    for file in files:
-        file_lower_case = file.lower()
-        if file_lower_case in LICENSE_INCLUDE_FILES or file_lower_case.startswith("license") or file_lower_case.startswith("notice"):
-            found_file.append(file)
-            found_license_file = True
-
-    input_license = check_input_license_format(input_license)
-    logger.info(f"\n - Representative license : {input_license}")
-
-    parsed_args = main_parser.parse_args(['download', f"{input_license}"])
-    input_license = input_license.replace(os.path.sep, '')
-    try:
-        # 0: successfully downloaded, 1: failed to download
-        reuse_return_code = reuse_download(parsed_args, prj)
-        # Check if the license text file is present
-        present_lic = present_license_file(path_to_find, input_license)
-
-        if reuse_return_code == 1 and not present_lic:
-            # True : successfully downloaded from LGE
-            success_from_lge = lge_lic_download(path_to_find, input_license)
-
-        if reuse_return_code == 0 or success_from_lge:
-            if found_license_file:
-                logger.info(f"# Found representative license file : {found_file}\n")
-            else:
-                logger.warning(f"# Created Representative License File : {input_license}.txt\n")
-                copy_to_root(path_to_find, input_license)
-    except Exception as ex:
-        dump_error_msg(f"Error - download representative license text: {ex}")
-
-
 def is_exclude_dir(dir_path: str) -> Optional[bool]:
     if dir_path != "":
         dir_path = dir_path.lower()
@@ -362,39 +256,21 @@ def is_exclude_dir(dir_path: str) -> Optional[bool]:
     return
 
 
-def download_oss_info_license(base_path: str, input_license: str = "") -> None:
-    license_list = []
-    converted_lic_list = []
-    oss_yaml_files = []
-    main_parser = reuse_parser()
-    prj = Project(base_path)
+def get_spdx_license_list():
+    global spdx_licenses
+    try:
+        success, error_msg, licenses = get_spdx_licenses_json()
+        if success is False:
+            dump_error_msg(f"Error to get SPDX Licesens : {error_msg}")
 
-    oss_yaml_files = find_sbom_yaml_files(base_path)
-
-    if input_license != "":
-        license_list.append(input_license)
-
-    if oss_yaml_files is None or len(oss_yaml_files) == 0:
-        logger.info("\n # There is no OSS package Info file in this path\n")
-        return
-    else:
-        logger.info(f"\n # There is OSS Package Info file(s) : {oss_yaml_files}\n")
-
-    for oss_pkg_file in oss_yaml_files:
-        _, license_list, _ = parsing_yml(oss_pkg_file, base_path)
-
-    for lic in license_list:
-        converted_lic_list.append(check_input_license_format(lic))
-
-    if license_list is not None and len(license_list) > 0:
-        parsed_args = main_parser.parse_args(['download'] + converted_lic_list)
-
-        try:
-            reuse_download(parsed_args, prj)
-        except Exception as ex:
-            dump_error_msg(f"Error - download license text in OSS-pkg-info.yml : {ex}")
-    else:
-        logger.info(" # There is no license in the path \n")
+        licenseInfo = licenses.get("licenses")
+        for info in licenseInfo:
+            shortID = info.get("licenseId")
+            isDeprecated = info.get("isDeprecatedLicenseId")
+            if isDeprecated is False:
+                spdx_licenses.append(shortID)
+    except Exception as ex:
+        dump_error_msg(f"Error access to get_spdx_licenses_json : {ex}")
 
 
 def add_content(
@@ -406,7 +282,7 @@ def add_content(
     need_log_file: bool = True,
     exclude_path: list = []
 ) -> None:
-    global _result_log, spdx_licenses
+    global _result_log
     _check_only_file_mode = False
     file_to_check_list = []
     missing_license = []
@@ -431,19 +307,7 @@ def add_content(
         sys.exit(1)
 
     # Get SPDX License List
-    try:
-        success, error_msg, licenses = get_spdx_licenses_json()
-        if success is False:
-            dump_error_msg(f"Error to get SPDX Licesens : {error_msg}")
-
-        licenseInfo = licenses.get("licenses")
-        for info in licenseInfo:
-            shortID = info.get("licenseId")
-            isDeprecated = info.get("isDeprecatedLicenseId")
-            if isDeprecated is False:
-                spdx_licenses.append(shortID)
-    except Exception as ex:
-        dump_error_msg(f"Error access to get_spdx_licenses_json : {ex}")
+    get_spdx_license_list()
 
     if _check_only_file_mode:
         main_parser = reuse_parser()
@@ -473,9 +337,6 @@ def add_content(
         if input_dl_url:
             add_dl_url_into_file(main_parser, project, path_to_find, input_dl_url, file_to_check_list)
     else:
-        # Download license text file of OSS-pkg-info.yaml
-        download_oss_info_license(path_to_find, input_license)
-
         # Get missing license / copyright file list
         missing_license, missing_copyright, _, project, prj_report = precheck_for_project(path_to_find, abs_path_to_exclude)
 
@@ -502,9 +363,4 @@ def add_content(
                                       input_copyright,
                                       total_files_excluded,
                                       input_dl_url)
-
-    # Find and create representative license file
-    if input_license != "" and len(missing_license) > 0:
-        find_representative_license(path_to_find, input_license)
-
     save_result_log()
