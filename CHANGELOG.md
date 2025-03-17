@@ -1,5 +1,18 @@
 # Changelog
 
+## v4.0.2 (17/03/2025)
+## Changes
+## 🚀 Features
+
+- Add 'Download' mode to download license text @bjk7119 (#168)
+
+## 🔧 Maintenance
+
+- Import exclude path fct. from FL util @bjk7119 (#167)
+- Print option name with error msg @bjk7119 (#166)
+
+---
+
 ## v4.0.1 (08/10/2024)
 ## Changes
 ## 🔧 Maintenance
@@ -308,17 +321,3 @@
 - Change it to a responsive table @soimkim (#78)
 - Remove gray background from html @soimkim (#77)
 - Modify html format when files exceeds 100 @bjk7119 (#76)
-
----
-
-## v2.2.1 (28/06/2022)
-## Changes
-## 🚀 Features
-
-- Add generating html format file @bjk7119 (#73)
-
-## 🔧 Maintenance
-
-- Add expand button in html @bjk7119 (#75)
-- Add execution error handling for html @bjk7119 (#74)
-- Change field's name in yaml file @bjk7119 (#72)
