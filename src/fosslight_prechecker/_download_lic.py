@@ -31,14 +31,14 @@ def download_license(target_path: str, input_license: str) -> None:
 
     get_spdx_license_list()
 
-    # Download license text file of OSS-pkg-info.yaml
-    download_oss_info_license(path_to_find)
-
     # Find and create representative license file
     if input_license:
         find_representative_license(path_to_find, input_license)
+    else:
+        # Download license text file of OSS-pkg-info.yaml
+        download_oss_info_license(path_to_find)
 
-def lge_lic_download(path_to_find: str, input_license: str) -> bool:
+def lge_lic_download(temp_download_path: str, input_license: str) -> bool:
     success = False
 
     input_license_url = input_license.replace(' ', '_').replace('/', '_').replace('LicenseRef-', '').replace('-', '_')
@@ -58,8 +58,8 @@ def lge_lic_download(path_to_find: str, input_license: str) -> bool:
     soup = BeautifulSoup(source, 'html.parser')
     try:
         lic_text = soup.find("p", "bdTop")
-        Path(os.path.join(os.getcwd(), path_to_find, 'LICENSES')).mkdir(parents=True, exist_ok=True)
-        lic_file_path = os.path.join(path_to_find, 'LICENSES', f'{input_license}.txt')
+        Path(os.path.join(temp_download_path, 'LICENSES')).mkdir(parents=True, exist_ok=True)
+        lic_file_path = os.path.join(temp_download_path, 'LICENSES', f'{input_license}.txt')
 
         with open(lic_file_path, 'w', encoding='utf-8') as f:
             f.write(lic_text.get_text(separator='\n'))
@@ -71,9 +71,9 @@ def lge_lic_download(path_to_find: str, input_license: str) -> bool:
     return success
 
 
-def present_license_file(path_to_find: str, lic: str) -> bool:
+def present_license_file(path_to_check: str, lic: str) -> bool:
     present = False
-    lic_file_path = os.path.join(os.getcwd(), path_to_find, 'LICENSES')
+    lic_file_path = os.path.join(path_to_check, 'LICENSES')
     file_name = f"{lic}.txt"
     if file_name in os.listdir(lic_file_path):
         present = True
@@ -111,13 +111,17 @@ def download_oss_info_license(base_path: str = "") -> None:
     else:
         logger.info(" # There is no license in the path \n")
 
+    return converted_lic_list
 
-def copy_to_root(path_to_find: str, input_license: str) -> None:
+
+def copy_to_root(path_to_find: str, input_license: str, temp_download_path: str) -> None:
     lic_file = f"{input_license}.txt"
     try:
-        source = os.path.join(path_to_find, 'LICENSES', f'{lic_file}')
+        source = os.path.join(temp_download_path, 'LICENSES', f'{lic_file}')
         destination = os.path.join(path_to_find, 'LICENSE')
         shutil.copyfile(source, destination)
+        logger.warning(f"# Created Representative License File ({source} -> LICENSE)\n")
+        shutil.rmtree(temp_download_path)
     except Exception as ex:
         dump_error_msg(f"Error - Can't copy license file: {ex}")
 
@@ -141,7 +145,6 @@ def find_representative_license(path_to_find: str, input_license: str) -> None:
     found_file = []
     found_license_file = False
     main_parser = reuse_parser()
-    prj = Project(path_to_find)
     reuse_return_code = 0
     success_from_lge = False
     present_lic = False
@@ -160,29 +163,30 @@ def find_representative_license(path_to_find: str, input_license: str) -> None:
     input_license = check_input_license_format(input_license)
     logger.info(f"\n - Input license to be representative: {input_license}")
 
-    parsed_args = main_parser.parse_args(['download', f"{input_license}"])
     input_license = input_license.replace(os.path.sep, '')
     try:
-        if found_license_file and input_license:
+        if found_license_file:
             for lic_file in found_file:
                 found_license = check_license_name(os.path.abspath(lic_file), True)
-                if found_license != input_license:
-                    logger.warning(f"# Input License: {input_license}\n but found representative license: {found_license}, path: {os.path.abspath(lic_file)}\n")
-                    return
+                logger.warning(f"# Already exists representative license file: {found_license}, path: {os.path.abspath(lic_file)}\n")
+        else:
+            temp_download_path = os.path.join(path_to_find, "temp_lic")
+            os.makedirs(temp_download_path, exist_ok=True)
+            prj = Project(temp_download_path)
+            parsed_args = main_parser.parse_args(['download', f"{input_license}"])
 
-        # 0: successfully downloaded, 1: failed to download
-        reuse_return_code = reuse_download(parsed_args, prj)
-        # Check if the license text file is present
-        present_lic = present_license_file(path_to_find, input_license)
+            # 0: successfully downloaded, 1: failed to download
+            reuse_return_code = reuse_download(parsed_args, prj)
+            # Check if the license text file is present
+            present_lic = present_license_file(temp_download_path, input_license)
 
-        if reuse_return_code == 1 and not present_lic:
-            # True : successfully downloaded from LGE
-            success_from_lge = lge_lic_download(path_to_find, input_license)
-            if success_from_lge:
-                logger.warning(f"\n# Successfully downloaded from LGE")
-        
-        if reuse_return_code == 0 or success_from_lge:
-            logger.warning(f"# Created Representative License File : {input_license}.txt\n")
-            copy_to_root(path_to_find, input_license)
+            if reuse_return_code == 1 and not present_lic:
+                # True : successfully downloaded from LGE
+                success_from_lge = lge_lic_download(temp_download_path, input_license)
+                if success_from_lge:
+                    logger.warning(f"\n# Successfully downloaded from LGE")
+            
+            if reuse_return_code == 0 or success_from_lge:
+                copy_to_root(path_to_find, input_license, temp_download_path)
     except Exception as ex:
         dump_error_msg(f"Error - download representative license text: {ex}")
