@@ -32,11 +32,11 @@ def download_license(target_path: str, input_license: str) -> None:
     get_spdx_license_list()
 
     # Download license text file of OSS-pkg-info.yaml
-    download_oss_info_license(path_to_find)
+    lic_in_yaml = download_oss_info_license(path_to_find)
 
     # Find and create representative license file
     if input_license:
-        find_representative_license(path_to_find, input_license)
+        find_representative_license(path_to_find, input_license, lic_in_yaml)
 
 def lge_lic_download(path_to_find: str, input_license: str) -> bool:
     success = False
@@ -111,13 +111,36 @@ def download_oss_info_license(base_path: str = "") -> None:
     else:
         logger.info(" # There is no license in the path \n")
 
+    return converted_lic_list
 
-def copy_to_root(path_to_find: str, input_license: str) -> None:
+
+def is_directory_empty(directory_path: str):
+    return not os.listdir(directory_path)
+
+
+def delete_empty_directory(directory_path: str):
+    if is_directory_empty(directory_path):
+        try:
+            os.rmdir(directory_path)
+        except OSError as error:
+            print(f"Error - Remove empty directory: {error}")
+
+
+def check_lic_file_present(file_path: str) -> bool:
+    return os.path.isfile(file_path)
+
+
+def check_lic_in_yaml(input_license: str, lic_in_yaml: list) -> bool:
+    return input_license in lic_in_yaml
+
+
+def copy_to_root(path_to_find: str, input_license: str, temp_download_path: str) -> None:
     lic_file = f"{input_license}.txt"
     try:
-        source = os.path.join(path_to_find, 'LICENSES', f'{lic_file}')
+        source = os.path.join(temp_download_path, 'LICENSES', f'{lic_file}')
         destination = os.path.join(path_to_find, 'LICENSE')
         shutil.copyfile(source, destination)
+        shutil.rmtree(temp_download_path)
     except Exception as ex:
         dump_error_msg(f"Error - Can't copy license file: {ex}")
 
@@ -136,12 +159,11 @@ def check_license_name(license_txt, is_filepath=False):
     return license_name
 
 
-def find_representative_license(path_to_find: str, input_license: str) -> None:
+def find_representative_license(path_to_find: str, input_license: str, lic_in_yaml: list) -> None:
     files = []
     found_file = []
     found_license_file = False
     main_parser = reuse_parser()
-    prj = Project(path_to_find)
     reuse_return_code = 0
     success_from_lge = False
     present_lic = False
@@ -160,29 +182,31 @@ def find_representative_license(path_to_find: str, input_license: str) -> None:
     input_license = check_input_license_format(input_license)
     logger.info(f"\n - Input license to be representative: {input_license}")
 
-    parsed_args = main_parser.parse_args(['download', f"{input_license}"])
     input_license = input_license.replace(os.path.sep, '')
     try:
-        if found_license_file and input_license:
+        if found_license_file:
             for lic_file in found_file:
                 found_license = check_license_name(os.path.abspath(lic_file), True)
-                if found_license != input_license:
-                    logger.warning(f"# Input License: {input_license}\n but found representative license: {found_license}, path: {os.path.abspath(lic_file)}\n")
-                    return
+                logger.warning(f"# Already exists representative license file: {found_license}, path: {os.path.abspath(lic_file)}\n")
+        else:
+            temp_download_path = os.path.join(path_to_find, "temp_lic")
+            os.makedirs(temp_download_path, exist_ok=True)
+            prj = Project(temp_download_path)
+            parsed_args = main_parser.parse_args(['download', f"{input_license}"])
 
-        # 0: successfully downloaded, 1: failed to download
-        reuse_return_code = reuse_download(parsed_args, prj)
-        # Check if the license text file is present
-        present_lic = present_license_file(path_to_find, input_license)
+            # 0: successfully downloaded, 1: failed to download
+            reuse_return_code = reuse_download(parsed_args, prj)
+            # Check if the license text file is present
+            present_lic = present_license_file(path_to_find, input_license)
 
-        if reuse_return_code == 1 and not present_lic:
-            # True : successfully downloaded from LGE
-            success_from_lge = lge_lic_download(path_to_find, input_license)
-            if success_from_lge:
-                logger.warning(f"\n# Successfully downloaded from LGE")
-        
-        if reuse_return_code == 0 or success_from_lge:
-            logger.warning(f"# Created Representative License File : {input_license}.txt\n")
-            copy_to_root(path_to_find, input_license)
+            if reuse_return_code == 1 and not present_lic:
+                # True : successfully downloaded from LGE
+                success_from_lge = lge_lic_download(path_to_find, input_license)
+                if success_from_lge:
+                    logger.warning(f"\n# Successfully downloaded from LGE")
+            
+            if reuse_return_code == 0 or success_from_lge:
+                logger.warning(f"# Created Representative License File\n")
+                copy_to_root(path_to_find, input_license, temp_download_path)
     except Exception as ex:
         dump_error_msg(f"Error - download representative license text: {ex}")

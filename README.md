@@ -22,6 +22,8 @@ Here a short summary:
 
 - `add` --- Add copyright and license to missing file(s)
 
+- `download` --- Download the text license file(s) that written in sbom-info.yaml or oss-pkg-info.yaml.
+
 
 ## 👏 How to report issue
 
