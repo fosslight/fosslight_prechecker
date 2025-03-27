@@ -80,6 +80,21 @@ def present_license_file(path_to_check: str, lic: str) -> bool:
     return present
 
 
+def download_lic_text_file(parsed_args: str, prj: Project, download_path: str) -> None:
+    # 0: successfully downloaded, 1: failed to download
+    reuse_return_code = reuse_download(parsed_args, prj)
+    # Check if the license text file is present
+    present_lic = present_license_file(download_path, input_license)
+
+    if reuse_return_code == 1 and not present_lic:
+        # True : successfully downloaded from LGE
+        success_from_lge = lge_lic_download(download_path, input_license)
+        if success_from_lge:
+            logger.warning(f"\n# Successfully downloaded from LGE")
+
+    return reuse_return_code == 0 and success_from_lge
+
+
 def download_oss_info_license(base_path: str = "") -> None:
     license_list = []
     converted_lic_list = []
@@ -105,7 +120,7 @@ def download_oss_info_license(base_path: str = "") -> None:
         parsed_args = main_parser.parse_args(['download'] + converted_lic_list)
 
         try:
-            reuse_download(parsed_args, prj)
+            download_lic_text_file(parsed_args, prj, base_path)
         except Exception as ex:
             dump_error_msg(f"Error - download license text in OSS-pkg-info.yml : {ex}")
     else:
@@ -175,16 +190,10 @@ def find_representative_license(path_to_find: str, input_license: str) -> None:
             prj = Project(temp_download_path)
             parsed_args = main_parser.parse_args(['download', f"{input_license}"])
 
-            # 0: successfully downloaded, 1: failed to download
-            reuse_return_code = reuse_download(parsed_args, prj)
-            # Check if the license text file is present
-            present_lic = present_license_file(temp_download_path, input_license)
-
-            if reuse_return_code == 1 and not present_lic:
-                # True : successfully downloaded from LGE
-                success_from_lge = lge_lic_download(temp_download_path, input_license)
-                if success_from_lge:
-                    logger.warning(f"\n# Successfully downloaded from LGE")
+            try:
+                download_lic_text_file(parsed_args, prj, temp_download_path)
+            except Exception as ex:
+                dump_error_msg(f"Error - download the representative license text file : {ex}")
             
             if reuse_return_code == 0 or success_from_lge:
                 copy_to_root(path_to_find, input_license, temp_download_path)
