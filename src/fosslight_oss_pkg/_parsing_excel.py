@@ -50,8 +50,6 @@ def convert_yml_to_excel(
     for yaml_file in oss_yaml_files:
         try:
             if os.path.isfile(yaml_file):
-                items_to_print = []
-
                 logger.info(f"Read data from : {yaml_file}")
 
                 if file_option_on:
@@ -73,7 +71,6 @@ def convert_yml_to_excel(
                     for file_item in file_items:
                         row_items.extend(file_item.get_print_array())
                     sheet_list[yaml_file_sheet] = row_items
-                
         except Exception as ex:
             logger.error(f"Read yaml file: {ex}")
 

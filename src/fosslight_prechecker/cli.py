@@ -33,7 +33,8 @@ def run_main(mode: str, path, output, format, no_log, disable, copyright, licens
 
 def main():
     parser = argparse.ArgumentParser(description='FOSSLight Prechecker', prog='fosslight_prechecker', add_help=False)
-    parser.add_argument('mode', nargs='?', help='lint(default) | convert | add | download', choices=['lint', 'add', 'convert', 'download'], default='lint')
+    parser.add_argument('mode', nargs='?', help='lint(default) | convert | add | download',
+                        choices=['lint', 'add', 'convert', 'download'], default='lint')
     parser.add_argument('-h', '--help', help='Print help message', action='store_true', dest='help')
     parser.add_argument('-i', '--ignore', help='Do not write log to file', action='store_false', dest='log')
     parser.add_argument('-v', '--version', help='Print FOSSLight Prechecker version', action='store_true', dest='version')
@@ -41,7 +42,8 @@ def main():
     parser.add_argument('-p', '--path', help='Path to check', type=str, dest='path', default="")
     parser.add_argument('-f', '--format', help='Format of ouput', type=str, dest='format', default="")
     parser.add_argument('-o', '--output', help='Output file name', type=str, dest='output', default="")
-    parser.add_argument('-l', '--license', help="License name to add or download(used in both 'add' and 'download' mode)", type=str, dest='license', default="")
+    parser.add_argument('-l', '--license', help="License name to add or download(used in both 'add' and 'download' mode)",
+                        type=str, dest='license', default="")
     parser.add_argument('-c', '--copyright', help="Copyright to add(used in only 'add' mode)", type=str, dest='copyright', default="")
     parser.add_argument('-u', '--dlurl', help="Download URL to add(used in only 'add' mode)", type=str, dest='dlurl', default="")
     parser.add_argument('-e', '--exclude', help='Path to exclude from checking', nargs='*', dest='exclude_path', default=[])
