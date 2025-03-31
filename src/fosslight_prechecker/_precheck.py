@@ -383,7 +383,8 @@ def run_lint(
         if _check_only_file_mode:
             license_missing_files, copyright_missing_files, project = precheck_for_files(path_to_find, file_to_check_list)
         else:
-            license_missing_files, copyright_missing_files, oss_pkg_info, project, report = precheck_for_project(path_to_find, abs_path_to_exclude)
+            license_missing_files, copyright_missing_files, oss_pkg_info, project, report = precheck_for_project(path_to_find,
+                                                                                                                 abs_path_to_exclude)
 
         if need_log_file:
             timer.stop = True

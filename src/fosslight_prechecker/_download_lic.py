@@ -120,7 +120,7 @@ def download_oss_info_license(base_path: str = "") -> None:
 
     if converted_lic_list is not None and len(converted_lic_list) > 0:
         parsed_args = main_parser.parse_args(['download'] + converted_lic_list)
-        
+
         try:
             download_lic_text_file(parsed_args, prj, base_path, converted_lic_list)
         except Exception as ex:
@@ -164,7 +164,6 @@ def find_representative_license(path_to_find: str, input_license: str) -> None:
     main_parser = reuse_parser()
     reuse_return_code = 0
     success_from_lge = False
-    present_lic = False
 
     all_items = os.listdir(path_to_find)
     for item in all_items:
@@ -196,7 +195,7 @@ def find_representative_license(path_to_find: str, input_license: str) -> None:
                 download_lic_text_file(parsed_args, prj, temp_download_path, [input_license])
             except Exception as ex:
                 dump_error_msg(f"Error - download the representative license text file : {ex}")
-            
+
             if reuse_return_code == 0 or success_from_lge:
                 copy_to_root(path_to_find, input_license, temp_download_path)
     except Exception as ex:

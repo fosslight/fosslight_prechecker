@@ -46,6 +46,7 @@ _HELP_MESSAGE_PRECHECKER = """
             -l <license>\t    License to be representative license
         """
 
+
 def print_help_msg(exitOpt: bool = True) -> None:
     helpMsg = PrintHelpMsg(_HELP_MESSAGE_PRECHECKER)
     helpMsg.print_help_msg(exitOpt)
