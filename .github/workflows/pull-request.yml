@@ -23,7 +23,7 @@ jobs:
             TARGET: ubuntu
             CMD_BUILD: >
                 tox -e ubuntu
-            OUT_FILE_NAME: fosslight_bin_ubuntu18
+            OUT_FILE_NAME: fosslight_bin_ubuntu
             ASSET_MIME: application/octet-stream
           - os: windows-latest
             TARGET: windows
@@ -36,10 +36,10 @@ jobs:
             ASSET_MIME: application/vnd.microsoft.portable-executable
     steps:
     - uses: actions/checkout@v3
-    - name: Set up Python 3.8
+    - name: Set up Python 3.11
       uses: actions/setup-python@v4
       with:
-        python-version: '3.8'
+        python-version: '3.11'
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
