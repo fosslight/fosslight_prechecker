@@ -257,7 +257,6 @@ def is_exclude_dir(dir_path: str) -> Optional[bool]:
 
 
 def get_spdx_license_list():
-    global spdx_licenses
     try:
         success, error_msg, licenses = get_spdx_licenses_json()
         if success is False:
