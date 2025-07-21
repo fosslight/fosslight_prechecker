@@ -37,7 +37,6 @@ logger = logging.getLogger(constant.LOGGER_NAME)
 
 
 def exclude_untracked_files(path: str) -> None:
-    global DEFAULT_EXCLUDE_EXTENSION_FILES
     try:
         cmd_result = subprocess.check_output(['git', 'ls-files', '-o'], universal_newlines=True)
         cmd_result = cmd_result.split('\n')
@@ -51,7 +50,6 @@ def exclude_untracked_files(path: str) -> None:
 
 
 def exclude_gitignore_files(path: str) -> None:
-    global DEFAULT_EXCLUDE_EXTENSION_FILES
     try:
         root_path = VCSStrategyGit.find_root(os.getcwd())
         if root_path:
@@ -89,7 +87,6 @@ def exclude_git_related_files(path: str) -> None:
 
 
 def find_oss_pkg_info_and_exclude_file(path: str, abs_path_to_exclude: List) -> List[str]:
-    global DEFAULT_EXCLUDE_EXTENSION_FILES
     oss_pkg_info = []
     git_present = shutil.which("git")
 
@@ -140,7 +137,6 @@ def find_oss_pkg_info_and_exclude_file(path: str, abs_path_to_exclude: List) -> 
 
 
 def create_reuse_dep5_file(path: str) -> Tuple[bool, str, str]:
-    global DEFAULT_EXCLUDE_EXTENSION_FILES
     # Create .reuse/dep5 for excluding directories from reuse.
     _DEFAULT_CONFIG_PREFIX = "Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/\nUpstream-Name: \
                         reuse\nUpstream-Contact: Carmen Bianca Bakker <carmenbianca@fsfe.org>\nSource: https://github.com/fsfe/reuse-tool\n"
@@ -201,8 +197,6 @@ def remove_reuse_dep5_file(
 
 
 def precheck_for_files(path: str, files: List[str]) -> Tuple[List[str], List[str], Project]:
-    global DEFAULT_EXCLUDE_EXTENSION_FILES
-
     missing_license_list = []
     missing_copyright_list = []
 
@@ -287,7 +281,6 @@ def filter_missing_list(missing_list: List[str], abs_path_to_exclude: List) -> L
 
 
 def dump_error_msg(error_msg: str, exit=False) -> None:
-    global error_items
     error_items.append(error_msg)
     if exit:
         logger.error(error_msg)
