@@ -1,5 +1,14 @@
 # Changelog
 
+## v4.0.4 (21/07/2025)
+## Changes
+## 🔧 Maintenance
+
+- Change the minimum Python version to 3.10 @bjk7119 (#171)
+- Modify to download lic. text from LGE DB @bjk7119 (#170)
+
+---
+
 ## v4.0.3 (25/03/2025)
 ## Changes
 ## 🔧 Maintenance
@@ -309,11 +318,3 @@
 ## 🐛 Hotfixes
 
 - Remove unused packages @bjk7119 (#89)
-
----
-
-## v3.0.0 (22/07/2022)
-## Changes
-## 🔧 Maintenance
-
-- Rename FOSSLight Reuse to FOSSLight Prechecker @bjk7119 (#87)
