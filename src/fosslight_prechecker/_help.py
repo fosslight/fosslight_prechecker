@@ -26,7 +26,9 @@ _HELP_MESSAGE_PRECHECKER = """
             -h\t\t\t    Print help message
             -v\t\t\t    Print FOSSLight Prechecker version
             -p <path>\t\t    Path to check(Default: current directory)
-            -e <path>\t\t    Path to exclude from checking(only work with 'lint' mode)
+            -e <path>\t\t    Path to exclude from checking(files and directories, only work with 'lint' mode)
+            \t\t\t    * IMPORTANT: Always wrap patterns in double quotes ("") to avoid shell expansion.
+            \t\t\t      Example) fosslight_prechecker -e "test/abc.py" "*.jar"
             -f <format>\t\t    Result format(yaml, xml, html)
             -o <file_name>\t    Output file name
             -i\t\t\t    Don't both write log file and show progress bar

@@ -30,8 +30,7 @@ jobs:
             CMD_BUILD: |
                 tox -e windows
                 pyinstaller --onefile cli.py -n cli --additional-hooks-dir=hooks --collect-datas reuse --collect-datas fosslight_util --add-data="src\fosslight_prechecker\templates\default_template.jinja2;." &&
-                move dist/cli.exe fosslight_prechecker_windows.exe &&
-                ./fosslight_prechecker_windows.exe
+                move dist\cli.exe fosslight_prechecker_windows.exe && .\fosslight_prechecker_windows.exe
             OUT_FILE_NAME: fosslight_prechecker_windows.exe
             ASSET_MIME: application/vnd.microsoft.portable-executable
     steps:
@@ -43,8 +42,8 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
+        pip install tox
         pip install .
-        pip install -r requirements-dev.txt
         pip install pyinstaller
     - name: Build with pyinstaller for ${{matrix.TARGET}}
       run: ${{matrix.CMD_BUILD}}
