@@ -6,47 +6,73 @@ from fosslight_util.help import PrintHelpMsg
 
 
 _HELP_MESSAGE_PRECHECKER = """
-    FOSSLight Prechecker is a tool that checks whether source code complies with copyright and license writing rules.
+    📖 Usage
+    ────────────────────────────────────────────────────────────────────
+    fosslight_prechecker [mode] [options] <arguments>
 
-    Usage: fosslight_prechecker [Mode] [option1] <arg1> [option2] <arg2>...
-     ex) fosslight_prechecker lint -p /home/test/src/
-         fosslight_prechecker lint -p /home/test/src/ -e test.py dep/temp
-         fosslight_prechecker add -p /home/test/test.py -c "2019-2021 LG Electronics Inc." -l "GPL-3.0-only"
-         fosslight_prechecker convert -p /home/test/sbom_info.yaml
-         fosslight_prechecker download -l "MIT"
+    📝 Description
+    ────────────────────────────────────────────────────────────────────
+    FOSSLight Prechecker checks and corrects copyright and license writing
+    rules in source code. It can lint, add, convert, and
+    download license information.
 
-    Parameters:
-        Mode
-            lint\t\t    (Default) Check whether the copyright and license writing rules are complied with
-            convert\t\t    Convert sbom_info.yaml -> FOSSLight-Report.xlsx
-            add\t\t\t    Add missing license, copyright, and download url
-            download\t\t    Download the license text of the license specified in sbom-info.yaml
+    📚 Guide: https://fosslight.org/fosslight-guide/scanner/1_prechecker.html
 
-        Options:
-            -h\t\t\t    Print help message
-            -v\t\t\t    Print FOSSLight Prechecker version
-            -p <path>\t\t    Path to check(Default: current directory)
-            -e <path>\t\t    Path to exclude from checking(files and directories, only work with 'lint' mode)
-            \t\t\t    * IMPORTANT: Always wrap patterns in double quotes ("") to avoid shell expansion.
-            \t\t\t      Example) fosslight_prechecker -e "test/abc.py" "*.jar"
-            -f <format>\t\t    Result format(yaml, xml, html)
-            -o <file_name>\t    Output file name
-            -i\t\t\t    Don't both write log file and show progress bar
-            --notice\t\t    Print the open source license notice text.
+    🔧 Modes
+    ────────────────────────────────────────────────────────────────────
+    lint (default)         Check copyright and license writing rules compliance
+    add                    Add missing license, copyright, and download location
+    convert                Convert sbom-info.yaml to FOSSLight-Report.xlsx
+    download               Download license text specified in sbom-info.yaml
 
-        Option for 'lint' mode
-            -n\t\t\t    Don't exclude venv*, node_modules, .*/, and the result of FOSSLight Scanners from the analysis
+    ⚙️  General Options
+    ────────────────────────────────────────────────────────────────────
+    -p <path>              Path to check (default: current directory)
+    -o <file>              Output file name
+    -f <format>            Result format (yaml, xml, html)
+    -e <pattern>           Exclude paths from checking (files and directories)
+                           (only works with 'lint' mode)
+                           ⚠️  IMPORTANT: Always wrap in quotes to avoid shell expansion
+                           Example: fosslight_prechecker -e "test/" "*.pyc"
+    -h                     Show this help message
+    -v                     Show version information
+    -i                     Don't write log file and show progress bar
+    --notice               Print the open source license notice text
 
-        Options for 'add' mode
-            Please enter any argument with double quotation marks("").
-            -l <license>\t    License name(SPDX format) to add(ex, "Apache-2.0")
-            -c <copyright>\t    Copyright to add(ex, "2015-2021 LG Electronics Inc.")
-            -u <dl_location>\t    Download Location to add(ex, "https://github.com/fosslight/fosslight_prechecker")
+    🔍 Mode-Specific Options
+    ────────────────────────────────────────────────────────────────────
+    lint mode:
+      -n                   Don't exclude venv*, node_modules, .*/, and
+                           FOSSLight Scanner results from analysis
 
-        Options for 'download' mode
-            Please enter any argument with double quotation marks("").
-            -l <license>\t    License to be representative license
-        """
+    add mode:
+      -l <license>         Add license name in SPDX format (ex: "Apache-2.0")
+      -c <copyright>       Add copyright text (ex: "2015-2021 LG Electronics Inc.")
+      -u <url>             Add download location URL(ex: "https://www.sampleurl.com")
+
+    download mode:
+      -l <license>         License to be representative license
+
+    💡 Examples
+    ────────────────────────────────────────────────────────────────────
+    # Lint current directory (check compliance)
+    fosslight_prechecker lint
+
+    # Lint specific path with exclusions
+    fosslight_prechecker lint -p /path/to/source -e "test/" "node_modules/"
+
+    # Add license and copyright to a file
+    fosslight_prechecker add -p test.py -l "GPL-3.0-only" -c "2019-2021 LG Electronics Inc."
+
+    # Add license, copyright, and download location
+    fosslight_prechecker add -p src/main.py -l "Apache-2.0" -c "2023 MyCompany" -u "https://github.com/user/repo"
+
+    # Convert sbom-info.yaml to Excel report
+    fosslight_prechecker convert -p sbom-info.yaml
+
+    # Download license text
+    fosslight_prechecker download -l "MIT"
+    """
 
 
 def print_help_msg(exitOpt: bool = True) -> None:
