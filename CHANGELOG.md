@@ -1,5 +1,14 @@
 # Changelog
 
+## v4.0.5 (02/02/2026)
+## Changes
+## 🔧 Maintenance
+
+- Update help message @bjk7119 (#173)
+- Add how to use -e option @bjk7119 (#172)
+
+---
+
 ## v4.0.4 (21/07/2025)
 ## Changes
 ## 🔧 Maintenance
@@ -310,11 +319,3 @@
 - Add new format of oss-pkg-info.yaml @bjk7119 (#93)
 - Change the message if there is nothing to convert @soimkim (#92)
 - Modify badge info in README.md @bjk7119 (#90)
-
----
-
-## v3.0.1 (22/07/2022)
-## Changes
-## 🐛 Hotfixes
-
-- Remove unused packages @bjk7119 (#89)
