@@ -6,3 +6,4 @@ PyYAML
 fosslight_util>=2.1.10
 jinja2
 pyaskalono
+setuptools<=80.10.2
