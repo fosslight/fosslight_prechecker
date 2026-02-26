@@ -29,3 +29,7 @@ License: GPL-3.0-only
 Files: src/fosslight_prechecker/resources/convert_license.json
 Copyright: 2021 LG Electronics
 License: GPL-3.0-only
+
+Files: .coderabbit.yaml
+Copyright: 2026 LG Electronics
+License: GPL-3.0-only
