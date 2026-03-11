@@ -1,5 +1,6 @@
 python-debian==0.1.40
 binaryornot
+chardet<5.0.0
 requests
 reuse==1.1.2
 PyYAML

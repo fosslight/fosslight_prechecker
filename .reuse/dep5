@@ -33,3 +33,7 @@ License: GPL-3.0-only
 Files: .coderabbit.yaml
 Copyright: 2026 LG Electronics
 License: GPL-3.0-only
+
+Files: cli.spec
+Copyright: 2026 LG Electronics
+License: GPL-3.0-only
