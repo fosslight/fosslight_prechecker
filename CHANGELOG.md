@@ -1,5 +1,14 @@
 # Changelog
 
+## v4.0.7 (12/03/2026)
+## Changes
+## 🔧 Maintenance
+
+- Fix tox error @bjk7119 (#178)
+- Update CodeRabbit config @soimkim (#176)
+
+---
+
 ## v4.0.6 (23/02/2026)
 ## Changes
 ## 🐛 Hotfixes
@@ -304,11 +313,3 @@
 ## 🔧 Maintenance
 
 - Apply new help msg if invalid input @bjk7119 (#103)
-
----
-
-## v3.0.3 (19/08/2022)
-## Changes
-## 🐛 Hotfixes
-
-- Change the exit code to a constant for windows @soimkim (#99)
