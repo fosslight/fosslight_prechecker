@@ -1,0 +1,68 @@
+# Copyright (c) 2021 LG Electronics
+# SPDX-License-Identifier: GPL-3.0-only
+
+[build-system]
+requires = ["setuptools>=77", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fosslight_prechecker"
+version = "4.0.7"
+description = "FOSSLight Prechecker"
+readme = "README.md"
+license = "GPL-3.0-only"
+authors = [
+    { name = "LG Electronics" }
+]
+keywords = ["fosslight", "prechecker", "license", "reuse"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+]
+requires-python = ">=3.10,<3.15"
+dependencies = [
+    "python-debian==0.1.40",
+    "binaryornot",
+    "chardet<5.0.0",
+    "requests",
+    "reuse==1.1.2",
+    "PyYAML",
+    "fosslight_util>=2.1.10",
+    "jinja2",
+    "pyaskalono",
+    "setuptools<=80.10.2",
+]
+
+[project.optional-dependencies]
+dev = [
+    "tox",
+    "flake8",
+    "pytest",
+    "pytest-cov",
+    "pytest-flake8",
+    "importlib-metadata==4.2.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/fosslight/fosslight_prechecker"
+Download = "https://github.com/fosslight/fosslight_prechecker"
+
+[project.scripts]
+fosslight_prechecker = "fosslight_prechecker.cli:main"
+fosslight_reuse = "fosslight_prechecker.cli:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+fosslight_prechecker = [
+    "resources/convert_license.json",
+    "templates/*",
+]
