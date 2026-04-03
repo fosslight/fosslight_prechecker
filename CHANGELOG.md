@@ -1,5 +1,14 @@
 # Changelog
 
+## v4.0.8 (03/04/2026)
+## Changes
+## 🔧 Maintenance
+
+- Include LICENSES via license-files and read from dist-info @bjk7119 (#183)
+- Migrate from setup.py to pyproject.toml @bjk7119 (#181)
+
+---
+
 ## v4.0.7 (12/03/2026)
 ## Changes
 ## 🔧 Maintenance
@@ -300,16 +309,3 @@
 ## 🔧 Maintenance
 
 - Fix to print argparse help msg if input no mode @bjk7119 (#104)
-
----
-
-## v3.0.4 (01/09/2022)
-## Changes
-## 🐛 Hotfixes
-
-- Fix not to print argparse's help msg @bjk7119 (#102)
-- Fix bug where path in sbom-info.yaml is not excluded from lint result @bjk7119 (#101)
-
-## 🔧 Maintenance
-
-- Apply new help msg if invalid input @bjk7119 (#103)
