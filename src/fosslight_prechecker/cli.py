@@ -12,6 +12,7 @@ from fosslight_prechecker._constant import PKG_NAME
 from fosslight_prechecker._add import add_content
 from fosslight_prechecker._precheck import run_lint
 from fosslight_prechecker._download_lic import download_license
+from importlib.metadata import files as pkg_files
 
 
 def run_main(mode: str, path, output, format, no_log, disable, copyright, license, dl_url, parser, exclude_path):
@@ -61,16 +62,32 @@ def main():
     elif args.version:
         print_package_version(PKG_NAME, "FOSSLight Prechecker Version:")
     elif args.notice:
+        print(f"*** {PKG_NAME} open source license notice ***")
+        license_files = []
         try:
             base_path = sys._MEIPASS
-        except Exception:
-            base_path = os.path.dirname(__file__)
-
-        data_path = os.path.join(base_path, 'LICENSES')
-        print(f"*** {PKG_NAME} open source license notice ***")
-        for ff in os.listdir(data_path):
-            f = open(os.path.join(data_path, ff), 'r', encoding='utf8')
-            print(f.read())
+            data_path = os.path.join(base_path, 'LICENSES')
+            if os.path.isdir(data_path):
+                license_files = [
+                    os.path.join(data_path, f)
+                    for f in os.listdir(data_path)
+                    if os.path.isfile(os.path.join(data_path, f))
+                ]
+        except AttributeError:
+            license_files = [
+                str(f.locate()) for f in (pkg_files(PKG_NAME) or [])
+                if 'licenses' in str(f).lower() and f.locate().is_file()
+            ]
+        for fpath in sorted(license_files):
+            try:
+                with open(fpath, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                try:
+                    print(content)
+                except UnicodeEncodeError:
+                    sys.stdout.buffer.write(content.encode('utf-8', errors='replace') + b'\n')
+            except (OSError, UnicodeError) as exc:
+                print(f"Failed to output notice file '{fpath}': {exc}", file=sys.stderr)
     else:
         run_main(args.mode, args.path, args.output, args.format,
                  args.log, args.disable, args.copyright, args.license, args.dlurl, parser, args.exclude_path)
