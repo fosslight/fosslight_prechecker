@@ -11,6 +11,7 @@ version = "4.0.7"
 description = "FOSSLight Prechecker"
 readme = "README.md"
 license = "GPL-3.0-only"
+license-files = ["LICENSE", "LICENSES/*"]
 authors = [
     { name = "LG Electronics" }
 ]
@@ -64,6 +65,5 @@ where = ["src"]
 [tool.setuptools.package-data]
 fosslight_prechecker = [
     "resources/convert_license.json",
-    "LICENSES/*",
     "templates/*",
 ]
