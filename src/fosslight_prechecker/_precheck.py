@@ -302,6 +302,8 @@ def init(
     logger, _result_log = init_log(os.path.join(output_path, f"fosslight_log_pre_{_start_time}.txt"),
                                    need_log_file, logging.INFO, logging.DEBUG, PKG_NAME, path_to_find, exclude_path)
 
+    logger.info(f"Tool Info : {_result_log['Tool Info']}")
+
 
 def get_path_to_find(target_path: str, _check_only_file_mode: bool) -> Tuple[str, List[str], bool]:
     is_file = False
