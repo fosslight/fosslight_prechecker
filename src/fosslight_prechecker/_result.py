@@ -211,7 +211,11 @@ def create_result_file(output_file_name, format='', _start_time=""):
 
 
 def get_path_in_yaml(file_item):
-    path_in_yaml = [os.path.join(file_item.relative_path, file_item.source_name_or_path)]
+    # If source_name_or_path is empty, do not treat it as matching all files under the directory.
+    file_path = file_item.source_name_or_path
+    if file_path is None or str(file_path).strip() == '':
+        return []
+    path_in_yaml = [os.path.join(file_item.relative_path, file_path)]
     path_in_yaml = [path.replace('\\', '/') for path in path_in_yaml]
     return path_in_yaml
 
@@ -228,6 +232,8 @@ def extract_files_in_path(remove_file_list, base_file_list, return_found=False):
         remained_file_to_remove = list(set(remove_file_list) - set(intersection_files))
 
     for remove_pattern in remained_file_to_remove:
+        if not remove_pattern:
+            continue
         try:
             for file in remained_base_files[:]:
                 if fnmatch.fnmatch(file, remove_pattern) or re.search(remove_pattern, file):
