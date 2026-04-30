@@ -137,7 +137,7 @@ def copy_to_root(path_to_find: str, input_license: str, temp_download_path: str)
         source = os.path.join(temp_download_path, 'LICENSES', f'{lic_file}')
         destination = os.path.join(path_to_find, 'LICENSE')
         shutil.copyfile(source, destination)
-        logger.warning(f"# Created Representative License File ({source} -> LICENSE)\n")
+        logger.warning(f"# Created Representative License File: {destination}\n")
         shutil.rmtree(temp_download_path)
     except Exception as ex:
         dump_error_msg(f"Error - Can't copy license file: {ex}")
