@@ -1,5 +1,17 @@
 # Changelog
 
+## v4.0.9 (30/04/2026)
+## Changes
+## 🐛 Hotfixes
+
+- Ignore empty SBOM source entries when mapping files @bjk7119 (#185)
+
+## 🔧 Maintenance
+
+- Add scanner version log at startup @woocheol-lge (#184)
+
+---
+
 ## v4.0.8 (03/04/2026)
 ## Changes
 ## 🔧 Maintenance
@@ -301,11 +313,3 @@
 ## 🔧 Maintenance
 
 - Modify result file name format @bjk7119 (#106)
-
----
-
-## v3.0.5 (15/09/2022)
-## Changes
-## 🔧 Maintenance
-
-- Fix to print argparse help msg if input no mode @bjk7119 (#104)
