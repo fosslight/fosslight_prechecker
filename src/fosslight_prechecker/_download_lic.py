@@ -85,16 +85,20 @@ def download_lic_text_file(parsed_args: str, prj: Project, download_path: str, i
     # 0: successfully downloaded, 1: failed to download
     reuse_return_code = reuse_download(parsed_args, prj)
     # Check if the license text file is present
+    success_from_lge = False
     for lic in input_license:
         present_lic = present_license_file(download_path, lic)
 
         if reuse_return_code == 1 and not present_lic:
-            # True : successfully downloaded from LGE
-            success_from_lge = lge_lic_download(download_path, lic)
-            if success_from_lge:
+            # Try to download from LGE if reuse failed
+            this_success = lge_lic_download(download_path, lic)
+            if this_success:
+                success_from_lge = True
                 logger.warning(f"\n# Successfully downloaded from LGE: {lic}.txt")
+            else:
+                logger.warning(f"\n# Failed to download from LGE: {lic}.txt")
 
-    return reuse_return_code == 0 and success_from_lge
+    return reuse_return_code, success_from_lge
 
 
 def download_oss_info_license(base_path: str = "") -> None:
@@ -113,22 +117,25 @@ def download_oss_info_license(base_path: str = "") -> None:
         logger.info(f"\n # There is OSS Package Info file(s) : {oss_yaml_files}\n")
 
     for oss_pkg_file in oss_yaml_files:
-        _, license_list, _ = parsing_yml(oss_pkg_file, base_path)
+        _, lic_list, _ = parsing_yml(oss_pkg_file, base_path)
+        if lic_list:
+            license_list.extend(lic_list)
 
     for lic in license_list:
         converted_lic_list.append(check_input_license_format(lic))
+
+    if converted_lic_list:
+        converted_lic_list = list(set(converted_lic_list))
 
     if converted_lic_list is not None and len(converted_lic_list) > 0:
         parsed_args = main_parser.parse_args(['download'] + converted_lic_list)
 
         try:
-            download_lic_text_file(parsed_args, prj, base_path, converted_lic_list)
+            _, _ = download_lic_text_file(parsed_args, prj, base_path, converted_lic_list)
         except Exception as ex:
             dump_error_msg(f"Error - download license text in OSS-pkg-info.yml : {ex}")
     else:
         logger.info(" # There is no license in the path \n")
-
-    return converted_lic_list
 
 
 def copy_to_root(path_to_find: str, input_license: str, temp_download_path: str) -> None:
@@ -192,7 +199,7 @@ def find_representative_license(path_to_find: str, input_license: str) -> None:
             parsed_args = main_parser.parse_args(['download', f"{input_license}"])
 
             try:
-                download_lic_text_file(parsed_args, prj, temp_download_path, [input_license])
+                reuse_return_code, success_from_lge = download_lic_text_file(parsed_args, prj, temp_download_path, [input_license])
             except Exception as ex:
                 dump_error_msg(f"Error - download the representative license text file : {ex}")
 
