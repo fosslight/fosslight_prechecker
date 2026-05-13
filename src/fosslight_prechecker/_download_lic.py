@@ -51,13 +51,16 @@ def lge_lic_download(temp_download_path: str, input_license: str) -> bool:
         html.close()
     except urllib.error.URLError:
         logger.error("Invalid URL address")
+        return False
     except ValueError as val_err:
         logger.error(f"Invalid Value : {val_err}")
+        return False
     except Exception as ex:
         logger.error(f"Error to open url - {lic_url} : {ex}")
+        return False
 
-    soup = BeautifulSoup(source, 'html.parser')
     try:
+        soup = BeautifulSoup(source, 'html.parser')
         lic_text = soup.find("p", "bdTop")
         Path(os.path.join(temp_download_path, 'LICENSES')).mkdir(parents=True, exist_ok=True)
         lic_file_path = os.path.join(temp_download_path, 'LICENSES', f'{input_license}.txt')
@@ -87,7 +90,10 @@ def download_lic_text_file(parsed_args: str, prj: Project, download_path: str, i
     # Check if the license text file is present
     success_from_lge = False
     for lic in input_license:
-        present_lic = present_license_file(download_path, lic)
+        try:
+            present_lic = present_license_file(download_path, lic)
+        except FileNotFoundError:
+            present_lic = False
 
         if reuse_return_code == 1 and not present_lic:
             # Try to download from LGE if reuse failed
