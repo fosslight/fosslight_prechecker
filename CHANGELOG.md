@@ -1,5 +1,14 @@
 # Changelog
 
+## v4.0.10 (13/05/2026)
+## Changes
+## 🐛 Hotfixes
+
+- Merge all licenses from several yaml files before download @bjk7119 (#186)
+- Aggregates and deduplicates license IDs across SBOMs before downloading.
+
+---
+
 ## v4.0.9 (30/04/2026)
 ## Changes
 ## 🐛 Hotfixes
@@ -305,11 +314,3 @@
 ## 🚀 Features
 
 - Convert multiple yaml files into one report @bjk7119 (#107)
-
----
-
-## v3.0.6 (15/09/2022)
-## Changes
-## 🔧 Maintenance
-
-- Modify result file name format @bjk7119 (#106)

@@ -7,7 +7,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "fosslight_prechecker"
-version = "4.0.9"
+version = "4.0.10"
 description = "FOSSLight Prechecker"
 readme = "README.md"
 license = "GPL-3.0-only"
