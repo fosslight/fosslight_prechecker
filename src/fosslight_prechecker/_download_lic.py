@@ -81,7 +81,7 @@ def present_license_file(path_to_check: str, lic: str) -> bool:
     return present
 
 
-def download_lic_text_file(parsed_args: str, prj: Project, download_path: str, input_license: list) -> None:
+def download_lic_text_file(parsed_args: str, prj: Project, download_path: str, input_license: list) -> tuple[int, bool]:
     # 0: successfully downloaded, 1: failed to download
     reuse_return_code = reuse_download(parsed_args, prj)
     # Check if the license text file is present
@@ -169,7 +169,7 @@ def find_representative_license(path_to_find: str, input_license: str) -> None:
     found_file = []
     found_license_file = False
     main_parser = reuse_parser()
-    reuse_return_code = 0
+    reuse_return_code = 1
     success_from_lge = False
 
     all_items = os.listdir(path_to_find)
@@ -202,6 +202,7 @@ def find_representative_license(path_to_find: str, input_license: str) -> None:
                 reuse_return_code, success_from_lge = download_lic_text_file(parsed_args, prj, temp_download_path, [input_license])
             except Exception as ex:
                 dump_error_msg(f"Error - download the representative license text file : {ex}")
+                return
 
             if reuse_return_code == 0 or success_from_lge:
                 copy_to_root(path_to_find, input_license, temp_download_path)
