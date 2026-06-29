@@ -2,9 +2,16 @@
 Copyright (c) 2021 LG Electronics
 SPDX-License-Identifier: GPL-3.0-only
  -->
+<p align='right'>
+  <a href="https://fosslight.org/fosslight-guide/prechecker/">
+    [Korean]
+ </a>
+</p>
+ 
 # FOSSLight Prechecker
 
-<img src="https://img.shields.io/pypi/l/fosslight-prechecker" alt="License" /> <img src="https://img.shields.io/pypi/v/fosslight_prechecker" alt="Current python package version." /> <img src="https://img.shields.io/pypi/pyversions/fosslight_prechecker" /> [![REUSE status](https://api.reuse.software/badge/github.com/fosslight/fosslight_prechecker)](https://api.reuse.software/info/github.com/fosslight/fosslight_prechecker)
+<img src="https://img.shields.io/pypi/l/fosslight-prechecker" alt="License" /> <img src="https://img.shields.io/pypi/v/fosslight_prechecker" alt="Current python package version." /> <img src="https://img.shields.io/pypi/pyversions/fosslight_prechecker" /> [![REUSE status](https://api.reuse.software/badge/github.com/fosslight/fosslight_prechecker)](https://api.reuse.software/info/github.com/fosslight/fosslight_prechecker) [![Guide](http://img.shields.io/badge/-doc-blue?style=flat-square&logo=github&link=https://fosslight.org/fosslight-guide-en/prechecker/)](https://fosslight.org/fosslight-guide-en/scanner/prechecker/)
+</p>
 
 **FOSSLight Prechecker** is a tool that can be used to comply with the copyright/license writing rules in the source code.     
 It uses [reuse-tool][ret] to check whether the [source code's copyright and license writing rules][rule] are complied with.
@@ -25,7 +32,7 @@ Here a short summary:
 - `download` --- Download the text license file(s) that written in sbom-info.yaml or oss-pkg-info.yaml.
 
 
-## 💡 How to report issue
+## 📝 How to report issue
 
 Please report any ideas or bugs to improve by creating an issue in [Git Repository][repo]. Then there will be quick bug fixes and upgrades. Ideas to improve are always welcome.
 
@@ -33,8 +40,7 @@ Please report any ideas or bugs to improve by creating an issue in [Git Reposito
 
 ## 👏 Contributing Guide
 
-We always welcome your contributions.  
-Please see the [CONTRIBUTING guide](https://fosslight.org/hub-guide-en/contribution/1_contribution.html) for how to contribute.
+We always welcome your contributions. Please see the [CONTRIBUTING guide](https://fosslight.org/hub-guide-en/contribution/1_contribution.html) for how to contribute.
 
 
 ## 📄 License  
