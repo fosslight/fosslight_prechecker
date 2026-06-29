@@ -25,11 +25,17 @@ Here a short summary:
 - `download` --- Download the text license file(s) that written in sbom-info.yaml or oss-pkg-info.yaml.
 
 
-## 👏 How to report issue
+## 💡 How to report issue
 
 Please report any ideas or bugs to improve by creating an issue in [Git Repository][repo]. Then there will be quick bug fixes and upgrades. Ideas to improve are always welcome.
 
 [repo]: https://github.com/fosslight/fosslight_prechecker/issues
+
+## 👏 Contributing Guide
+
+We always welcome your contributions.  
+Please see the [CONTRIBUTING guide](https://fosslight.org/hub-guide-en/contribution/1_contribution.html) for how to contribute.
+
 
 ## 📄 License  
 FOSSLight Prechecker is licensed under [GPL-3.0-only][l].
