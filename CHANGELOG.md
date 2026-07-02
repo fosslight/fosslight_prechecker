@@ -1,5 +1,13 @@
 # Changelog
 
+## v4.0.11 (02/07/2026)
+## Changes
+## 🔧 Maintenance
+
+- Update user guide URL in README @bjk7119 (#187)
+
+---
+
 ## v4.0.10 (13/05/2026)
 ## Changes
 ## 🐛 Hotfixes
@@ -306,11 +314,3 @@
 ## 🔧 Maintenance
 
 - Add OSS pkg file list for Nuget @bjk7119 (#108)
-
----
-
-## v3.0.7 (06/10/2022)
-## Changes
-## 🚀 Features
-
-- Convert multiple yaml files into one report @bjk7119 (#107)
