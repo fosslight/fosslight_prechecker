@@ -20,7 +20,7 @@ datas += [('src/fosslight_prechecker/templates/default_template.jinja2', '.')]
 
 # Add license files
 datas += [('LICENSE', 'LICENSES')]
-datas += [('LICENSES/LicenseRef-3rd_party_licenses.txt', 'LICENSES')]
+datas += [('LICENSES/LicenseRef-3rd-party-licenses.txt', 'LICENSES')]
 
 # Collect binaries
 binaries = []

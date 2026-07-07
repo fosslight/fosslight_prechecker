@@ -1,0 +1,49 @@
+version = 1
+SPDX-PackageName = "FOSSLight Prechecker"
+SPDX-PackageDownloadLocation = "https://github.com/fosslight/fosslight_prechecker"
+
+[[annotations]]
+path = "pyproject.toml"
+SPDX-FileCopyrightText = "2021 LG Electronics Inc."
+SPDX-License-Identifier = "GPL-3.0-only"
+
+[[annotations]]
+path = "**.md"
+SPDX-FileCopyrightText = "2021 LG Electronics"
+SPDX-License-Identifier = "GPL-3.0-only"
+
+[[annotations]]
+path = ".github/**"
+SPDX-FileCopyrightText = "2021 LG Electronics"
+SPDX-License-Identifier = "GPL-3.0-only"
+
+[[annotations]]
+path = "tests/**"
+SPDX-FileCopyrightText = "2021 LG Electronics"
+SPDX-License-Identifier = "GPL-3.0-only"
+
+[[annotations]]
+path = "MANIFEST.in"
+SPDX-FileCopyrightText = "2021 LG Electronics"
+SPDX-License-Identifier = "GPL-3.0-only"
+
+[[annotations]]
+path = "LICENSES/LicenseRef-3rd-party-licenses.txt"
+SPDX-FileCopyrightText = "2021 LG Electronics"
+SPDX-License-Identifier = "LicenseRef-3rd-party-licenses"
+SPDX-FileComment = "Third-party license information file"
+
+[[annotations]]
+path = "src/fosslight_prechecker/resources/convert_license.json"
+SPDX-FileCopyrightText = "2021 LG Electronics"
+SPDX-License-Identifier = "GPL-3.0-only"
+
+[[annotations]]
+path = ".coderabbit.yaml"
+SPDX-FileCopyrightText = "2026 LG Electronics"
+SPDX-License-Identifier = "GPL-3.0-only"
+
+[[annotations]]
+path = "cli.spec"
+SPDX-FileCopyrightText = "2026 LG Electronics"
+SPDX-License-Identifier = "GPL-3.0-only"

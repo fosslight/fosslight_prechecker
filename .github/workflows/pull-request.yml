@@ -34,9 +34,9 @@ jobs:
             OUT_FILE_NAME: fosslight_prechecker_windows.exe
             ASSET_MIME: application/vnd.microsoft.portable-executable
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v7
     - name: Set up Python 3.11
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v6
       with:
         python-version: '3.11'
     - name: Install dependencies
@@ -49,7 +49,7 @@ jobs:
       run: ${{matrix.CMD_BUILD}}
   reuse:
     runs-on: ubuntu-latest
-    steps: 
-    - uses: actions/checkout@v3
+    steps:
+    - uses: actions/checkout@v7
     - name: REUSE Compliance Check
-      uses: fsfe/reuse-action@v1
+      uses: fsfe/reuse-action@v6
